@@ -389,6 +389,7 @@ def correlation_plot_bsp(kpo, params=[250., 0., 5.], plot_error=True,bsp_model=[
         mm=max(mm_data,mm_model)
         if mm==0 :
             mm=max(np.max(np.abs(kpo.bsp)),np.max(np.abs(bsp)))
+        mm*=1.05 # adding 5% from both sides												
         f1 = plt.figure()
         sp0 = f1.add_subplot(111)
         if plot_error:

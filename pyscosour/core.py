@@ -6,7 +6,7 @@ from scipy.io.idl import readsav
 import pyfits as pf
 import sys
 import multiprocessing
-from scipy.interpolate import RectBivariateSpline
+from scipy.interpolate import griddata
 
 ''' ================================================================
     Tools and functions useful for manipulating kernel phase data.
@@ -532,9 +532,10 @@ def extract_from_array(array, hdr, kpi, save_im=True, re_center=True, manual=0,
     if 'simu'    in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
     if 'Hale'    in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
 					
-    rev = -1.0
-    if 'Hale' in hdr['TELESCOP']: # P3K PA are clockwise
-        rev = 1.0					
+    rev = -1.0	
+    if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
+                                                                    # [AL, 04.07.2014] removed reverse from simulation		
+        rev = 1.0								
     								
     # [AL, 2014.04.16] Added calculation of super gaussian radius in sg_ld*lambda/D
     if sg_ld*D>0 :							
@@ -660,7 +661,8 @@ def extract_from_fits_frame(fname, kpi, save_im=True, wfs=False, plotim=True, ma
     if 'Hale'    in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
     
     rev = -1.0
-    if 'Hale' in hdr['TELESCOP']: # P3K PA are clockwise
+    if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
+                                                                    # [AL, 04.07.2014] removed reverse from simulation		
         rev = 1.0
 
     # [AL, 2014.03.18] Added calculation of super gaussian radius in sg_ld*lambda/D
@@ -728,8 +730,8 @@ def extract_from_fits_frame(fname, kpi, save_im=True, wfs=False, plotim=True, ma
 
     # [AL, 2014.05.06] Bispectrum (bsp) phases
     if bsp :	   				
-        bsp_res=extract_bsp(data_cplx,kpi.uvrel)
-        #bsp_res=extract_bsp(kpd_phase)								
+        #bsp_res=extract_bsp(data_cplx,kpi.uvrel)
+        bsp_res=extract_bsp(kpd_phase,kpi.uvrel)								
 	
     if bsp :   
         if (save_im): res = (kpd_info, kpd_signal,vis2, im, ac, bsp_res)
@@ -739,8 +741,6 @@ def extract_from_fits_frame(fname, kpi, save_im=True, wfs=False, plotim=True, ma
         if (save_im): res = (kpd_info, kpd_signal, vis2, im, ac)
         else:         res = (kpd_info, kpd_signal, vis2)
         if (wfs):     res = (kpd_info, kpd_phase)
-
-    wrad = 40.
 
     uvw = np.max(uv_samp)/2
 
@@ -856,9 +856,10 @@ def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False):
 # x, y - arrays of sampling points
 # data - input image
 # grid_size - number of pixels involved in interpolation
+# method - method for interpolation (linear, nearest, cubic)
 # output:
 # - res - array of interpolation values.					
-def grid_inter(x,y,data,grid_size=5) :
+def grid_inter(x,y,data,grid_size=5,method='cubic') :
     xx = np.cast['int'](np.round(x)) #rounding coordinates
     yy = np.cast['int'](np.round(y)) #rounding coordinates	
     if grid_size==0 :
@@ -875,12 +876,15 @@ def grid_inter(x,y,data,grid_size=5) :
                y0=sz-grid_size																	
             xarr=range(x0,x0+grid_size)	
             yarr=range(y0,y0+grid_size)
-            if data.dtype=='complex' :												
-                freal=RectBivariateSpline(xarr, yarr, data[np.meshgrid(xarr,yarr)].real)
-                fimag=RectBivariateSpline(xarr, yarr, data[np.meshgrid(xarr,yarr)].imag)								
-                res[i]=(freal(x[i],y[i])+1j*fimag(x[i],y[i]))[0,0]	
-            else :												
-                freal=RectBivariateSpline(xarr, yarr, data[np.meshgrid(xarr,yarr)])								
-                res[i]=(freal(x[i],y[i]))[0,0]	
+            grd=np.meshgrid(xarr,yarr)
+            grd_x=np.reshape(grd[0],np.size(grd[0]))	
+            grd_y=np.reshape(grd[1],np.size(grd[1]))
+            grd_xy=np.transpose([grd_x,grd_y])													
+            if data.dtype=='complex' :																	
+                res_real=griddata(grd_xy,data[grd_x,grd_y].real,[[x[i],y[i]]],method=method)[0]											
+                res_imag=griddata(grd_xy,data[grd_x,grd_y].imag,[[x[i],y[i]]],method=method)[0]																
+                res[i]=res_real+1j*res_imag				
+            else :													
+                res[i]=griddata(grd_xy,data[grd_x,grd_y].real,[[x[i],y[i]]],method=method)[0]	
     return res																
 																

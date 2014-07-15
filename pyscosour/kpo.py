@@ -203,10 +203,10 @@ class kpo():
                 if bsp : 
                     self.bsp=np.asarray(bsps)															
             self.wavel = self.hdr['filter']
-            if bsp : 
-                self.bsp=np.median(bsps,0)															
+            #if bsp : 
+            #    self.bsp=np.median(bsps,0)															
 
-        if ave == "mean":
+        elif ave == "mean":
             print "mean average"
             self.kpd = np.mean(kpds, 0)
             self.vis2 = np.mean(vis2s,0)
@@ -220,8 +220,7 @@ class kpo():
                     self.bsp=np.asarray(bsps)
             self.wavel = self.hdr['filter']
 												
-
-        if ave == "none":
+        elif ave == "none":
             print "no average"
             self.kpd = kpds
             self.vis2 = vis2s
@@ -319,9 +318,6 @@ class kpo():
 
         Default is "median". Other option is "mean".
         '''
-        
-        temp = np.array(self.kpd)
-
         if algo == "median":
             aver = np.median(self.kpd, 0)
         else:
