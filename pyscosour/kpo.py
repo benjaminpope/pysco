@@ -36,8 +36,6 @@ from scipy.interpolate import griddata
 
 from scipy.io.idl import readsav
 
-import oifits
-
 from core import *
 from kpi import *
 
@@ -95,8 +93,8 @@ class kpo():
     # [AL, 2014.03.20] Recentering and windowing parameters added
     # [AL, 2014.04.17] use_main_header option added to replace individual headers from the datacube by the main one
     # [AL, 2014.05.06] Extract bispectrum (bsp)
-    # [AL, 2014.05.20] Interpolation for image grid added. grid_size - size of the grid to calculate interpolation on
-    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, bsp=False, use_main_header=False, grid_size=5):
+    # [AL, 2014.05.28] Adjust sampling points in pupil plane to make coordinates in uv-plane integer (increases quality)
+    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, bsp=False, use_main_header=False, adjust_sampling=True):
         ''' extract kernel-phase data from one or more files (use regexp).
 
         If the path leads to a fits data cube, or to multiple single frame
@@ -132,7 +130,7 @@ class kpo():
 																
                 res = \
                     extract_from_fits_frame(fname, self.kpi, save_im=True,plotim=plotim,
-				   	manual=manual,sg_ld=sg_ld,D=D,re_center=re_center,window=window,bsp=bsp,grid_size=grid_size)
+				   	manual=manual,sg_ld=sg_ld,D=D,re_center=re_center,window=window,bsp=bsp,adjust_sampling=adjust_sampling)
                 if bsp :
                     (hdr, sgnl, vis2, im, ac, bsp_res)=res
                 else :
@@ -162,10 +160,10 @@ class kpo():
             for i in xrange(nslices):
                 sys.stdout.write(
                     "\rextracting kp from img %3d/%3d" % (i+1,nslices))
-                sys.stdout.flush()																
+                sys.stdout.flush()															
                 res = extract_from_array(dcube[i], fits_hdr, self.kpi, 
                                                  save_im=False, re_center=re_center,
-                                                 wrad=50.0, plotim=plotim,sg_ld=sg_ld,D=D,bsp=bsp,grid_size=grid_size)# [AL, 2014.04.16] Added plotim parameter
+                                                 wrad=50.0, plotim=plotim,sg_ld=sg_ld,D=D,bsp=bsp,adjust_sampling=adjust_sampling)# [AL, 2014.04.16] Added plotim parameter
 																	#[AL, 2014.04.16] Added D and sg_ld parameters
 																	# [AL, 2014.03.21] changed re_center default value 
                 if bsp :
@@ -192,19 +190,18 @@ class kpo():
 												
         if ave == "median":
             print "median average"
-            self.kpd = np.median(kpds, 0)
-            self.vis2 = np.median(vis2s,0)
+
             if nf>1 or fits_hdr['NAXIS'] == 3:
                 self.hdr = hdrs[0]
                 if bsp : 
-                    self.bsp=np.median(bsps,0)																	
+                    self.bsp=np.median(bsps,0)																
             else :
                 self.hdr = hdrs	
+                self.kpd = np.asarray(kpds, 0)
+                self.vis2 = np.asarray(vis2s,0)
                 if bsp : 
                     self.bsp=np.asarray(bsps)															
-            self.wavel = self.hdr['filter']
-            #if bsp : 
-            #    self.bsp=np.median(bsps,0)															
+            self.wavel = self.hdr['filter']														
 
         elif ave == "mean":
             print "mean average"
@@ -212,18 +209,22 @@ class kpo():
             self.vis2 = np.mean(vis2s,0)
             if nf>1 or fits_hdr['NAXIS'] == 3:
                 self.hdr = hdrs[0]
+                self.kpd = np.mean(kpds, 0)
+                self.vis2 = np.mean(vis2s,0)	
                 if bsp : 
                     self.bsp=np.mean(bsps,0)																	
             else :
-                self.hdr = hdrs	
+                self.hdr = hdrs
+                self.kpd = np.asarray(kpds, 0)
+                self.vis2 = np.asarray(vis2s,0)	
                 if bsp : 
                     self.bsp=np.asarray(bsps)
             self.wavel = self.hdr['filter']
 												
         elif ave == "none":
             print "no average"
-            self.kpd = kpds
-            self.vis2 = vis2s
+            self.kpd = np.asarray(kpds)
+            self.vis2 = np.asarray(vis2s)
             self.hdr = hdrs	
             if fits_hdr['NAXIS']>3 :												
                 self.nsets = nslices # =np.size(hdrs)	# [AL, 2014.04.22] changed to nslices

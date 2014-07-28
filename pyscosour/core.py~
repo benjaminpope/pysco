@@ -906,5 +906,134 @@ def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False,unwrap=0):
     if deg :																							
         return res/dtor
     else :
-        return res							
+        return res			
+		
+
+
+
+#------------ Code below is for testing only -------------------
+def grid_inter1(x,y,data) :
+    res=np.zeros(np.shape(x),dtype=data.dtype)
+    sz=len(data)
+    grid_size=2 # 2x2 square around a sampling point								
+    for i in range(0,len(x)) :
+        x0=int(np.round(max(-sz,x[i]-grid_size//2)))
+        y0=int(np.round(max(-sz,y[i]-grid_size//2)))												
+        if x0+grid_size>=sz :
+            x0=sz-grid_size		
+        if y0+grid_size>=sz :
+           y0=sz-grid_size																	
+        xarr=range(x0,x0+grid_size)	
+        yarr=range(y0,y0+grid_size)
+        grd=np.meshgrid(xarr,yarr)
+        grd_x=np.reshape(grd[0],np.size(grd[0]))	
+        grd_y=np.reshape(grd[1],np.size(grd[1]))
+	#determining the closest point
+	xc=0
+	yc=0
+	rho=2.
+	for j in range(grid_size) :
+	    for k in range(grid_size) :
+		dist=(xarr[j]-x[i])**2 + (yarr[k]-y[i])**2
+                if dist<rho :
+                    xc=j
+                    yc=k
+                    rho=dist
+        #estimating derivatives at a sampling point as linear combinations of two
+        dx=(data[xarr[0],yarr[1]]-data[xarr[0],yarr[0]])*(x[i]-xarr[0])+(data[xarr[1],yarr[1]]-data[xarr[1],yarr[0]])*(xarr[1]-x[i])
+        dy=(data[xarr[1],yarr[0]]-data[xarr[0],yarr[0]])*(y[i]-yarr[0])+(data[xarr[1],yarr[1]]-data[xarr[0],yarr[1]])*(yarr[1]-y[i])
+	res[i]=data[xarr[xc],yarr[yc]]+(xarr[xc]-x[i])*dx+(yarr[yc]-y[i])*dy        
+    return res			
+
+
+def recenter1(im0, th_rad=[80, 40, 10], sg_rad=25.0, showMessages=True):
+    ''' -----------------------------------------------------------------
+        Good image centroid algorithm. Amazing how an apparently simple
+        problem turns out to be a real bitch...
+
+        im0:    of course, the array to be analyzed
+        th_rad: array of top-hat mask radii to be used
+        sg_rad: super-Gaussian mask radius
+        ----------------------------------------------------------------- '''
+    szh = im0.shape[1] # horiz
+    szv = im0.shape[0] # vertic
+    temp = np.max(im0.shape) # max dimension of image
+
+    for sz in [64, 128, 256, 512, 1024, 2048]:
+        if sz >= temp: break
+
+    dz = sz/2.           # image half-size
+    nm = np.size(th_rad) # number of masks
+
+    sgmask = super_gauss(sz, sz, dz, dz, sg_rad)
+    x,y = np.meshgrid(np.arange(sz)-dz, np.arange(sz)-dz)
+    dist = np.hypot(y,x)
+
+    wedge_x, wedge_y = x*np.pi/dz, y*np.pi/dz
+    offset = np.zeros((sz, sz), dtype=complex) # to Fourier-center array
+
+    # insert image in zero-padded array (dim. power of two)
+    im = np.zeros((sz, sz)) 
+    orih, oriv = (sz-szh)/2, (sz-szv)/2
+    im[oriv:oriv+szv,orih:orih+szh] = im0
+
+    # first round
+    # -----------
+    profx = im.mean(1) - np.median(im, 1)
+    profy = im.mean(0) - np.median(im, 0)
+    dx = np.where(profx == profx.max())[0][0] - dz
+    dy = np.where(profy == profy.max())[0][0] - dz
+    im = np.roll(np.roll(im, -int(dx), axis=0), -int(dy), axis=1)
+    if showMessages : print "centroid 0: (dx,dy) = %d %d" % (dx, dy)
+
+    # following rounds: using shrinking mask
+    # --------------------------------------
+    for i in range(nm):
+        thm = np.zeros((sz, sz))               # top-hat mask array
+        thm[np.where(dist < th_rad[i])] = 1.0  # define active region
+        im1 = im * thm                         # temporary image array
+        # ----
+        dx = np.sum(np.arange(sz) * im1.sum(1)) / im1.sum() - dz
+        dy = np.sum(np.arange(sz) * im1.sum(0)) / im1.sum() - dz
+        dx, dy = np.int(np.round(dx)), np.int(np.round(dy))
+        im = np.roll(np.roll(im, -dx, axis=0), -dy, axis=1)
+        if showMessages : print "centroid %d: (dx,dy) = %d %d" % (i+1, dx, dy)
+
+    # final round: sub-pixel (Fourier) centering
+    # ------------------------------------------
+    threshold = 0.1
+
+    # create a weighted mask
+    wgmask  = np.zeros((sz, sz)) # weight
+    wgmask[np.where(im*thm > threshold)] = 1.0
+    wgmask *= im
+
+    # determine the centroid offsets
+    dx = np.sum(np.arange(sz) * wgmask.sum(1)) / wgmask.sum() - dz
+    dy = np.sum(np.arange(sz) * wgmask.sum(0)) / wgmask.sum() - dz
+    if showMessages : print "centroid N: (dx,dy) = %+0.3f %+0.3f" % (dx, dy)
+
+    # window function to determine image integral in region of interest
+    temp = im * sgmask
+    mynorm = temp.sum()
+
+    # array for Fourier-translation
+    dummy = shift(dx * wedge_x + dy * wedge_y)
+    offset.real, offset.imag = np.cos(dummy), np.sin(dummy)
+    dummy = np.abs(shift(ifft(offset * fft(shift(im)))))
+
+    # image masking, and set integral to right value
+    dummy *= sgmask
+    return (dummy * mynorm / dummy.sum())	
+
+
+def centroid2(data):
+    h,w=data.shape
+    x=np.arange(h)
+    y=np.arange(w)
+    x1=np.ones((1,h))
+    y1=np.ones((w,1))
+    (x0,y0)=((np.dot(np.dot(x1, temp), y))/(np.dot(np.dot(x1, temp), y1))[0][0],
+            (np.dot(np.dot(x, temp), y1))/(np.dot(np.dot(x1, temp), y1))[0][0])	
+    return (x0,y0)												
 																

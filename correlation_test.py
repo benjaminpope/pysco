@@ -18,7 +18,7 @@ sg_ld=10.0 # windowing radius in lambda/D
 # creating kpd with bispectral phases	(100000 phases)
 kpo=pysco.kpo(ddir+kpidir+'full_hex15.kpi.gz')
 kpo.extract_kpd(ddir+'outputs/frozen_noiseless7000/PSF/binaries/full_hex15_frozen_s135_c5_a0_7000.fits',manual=0,D=D,sg_ld=sg_ld,
-		plotim=False,re_center=True,window=True,use_main_header=True,ave='median',bsp=True,range=(0,100000))
+		plotim=False,re_center=True,window=True,use_main_header=True,ave='median',bsp=True)
 kpo.save_to_file(ddir+kpddir+'full_hex15_frozen_'+s+'_s135_c5_a0_7000.kpd.gz')
 
 '''	
