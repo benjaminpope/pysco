@@ -159,7 +159,7 @@ class kpo():
                 bsps=[]	
             for i in xrange(nslices):
                 sys.stdout.write(
-                    "\rextracting kp from img %3d/%3d" % (i+1,nslices))
+                    "\rextracting kp from img %3d/%3d" % (i+1,nslices))																				
                 sys.stdout.flush()															
                 res = extract_from_array(dcube[i], fits_hdr, self.kpi, 
                                                  save_im=False, re_center=re_center,

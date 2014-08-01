@@ -17,6 +17,7 @@ fft   = np.fft.fft2
 ifft  = np.fft.ifft2
 
 dtor = np.pi/180.0
+m_zero=1e-10 # machine zero
 
 # =========================================================================
 # =========================================================================
@@ -330,14 +331,14 @@ def recenter(im0, sg_rad=25.0, verbose=True, nbit=10, manual = 0):
         #dx=1.0
         #dy=1.0	
         #print(" Test only! dx=%f, dy=%f " % (dx,dy))					
-        im = np.roll(np.roll(im, -int(dx), axis=1), -int(dy), axis=0)
+        im = np.roll(np.roll(im, -int(dx), axis=1), -int(dy), axis=0)        
         dx -= np.int(dx)
-        dy -= np.int(dy)
+        dy -= np.int(dy)					
         # array for Fourier-translation
         dummy = shift(-dx * wedge_x + dy * wedge_y)
         offset.real, offset.imag = np.cos(dummy), np.sin(dummy)
         im = np.abs(shift(ifft(offset * fft(shift(im*sgmask)))))*sgmask
-        # image masking, and set integral to right value
+        # image masking, and set integral to right value        
         im=im * mynorm / im.sum()
     elif len(im0.shape)==3 :  
         im = np.zeros((im0.shape[0],sz, sz))
@@ -623,14 +624,18 @@ def extract_from_array(array, hdr, kpi, save_im=True, wfs=False, plotim=False, m
 
     uv_samp = kpi.uv * m2pix + dz # uv sample coordinates in pixels
     #uv_samp = uv_rot * m2pix + dz # uv sample coordinates in pixels
-    if adjust_sampling : uv_samp=adjust_samp(uv_samp,kpi,m2pix,sz) # rounding
+				
+    if adjust_sampling: 
+        uv_samp=adjust_samp(uv_samp,kpi,m2pix,sz) # rounding if not integer							
        
     # calculate and normalize Fourier Transform
     ac = shift(fft(shift(im)))
     ac /= (np.abs(ac)).max() / kpi.nbh
 
-    # [AL, 2014.06.20] visibilities extraction						
-    data_cplx=grid_inter(uv_samp[:,1],rev * uv_samp[:,0],ac,grid_size=0)
+    # [AL, 2014.06.20] visibilities extraction
+    uv_samp_rev=np.copy(uv_samp)
+    uv_samp_rev[:,0]*=rev
+    data_cplx=ac[np.cast['int'](np.round(uv_samp_rev[:,1])), np.cast['int'](np.round(uv_samp_rev[:,0]))]				
 				
     vis = np.real(ac*ac.conjugate())
     viscen = vis.shape[0]/2
@@ -643,13 +648,16 @@ def extract_from_array(array, hdr, kpi, save_im=True, wfs=False, plotim=False, m
 
     #kpd_phase = kpi.RED * np.angle(data_cplx) # in radians for WFS # [Al, 2014.05.12] Replaced by Frantz's version
     #kpd_signal = np.dot(kpi.KerPhi, kpd_phase) / dtor # [Al, 2014.05.12] Replaced by Frantz's version
-    kpd_phase = np.angle(data_cplx) # uv-phase (in radians for WFS) #[Al, 2014.05.12] Frantz's version
-    kpd_signal = np.dot(kpi.KerPhi, kpd_phase) / dtor #[Al, 2014.05.12] Frantz's version				
-	
+    #kpd_phase = np.angle(data_cplx) # uv-phase (in radians for WFS) #[Al, 2014.05.12] Frantz's version #[AL, 2014.07.30 Replaced]
+
+    kpd_phase=unwrap_uv_phases(ac,uv_samp_rev,maxVar=np.pi) 
+    
+    kpd_signal = np.dot(kpi.KerPhi, kpd_phase) / dtor #[Al, 2014.05.12] Frantz's version
+						
     # [AL, 2014.05.06] Bispectrum (bsp)
     if bsp :	   				
-        #bsp_res=extract_bsp(data_cplx,kpi.uvrel)
-        bsp_res=extract_bsp(kpd_phase,kpi.uvrel,unwrap=0)
+        bsp_res=extract_bsp(data_cplx,kpi.uvrel) # robust to phase wrapping
+       # bsp_res=extract_bsp(kpd_phase,kpi.uvrel,rng=(0,50000)) # works if unwrapping algorithm is fine. Can be used to check it as it is a requirement for kpd extraction
 								
     if bsp :   
         if (save_im): res = (kpd_info, kpd_signal,vis2, im, ac, bsp_res)
@@ -773,50 +781,94 @@ def adjust_samp(uv_samp,kpi,m2pix,sz,save_kpi=True) :
     # converting to pixels once again
     return uv * m2pix + dz
 
-			
-# [AL, 2014.05.20]
-# A function for image data interpolation for a given set of non-integer points
-# x, y - arrays of sampling points
-# data - input image matrix (in case of complex data the function interpolates amplitude and phase part separately)
-# grid_size - number of pixels involved in interpolation
-# method - method for interpolation (linear, nearest, cubic)
-# unwrap - unwrap the phase in case maximum difference is greater than 'unwrap' number (work unpredictably if phase variations are >"unwrap value" between adjacent pixels)
-# output:
-# - res - array of interpolation values.					
-def grid_inter(x,y,data,grid_size=3,method='cubic',unwrap=0) :
-    if grid_size==0 :
-        xx = np.cast['int'](np.round(x)) #rounding coordinates
-        yy = np.cast['int'](np.round(y)) #rounding coordinates	
-        res = data[xx, yy]	
-    else :				
-        res=np.zeros(np.shape(x),dtype=data.dtype)
-        sz=len(data)								
-        for i in range(0,len(x)) :
-            x0=int(np.round(max(-sz,x[i]-grid_size//2)))
-            y0=int(np.round(max(-sz,y[i]-grid_size//2)))												
-            if x0+grid_size>=sz :
-               x0=sz-grid_size		
-            if y0+grid_size>=sz :
-               y0=sz-grid_size																	
-            xarr=range(x0,x0+grid_size)	
-            yarr=range(y0,y0+grid_size)
-            grd=np.meshgrid(xarr,yarr)
-            grd_x=np.reshape(grd[0],np.size(grd[0]))	
-            grd_y=np.reshape(grd[1],np.size(grd[1]))
-            grd_xy=np.transpose([grd_x,grd_y])													
-            if data.dtype=='complex' :																	
-                #res_real=griddata(grd_xy,data[grd_x,grd_y].real,[[x[i],y[i]]],method=method)[0]											
-                #res_imag=griddata(grd_xy,data[grd_x,grd_y].imag,[[x[i],y[i]]],method=method)[0]
-                #res[i]=res_real+1j*res_imag
-		res_amp=griddata(grd_xy,np.abs(data[grd_x,grd_y]),[[x[i],y[i]]],method=method)[0]	
-		if unwrap>0 :
-                    res_phase=griddata(grd_xy,np.unwrap(np.angle(data[grd_x,grd_y]),discont=unwrap),[[x[i],y[i]]],method=method)[0]	
-		else :
-                    res_phase=griddata(grd_xy,np.angle(data[grd_x,grd_y]),[[x[i],y[i]]],method=method)[0]														
-                res[i]=res_amp*np.exp(1j*res_phase)
-            else :													
-                res[i]=griddata(grd_xy,data[grd_x,grd_y].real,[[x[i],y[i]]],method=method)[0]
-    return res	
+# [AL, 2014.07.29]				
+# ---- this function unwraps phases for a given set of uv points by goint to each uv point from across a line from the center ------
+#data # initial array with phases or complex visibilities (square image)
+#uv0    # array with sampling points
+#maxVar # maximum variation between positive and negative phases
+#return_image # return image with unwrapped phases
+# output :
+# - unwrapped phases for sampling at given uv-points
+def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
+    two_pi=np.pi*2
+    sz=data.shape[0] # square image size
+    dz=sz//2
+    #shifting initial array
+    uv=np.array(np.round(uv0-dz),dtype=int)
+    if data.dtype=='complex' :				
+        phases=np.angle(data)
+    else : 	phases=np.copy(data)							
+    res=np.empty((uv0.shape[0]),dtype=phases.dtype)
+    # determining the line function between each of the sampling points and image center y=ax
+    for i in range(uv.shape[0]) : 
+        xShift=True
+        if uv[i,1]==0 and uv[i,0]==0:
+            continue # no unwrapping in case of image center		
+        elif uv[i,1]==0 :           # going vertically along y axis
+            dx=0.
+            dy=np.sign(uv[i,0])
+            xShift=False
+        elif uv[i,0]==0 :          # going horizontally along x axis
+            dx=np.sign(uv[i,1])
+            dy=0.																		
+        else :			   # determining x and y shifts
+            dy=np.abs(1.*uv[i,0]/uv[i,1])*np.sign(uv[i,0])
+            if np.abs(dy)<=1 :
+                dx=np.sign(uv[i,1])
+            else :
+                dx=np.abs(1.*uv[i,1]/uv[i,0])*np.sign(uv[i,1])
+                dy=np.sign(uv[i,0])
+                xShift=False								
+        if xShift:				
+            x=dz
+            y1=dz
+            y2=dz				
+            while (np.abs(uv[i,1])>=np.abs(x-dz)) :
+                x+=dx
+                y=np.int(np.abs(x-dz)*dy)+dz
+                # we calculate number of wrappings by rounding a previous phase to the nearest integer
+                n_pi=np.round((max(np.abs(phases[x-dx,y2]),np.abs(phases[x-dx,y1]))-1e-14)/np.pi) # 1e-14 is a small number to avoid +/-pi ambiguity
+                if ((np.sign(phases[x,y])*np.sign(phases[x-dx,y1])<=0) and np.abs(phases[x-dx,y1]-phases[x,y])>maxVar) or \
+                   ((np.sign(phases[x,y])*np.sign(phases[x-dx,y2])<=0) and np.abs(phases[x-dx,y2]-phases[x,y])>maxVar) :
+                    phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))													                    
+                    if (np.sign(phases[x,y])*np.sign(phases[x,y+1])<0) and (np.abs(phases[x,y]-phases[x,y+1])>maxVar)	:
+                        phases[x,y+1]=-np.sign(phases[x,y+1])*(two_pi*n_pi-np.abs(phases[x,y+1]))																								
+                if (dy!=0) and \
+                   (((np.sign(phases[x,y+1])*np.sign(phases[x-dx,y1])<=0) and np.abs(phases[x-dx,y1]-phases[x,y+1])>maxVar) or \
+                    ((np.sign(phases[x,y+1])*np.sign(phases[x-dx,y2]))<=0 and np.abs(phases[x-dx,y2]-phases[x,y+1])>maxVar)) :
+                    phases[x,y+1]=-np.sign(phases[x,y+1])*(two_pi*n_pi-np.abs(phases[x,y+1]))
+                    if (np.sign(phases[x,y])*np.sign(phases[x,y+1])<0) and (np.abs(phases[x,y]-phases[x,y+1])>maxVar)	:
+                        phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))																						
+                y1=y        												
+                y2=y+1   
+        else :				
+            y=dz
+            x1=dz
+            x2=dz				
+            while (np.abs(uv[i,0])>=np.abs(y-dz)) :
+                y+=dy
+                x=np.int(np.abs(y-dz)*dx)+dz
+                # we calculate number of wrappings by rounding a previous phase to the nearest integer
+                n_pi=np.round((max(np.abs(phases[x2,y-dy]),np.abs(phases[x1,y-dy]))-m_zero)//np.pi) # m_zero is a small number to avoid +/-pi ambiguity
+                if ((np.sign(phases[x,y])*np.sign(phases[x1,y-dy])<=0) and np.abs(phases[x1,y-dy]-phases[x,y])>maxVar) or \
+                   ((np.sign(phases[x,y])*np.sign(phases[x2,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x,y])>maxVar) :
+                    phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))	
+                    if (np.sign(phases[x,y])*np.sign(phases[x+1,y])<0) and (np.abs(phases[x,y]-phases[x+1,y])>maxVar)	:
+                        phases[x+1,y]=-np.sign(phases[x+1,y])*(two_pi*n_pi-np.abs(phases[x+1,y]))																				
+                if  (dx!=0) and \
+                   (((np.sign(phases[x+1,y])*np.sign(phases[x1,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar) or \
+                    ((np.sign(phases[x+1,y])*np.sign(phases[x2,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar)):
+                    phases[x+1,y]=-np.sign(phases[x+1,y])*(two_pi*n_pi-np.abs(phases[x+1,y]))	
+                    if (np.sign(phases[x,y])*np.sign(phases[x+1,y])<0) and (np.abs(phases[x,y]-phases[x+1,y])>maxVar)	:
+                        phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))																					
+                x1=x        												
+                x2=x+1																
+        res[i]=phases[uv[i,1]+dz,uv[i,0]+dz]																															
+    if not return_image : 
+        return res  
+    else :
+        return res,phases					
+
 
 #[AL, 07.05.2014] Extract bispectral phases for a given set of visibilities
 # vis - input visibilities or phases (in radians!!!)
@@ -824,8 +876,7 @@ def grid_inter(x,y,data,grid_size=3,method='cubic',unwrap=0) :
 # deg - return result in degrees 
 # rng - upper and lower bounds for bsp to be extracted. Used to reduce the resources usage
 # nonred - extract non-redundant Bsp only. Much slower
-# unwrap - unwrap the phase in case maximum difference is greater than 'unwrap' number (work unpredictably if phase variations are "unwrap" value between closure phases)
-def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False,unwrap=0):
+def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False):
     # determining number of sampling points
     nsp=uvrel.shape[0]
     # creating a relationship								
@@ -899,12 +950,9 @@ def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False,unwrap=0):
                             total+=1																											
                     if total>=u :
                         break
-    if unwrap>0 :
-        res=np.unwrap(bsp_res,discont=unwrap)
-    else :
-        res=np.asarray(bsp_res)
+    res=np.asarray(bsp_res)
     if deg :																							
         return res/dtor
     else :
-        return res							
-																
+        return res			
+		
