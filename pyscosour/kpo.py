@@ -176,12 +176,13 @@ class kpo():
                 if bsp :
                     bsps.append(bsp_res)       
         # [Al, 2014.05.02] kpe and vis2e definition changed	
-        # [Al, 2014.05.29] kpe is standard error now																			
+        # [Al, 2014.05.29] kpe is standard error now	
+        # [AL, 2014.08.26] fixed kpe calculation (shift to mean instead of zero)																		
         if len(kpds.shape)==2 :
-            self.kpe = np.std(kpds, 0)/np.sqrt(kpds.shape[0])
-            self.vis2e = np.std(vis2s,0)/np.sqrt(kpds.shape[0])
+            self.kpe = np.std(kpds-np.mean(kpds,axis=0), axis=0)/np.sqrt(kpds.shape[0])
+            self.vis2e = np.std(vis2s-np.mean(vis2s,axis=0), axis=0)/np.sqrt(kpds.shape[0])
             if bsp : 
-                self.bspe=np.std(bsps,0)/np.sqrt(kpds.shape[0])												
+                self.bspe=np.std(bsps-np.mean(bsps,axis=0), axis=0)/np.sqrt(kpds.shape[0])												
         else :
             self.kpe = np.zeros(self.kpi.nkphi)
             self.vis2e = np.zeros(np.shape(vis2s))	
