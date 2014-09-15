@@ -827,7 +827,7 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
                 x+=dx
                 y=np.int(np.abs(x-dz)*dy)+dz
                 # we calculate number of wrappings by rounding a previous phase to the nearest integer
-                n_pi=np.round((max(np.abs(phases[x-dx,y2]),np.abs(phases[x-dx,y1]))-1e-14)/np.pi) # 1e-14 is a small number to avoid +/-pi ambiguity
+                n_pi=np.floor((max(np.abs(phases[x-dx,y2]),np.abs(phases[x-dx,y1]))-1e-14)/np.pi) # 1e-14 is a small number to avoid +/-pi ambiguity
                 if ((np.sign(phases[x,y])*np.sign(phases[x-dx,y1])<=0) and np.abs(phases[x-dx,y1]-phases[x,y])>maxVar) or \
                    ((np.sign(phases[x,y])*np.sign(phases[x-dx,y2])<=0) and np.abs(phases[x-dx,y2]-phases[x,y])>maxVar) :
                     phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))													                    
@@ -849,7 +849,7 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
                 y+=dy
                 x=np.int(np.abs(y-dz)*dx)+dz
                 # we calculate number of wrappings by rounding a previous phase to the nearest integer
-                n_pi=np.round((max(np.abs(phases[x2,y-dy]),np.abs(phases[x1,y-dy]))-m_zero)//np.pi) # m_zero is a small number to avoid +/-pi ambiguity
+                n_pi=np.floor((max(np.abs(phases[x2,y-dy]),np.abs(phases[x1,y-dy]))-m_zero)//np.pi) # m_zero is a small number to avoid +/-pi ambiguity
                 if ((np.sign(phases[x,y])*np.sign(phases[x1,y-dy])<=0) and np.abs(phases[x1,y-dy]-phases[x,y])>maxVar) or \
                    ((np.sign(phases[x,y])*np.sign(phases[x2,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x,y])>maxVar) :
                     phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))	
