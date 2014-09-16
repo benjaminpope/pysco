@@ -826,19 +826,35 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
             while (np.abs(uv[i,1])>=np.abs(x-dz)) :
                 x+=dx
                 y=np.int(np.abs(x-dz)*dy)+dz
-                # we calculate number of wrappings by rounding a previous phase to the nearest integer
-                n_pi=np.floor((max(np.abs(phases[x-dx,y2]),np.abs(phases[x-dx,y1]))-1e-14)/np.pi) # 1e-14 is a small number to avoid +/-pi ambiguity
                 if ((np.sign(phases[x,y])*np.sign(phases[x-dx,y1])<=0) and np.abs(phases[x-dx,y1]-phases[x,y])>maxVar) or \
-                   ((np.sign(phases[x,y])*np.sign(phases[x-dx,y2])<=0) and np.abs(phases[x-dx,y2]-phases[x,y])>maxVar) :
-                    phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))													                    
+		         ((np.sign(phases[x,y])*np.sign(phases[x-dx,y2])<=0) and np.abs(phases[x-dx,y2]-phases[x,y])>maxVar) :
+                    dist=np.abs(phases[x-dx,y1]-phases[x,y])%two_pi
+                    if (dist%two_pi<=np.pi) :
+                        phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x-dx,y1])-dist)
+                    else :
+                        phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x-dx,y1])+two_pi-dist)												                    
                     if (np.sign(phases[x,y])*np.sign(phases[x,y+1])<0) and (np.abs(phases[x,y]-phases[x,y+1])>maxVar)	:
-                        phases[x,y+1]=-np.sign(phases[x,y+1])*(two_pi*n_pi-np.abs(phases[x,y+1]))																								
+                        dist=np.abs(phases[x,y]-phases[x,y+1])%two_pi
+                        if (dist%two_pi<=np.pi) :
+                            phases[x,y+1]=-np.sign(phases[x,y+1])*(np.abs(phases[x,y])-dist)
+                        else :
+                            phases[x,y+1]=-np.sign(phases[x,y+1])*(np.abs(phases[x,y])+two_pi-dist)
+                    #print("1) f(%d,%d)=%f | f(%d,%d)=%f \n   f(%d,%d)=%f | f(%d,%d)=%f" % (x,y,phases[x,y],x,y+1,phases[x,y+1],x-dx,y1,phases[x-dx,y1],x-dx,y2,phases[x-dx,y2]))																								
                 if (dy!=0) and \
-                   (((np.sign(phases[x,y+1])*np.sign(phases[x-dx,y1])<=0) and np.abs(phases[x-dx,y1]-phases[x,y+1])>maxVar) or \
+                    (((np.sign(phases[x,y+1])*np.sign(phases[x-dx,y1])<=0) and np.abs(phases[x-dx,y1]-phases[x,y+1])>maxVar) or \
                     ((np.sign(phases[x,y+1])*np.sign(phases[x-dx,y2]))<=0 and np.abs(phases[x-dx,y2]-phases[x,y+1])>maxVar)) :
-                    phases[x,y+1]=-np.sign(phases[x,y+1])*(two_pi*n_pi-np.abs(phases[x,y+1]))
+                    dist=np.abs(phases[x-dx,y1]-phases[x,y+1])%two_pi
+                    if (dist%two_pi<=np.pi) :
+                        phases[x,y+1]=-np.sign(phases[x,y+1])*(np.abs(phases[x-dx,y1])-dist)
+                    else :
+                        phases[x,y+1]=-np.sign(phases[x,y+1])*(np.abs(phases[x-dx,y1])+two_pi-dist)	
                     if (np.sign(phases[x,y])*np.sign(phases[x,y+1])<0) and (np.abs(phases[x,y]-phases[x,y+1])>maxVar)	:
-                        phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))																						
+                        dist=np.abs(phases[x,y]-phases[x,y+1])%two_pi
+                        if (dist%two_pi<=np.pi) :
+                            phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x,y+1])-dist)
+                        else :
+                            phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x,y+1])+two_pi-dist)																	
+                    #print("2) f(%d,%d)=%f | f(%d,%d)=%f | f(%d,%d)=%f" % (x,y+1,phases[x,y+1],x-dx,y1,phases[x-dx,y1],x-dx,y2,phases[x-dx,y2]))																					
                 y1=y        												
                 y2=y+1   
         else :				
@@ -848,26 +864,40 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
             while (np.abs(uv[i,0])>=np.abs(y-dz)) :
                 y+=dy
                 x=np.int(np.abs(y-dz)*dx)+dz
-                # we calculate number of wrappings by rounding a previous phase to the nearest integer
-                n_pi=np.floor((max(np.abs(phases[x2,y-dy]),np.abs(phases[x1,y-dy]))-m_zero)//np.pi) # m_zero is a small number to avoid +/-pi ambiguity
                 if ((np.sign(phases[x,y])*np.sign(phases[x1,y-dy])<=0) and np.abs(phases[x1,y-dy]-phases[x,y])>maxVar) or \
-                   ((np.sign(phases[x,y])*np.sign(phases[x2,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x,y])>maxVar) :
-                    phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))	
+                   ((np.sign(phases[x,y])*np.sign(phases[x2,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x,y])>maxVar) :																				
+                    dist=np.abs(phases[x1,y-dy]-phases[x,y])%two_pi
+                    if (dist%two_pi<=np.pi) :
+                        phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x1,y-dy])-dist)
+                    else :
+                        phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x1,y-dy])+two_pi-dist)												                    
                     if (np.sign(phases[x,y])*np.sign(phases[x+1,y])<0) and (np.abs(phases[x,y]-phases[x+1,y])>maxVar)	:
-                        phases[x+1,y]=-np.sign(phases[x+1,y])*(two_pi*n_pi-np.abs(phases[x+1,y]))																				
+                        dist=np.abs(phases[x,y]-phases[x+1,y])%two_pi
+                        if (dist%two_pi<=np.pi) :
+                            phases[x+1,y]=-np.sign(phases[x+1,y])*(np.abs(phases[x,y])-dist)
+                        else :
+                            phases[x+1,y]=-np.sign(phases[x+1,y])*(np.abs(phases[x,y])+two_pi-dist)																												
                 if  (dx!=0) and \
                    (((np.sign(phases[x+1,y])*np.sign(phases[x1,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar) or \
-                    ((np.sign(phases[x+1,y])*np.sign(phases[x2,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar)):
-                    phases[x+1,y]=-np.sign(phases[x+1,y])*(two_pi*n_pi-np.abs(phases[x+1,y]))	
+                    ((np.sign(phases[x+1,y])*np.sign(phases[x2,y-dy])<=0) and np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar)):																				
+                    dist=np.abs(phases[x1,y-dy]-phases[x+1,y])%two_pi
+                    if (dist%two_pi<=np.pi) :
+                        phases[x+1,y]=-np.sign(phases[x+1,y])*(np.abs(phases[x1,y-dy])-dist)
+                    else :
+                        phases[x+1,y]=-np.sign(phases[x+1,y])*(np.abs(phases[x1,y-dy])+two_pi-dist)	
                     if (np.sign(phases[x,y])*np.sign(phases[x+1,y])<0) and (np.abs(phases[x,y]-phases[x+1,y])>maxVar)	:
-                        phases[x,y]=-np.sign(phases[x,y])*(two_pi*n_pi-np.abs(phases[x,y]))																					
+                        dist=np.abs(phases[x,y]-phases[x+1,y])%two_pi
+                        if (dist%two_pi<=np.pi) :
+                            phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x+1,y])-dist)
+                        else :
+                            phases[x,y]=-np.sign(phases[x,y])*(np.abs(phases[x+1,y])+two_pi-dist)																									
                 x1=x        												
                 x2=x+1																
         res[i]=phases[uv[i,1]+dz,uv[i,0]+dz]																															
     if not return_image : 
         return res  
     else :
-        return res,phases					
+        return res,phases						
 
 
 #[AL, 07.05.2014] Extract bispectral phases for a given set of visibilities
