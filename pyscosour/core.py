@@ -633,9 +633,9 @@ def extract_from_array(array, hdr, kpi, save_im=True, wfs=False, plotim=False, m
     ac /= (np.abs(ac)).max() / kpi.nbh
 
     # [AL, 2014.06.20] visibilities extraction
-    uv_samp_rev=np.copy(uv_samp)
+    uv_samp_rev=np.cast['int'](np.round(uv_samp))
     uv_samp_rev[:,0]*=rev
-    data_cplx=ac[np.cast['int'](np.round(uv_samp_rev[:,1])), np.cast['int'](np.round(uv_samp_rev[:,0]))]				
+    data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]				
 				
     vis = np.real(ac*ac.conjugate())
     viscen = vis.shape[0]/2
@@ -679,12 +679,12 @@ def extract_from_array(array, hdr, kpi, save_im=True, wfs=False, plotim=False, m
 	#[AL, 2014.03.03 : Added power spectrum as well]				
         f1 = plt.subplot(132)       
         f1.imshow(np.abs(ac))								
-        f1.plot(uv_samp[:,0], uv_samp[:,1], 'b.')
+        f1.plot(uv_samp_rev[:,0], uv_samp_rev[:,1], 'b.')
         f1.axis((dz-uvw, dz+uvw, dz-uvw, dz+uvw))	
 								
         f2 = plt.subplot(133)
         f2.imshow(np.angle(ac)) 								
-        f2.plot(uv_samp[:,0], uv_samp[:,1], 'b.')
+        f2.plot(uv_samp_rev[:,0], uv_samp_rev[:,1], 'b.')
         f2.axis((dz-uvw, dz+uvw, dz-uvw, dz+uvw))								
         plt.draw()
         plt.show()
@@ -823,9 +823,9 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
             x=dz
             y1=dz
             y2=dz				
-            while (np.abs(uv[i,1])>=np.abs(x-dz)) :
+            while (np.abs(uv[i,1])>np.abs(x-dz)) :
                 x+=dx
-                y=np.int(np.abs(x-dz)*dy)+dz
+                y=np.int(np.abs(x-dz)*dy+dz)
                 if (np.abs(phases[x-dx,y1]-phases[x,y])>maxVar) or \
 		         (np.abs(phases[x-dx,y2]-phases[x,y])>maxVar) :
                     dist=np.abs(phases[x-dx,y1]-phases[x,y])%two_pi
@@ -861,9 +861,9 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
             y=dz
             x1=dz
             x2=dz				
-            while (np.abs(uv[i,0])>=np.abs(y-dz)) :
+            while (np.abs(uv[i,0])>np.abs(y-dz)) :
                 y+=dy
-                x=np.int(np.abs(y-dz)*dx)+dz
+                x=np.int(np.abs(y-dz)*dx+dz)
                 if (np.abs(phases[x1,y-dy]-phases[x,y])>maxVar) or \
                    (np.abs(phases[x2,y-dy]-phases[x,y])>maxVar) :																				
                     dist=np.abs(phases[x1,y-dy]-phases[x,y])%two_pi
