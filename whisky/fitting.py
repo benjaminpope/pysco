@@ -191,7 +191,7 @@ def kp_loglikelihood(params,kpo):
 # =========================================================================
 # =========================================================================
 
-def hammer(kpo,ivar=[52., 192., 1.53],ndim=3,nwalkers=100,plot=False,burnin=100,nsteps=1000):
+def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,nsteps=1000):
 
     '''Default implementation of emcee, the MCMC Hammer, for kernel phase
     fitting. Requires a kernel phase object kpo, and is best called with 
@@ -206,7 +206,7 @@ def hammer(kpo,ivar=[52., 192., 1.53],ndim=3,nwalkers=100,plot=False,burnin=100,
 
     ivar = np.array(ivar)  # initial parameters for model-fit
 
-    p0 = [ivar + 0.1*ivar*np.random.rand(ndim) for i in range(nwalkers)] # initialise walkers in a ball
+    p0 = [ivar + 0.05*ivar*np.random.rand(ndim) for i in range(nwalkers)] # initialise walkers in a ball
 
     print 'Running emcee now!'
 
@@ -219,18 +219,15 @@ def hammer(kpo,ivar=[52., 192., 1.53],ndim=3,nwalkers=100,plot=False,burnin=100,
     sampler.reset()
 
     t1 = time.time()
-    print 'Burnt in! Took',t1,'seconds'
+
+    print 'Burnt in! Took %.3f seconds' %(t1-t0)
 
     # restart
     sampler.run_mcmc(pos,nsteps)
 
     tf = time.time()
 
-    print 'Time elapsed =', tf-t0,'s'
-
-    tf = time.time()
-
-    print 'Time elapsed =', tf-t0,'s'
+    print 'Time elapsed = %.3f s' %(tf-t0)
 
     seps = sampler.flatchain[:,0]
     ths = sampler.flatchain[:,1]

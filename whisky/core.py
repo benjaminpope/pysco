@@ -536,7 +536,7 @@ def get_simu_keywords(hdr):
 # [AL, 2014.05.28] Recentering and windowing parameters added
 # [AL, 2014.05.28] The same definitions (except hdr) for extract_from_array and extract_from_fits_frame functions
 # [AL, 2014.05.29] Description updated
-def extract_from_array(array, hdr, kpi, save_im=True, wfs=False, plotim=False, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True):
+def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True):
     ''' Extract the Kernel-phase signal from a ndarray + header info.
     
     ----------------------------------------------------------------
