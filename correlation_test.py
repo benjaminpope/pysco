@@ -4,7 +4,7 @@
 ################-----------------#################
 
 import numpy as np
-import pyscosour as pysco 
+import whisky as pysco 
 
 ddir = '/import/pendragon1/latyshev/Data/KerPhases/'
 kpidir='kpi/'

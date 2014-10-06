@@ -3,7 +3,7 @@
 ###  Author: Alexey Latyshev. Date: 02.2014 ###
 ################-----------------#################
 import numpy as np
-import pyscosour as pysco # for compatibility and ease of use
+import whisky as pysco # for compatibility and ease of use
 
 # Parameters for contrasts plot and for detection limits
 D=8.0
