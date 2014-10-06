@@ -899,6 +899,8 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
     else :
         return res,phases						
 
+# =========================================================================
+# =========================================================================
 
 #[AL, 07.05.2014] Extract bispectral phases for a given set of visibilities
 # vis - input visibilities or phases (in radians!!!)
@@ -985,4 +987,28 @@ def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False):
         return res/dtor
     else :
         return res			
+
+# =========================================================================
+# =========================================================================
 		
+def clip_signal(signal,threshold=3):
+    '''Cut out bad points'''
+
+    newsignal = signal
+    sigma = np.std(newsignal)
+    j = 0
+
+    while np.max(np.abs(newsignal-np.median(newsignal)))>=threshold*sigma and j<10:
+        sigma = np.std(newsignal)
+        newsignal = newsignal[(np.abs(newsignal-np.median(newsignal)))<=threshold*sigma]
+        j+=1
+        if j >6: 
+            print 'warning, many iterations!'
+
+    return newsignal
+
+# =========================================================================
+# =========================================================================
+
+def reject_outliers(data, m=2):
+    return data[abs(data - np.median(data)) < m * np.std(data)]
