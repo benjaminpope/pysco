@@ -191,7 +191,7 @@ def kp_loglikelihood(params,kpo):
 # =========================================================================
 # =========================================================================
 
-def hammer(kpo,ivar=[52., 192., 1.53],ndim=3,nwalkers=100,plot=False):
+def hammer(kpo,ivar=[52., 192., 1.53],ndim=3,nwalkers=100,plot=False,burnin=100,nsteps=1000):
 
     '''Default implementation of emcee, the MCMC Hammer, for kernel phase
     fitting. Requires a kernel phase object kpo, and is best called with 
@@ -213,7 +213,20 @@ def hammer(kpo,ivar=[52., 192., 1.53],ndim=3,nwalkers=100,plot=False):
     t0 = time.time()
 
     sampler = emcee.EnsembleSampler(nwalkers, ndim, kp_loglikelihood, args=[kpo])
-    sampler.run_mcmc(p0, 1000)
+
+    # burn in
+    pos,prob,state = sampler.run_mcmc(p0, burnin)
+    sampler.reset()
+
+    t1 = time.time()
+    print 'Burnt in! Took',t1,'seconds'
+
+    # restart
+    sampler.run_mcmc(pos,nsteps)
+
+    tf = time.time()
+
+    print 'Time elapsed =', tf-t0,'s'
 
     tf = time.time()
 

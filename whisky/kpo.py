@@ -190,7 +190,7 @@ class kpo():
                 self.bspe=np.zeros(np.shape(np.asarray(bsps)))													
 												
         if ave == "median":
-            print "median average"
+            print " median average"
 
             if nf>1 or fits_hdr['NAXIS'] == 3:
                 self.hdr = hdrs[0]
@@ -205,7 +205,7 @@ class kpo():
             self.wavel = self.hdr['filter']														
 
         elif ave == "mean":
-            print "mean average"
+            print " mean average"
             self.kpd = np.mean(kpds, 0)
             self.vis2 = np.mean(vis2s,0)
             if nf>1 or fits_hdr['NAXIS'] == 3:
@@ -223,7 +223,7 @@ class kpo():
             self.wavel = self.hdr['filter']
 												
         elif ave == "none":
-            print "no average"
+            print " no average"
             self.kpd = np.asarray(kpds)
             self.vis2 = np.asarray(vis2s)
             self.hdr = hdrs	
