@@ -95,7 +95,8 @@ class kpo():
     # [AL, 2014.05.06] Extract bispectrum (bsp)
     # [AL, 2014.05.28] Adjust sampling points in pupil plane to make coordinates in uv-plane integer (increases quality)
     # [AL, 2014.10.07] unwrap_kp flag added. Kernel phases unwrapping is off by default
-    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, bsp=False, use_main_header=False, adjust_sampling=True, unwrap_kp=False):
+    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, 
+        bsp=False, use_main_header=False, adjust_sampling=True, unwrap_kp=False):
 
         ''' extract kernel-phase data from one or more files (use regexp).
 
