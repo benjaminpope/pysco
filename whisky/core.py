@@ -536,7 +536,8 @@ def get_simu_keywords(hdr):
 # [AL, 2014.05.28] Recentering and windowing parameters added
 # [AL, 2014.05.28] The same definitions (except hdr) for extract_from_array and extract_from_fits_frame functions
 # [AL, 2014.05.29] Description updated
-def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True):
+# [AL, 2014.10.07] unwrap_kp flag added. Kernel phases unwrapping is off by default
+def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True, unwrap_kp=False):
     ''' Extract the Kernel-phase signal from a ndarray + header info.
     
     ----------------------------------------------------------------
@@ -648,9 +649,12 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
 
     #kpd_phase = kpi.RED * np.angle(data_cplx) # in radians for WFS # [Al, 2014.05.12] Replaced by Frantz's version
     #kpd_signal = np.dot(kpi.KerPhi, kpd_phase) / dtor # [Al, 2014.05.12] Replaced by Frantz's version
-    #kpd_phase = np.angle(data_cplx) # uv-phase (in radians for WFS) #[Al, 2014.05.12] Frantz's version #[AL, 2014.07.30 Replaced]
 
-    kpd_phase=unwrap_uv_phases(ac,uv_samp_rev,maxVar=np.pi) 
+    if not unwrap_kp :
+        kpd_phase = np.angle(data_cplx) # uv-phase (in radians for WFS) #[Al, 2014.05.12] Frantz's version #[AL, 2014.07.30 Replaced]
+    else :
+        kpd_phase=unwrap_uv_phases(ac,uv_samp_rev,maxVar=np.pi) 
+    
     
     kpd_signal = np.dot(kpi.KerPhi, kpd_phase) / dtor #[Al, 2014.05.12] Frantz's version
 						
@@ -703,7 +707,8 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
 # [AL, 2014.05.28] Adjust sampling points in pupil plane to make coordinates in uv-plane integer (increases quality)
 # [AL, 2014.05.29] The same definitions (except hdr) for extract_from_array and extract_from_fits_frame functions. extract_from_fits_frame is now defined via extract_from_array function
 # [AL, 2014.05.29] Description updated
-def extract_from_fits_frame(fname, kpi, save_im=True, wfs=False, plotim=True, manual=0, wrad=25.0, sg_ld=1.0, D=0.0, re_center=True, window=True, bsp=False, adjust_sampling=True):
+# [AL, 2014.10.07] unwrap_kp flag added. Kernel phases unwrapping is off by default
+def extract_from_fits_frame(fname, kpi, save_im=True, wfs=False, plotim=True, manual=0, wrad=25.0, sg_ld=1.0, D=0.0, re_center=True, window=True, bsp=False, adjust_sampling=True, unwrap_kp=False):
 
     ''' Extract the Kernel-phase signal from a single fits frame.
     
@@ -742,7 +747,7 @@ def extract_from_fits_frame(fname, kpi, save_im=True, wfs=False, plotim=True, ma
     ----------------------------------------------------------------  '''
     im0=pf.getdata(fname)
     hdr = pf.getheader(fname)
-    return extract_from_array(im0, hdr, kpi, save_im=save_im, wfs=wfs, plotim=plotim, manual=manual,  wrad=wrad, sg_ld=sg_ld, D=D,re_center=re_center, window=window,  bsp=bsp, adjust_sampling=adjust_sampling)
+    return extract_from_array(im0, hdr, kpi, save_im=save_im, wfs=wfs, plotim=plotim, manual=manual,  wrad=wrad, sg_ld=sg_ld, D=D,re_center=re_center, window=window,  bsp=bsp, adjust_sampling=adjust_sampling,unwrap_kp=unwrap_kp)
 
 
 # [AL, 2014.07.25]
