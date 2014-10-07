@@ -94,7 +94,8 @@ class kpo():
     # [AL, 2014.04.17] use_main_header option added to replace individual headers from the datacube by the main one
     # [AL, 2014.05.06] Extract bispectrum (bsp)
     # [AL, 2014.05.28] Adjust sampling points in pupil plane to make coordinates in uv-plane integer (increases quality)
-    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, bsp=False, use_main_header=False, adjust_sampling=True):
+    # [AL, 2014.10.07] unwrap_kp flag added. Kernel phases unwrapping is off by default
+    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, bsp=False, use_main_header=False, adjust_sampling=True, unwrap_kp=False):
         ''' extract kernel-phase data from one or more files (use regexp).
 
         If the path leads to a fits data cube, or to multiple single frame
@@ -130,7 +131,7 @@ class kpo():
 																
                 res = \
                     extract_from_fits_frame(fname, self.kpi, save_im=True,plotim=plotim,
-				   	manual=manual,sg_ld=sg_ld,D=D,re_center=re_center,window=window,bsp=bsp,adjust_sampling=adjust_sampling)
+				   	manual=manual,sg_ld=sg_ld,D=D,re_center=re_center,window=window,bsp=bsp,adjust_sampling=adjust_sampling, unwrap_kp=unwrap_kp)
                 if bsp :
                     (hdr, sgnl, vis2, im, ac, bsp_res)=res
                 else :
@@ -163,7 +164,7 @@ class kpo():
                 sys.stdout.flush()															
                 res = extract_from_array(dcube[i], fits_hdr, self.kpi, 
                                                  save_im=False, re_center=re_center,
-                                                 wrad=50.0, plotim=plotim,sg_ld=sg_ld,D=D,bsp=bsp,adjust_sampling=adjust_sampling)# [AL, 2014.04.16] Added plotim parameter
+                                                 wrad=50.0, plotim=plotim,sg_ld=sg_ld,D=D,bsp=bsp,adjust_sampling=adjust_sampling,unwrap_kp=unwrap_kp)# [AL, 2014.04.16] Added plotim parameter
 																	#[AL, 2014.04.16] Added D and sg_ld parameters
 																	# [AL, 2014.03.21] changed re_center default value 
                 if bsp :
