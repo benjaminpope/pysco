@@ -38,7 +38,7 @@ def binary_model(params, kpi, hdr, vis2=False):
     if vis2:
         res = vis2_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
     return res
-    
+
 # =========================================================================
 # =========================================================================
 def binary_KPD_model(kpo, params):
@@ -192,18 +192,29 @@ def kp_loglikelihood(params,kpo):
 # =========================================================================
 # =========================================================================
 
-def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,nsteps=1000):
+def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,nsteps=1000,
+    paramlimits=[40,250,0,360,1.1,50.]):
 
     '''Default implementation of emcee, the MCMC Hammer, for kernel phase
     fitting. Requires a kernel phase object kpo, and is best called with 
     ivar chosen to be near the peak - it can fail to converge otherwise.'''
 
     # make sure you're using the right number of parameters
+
     nbands = kpo.kpd.shape[0]
+
     if np.size(kpo.hdr) == 1:
         bands = str(round(1e6*kpo.hdr['filter'],3)) 
     else:
         bands = [str(round(1e6*hd['filter'],3)) for hd in kpo.hdr]
+
+    def lnprior(params):
+        if paramlimits[0] < params[0] < paramlimits[1] and paramlimits[2] < params[1] < paramlimits[3] and paramlimits[4] < params[2] < paramlimits[5]:
+            return 0.0
+        return -np.inf
+
+    def lnprob(params,kpo):
+        return lnprior(params) + kp_loglikelihood(params,kpo)
 
     ivar = np.array(ivar)  # initial parameters for model-fit
 
@@ -213,7 +224,7 @@ def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,n
 
     t0 = time.time()
 
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, kp_loglikelihood, args=[kpo])
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, args=[kpo])
 
     # burn in
     pos,prob,state = sampler.run_mcmc(p0, burnin)
