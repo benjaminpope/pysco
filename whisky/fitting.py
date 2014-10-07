@@ -30,14 +30,15 @@ def binary_model(params, kpi, hdr, vis2=False):
     if 'HST'  in hdr['tel']: params2[1] -= hdr['orient']
     else:                    params2[1] += 0.0
 
-    filter = hdr['filter']
+    wavel = hdr['filter']
     
-    testPhi = phase_binary(kpi.uv[:,0], kpi.uv[:,1], filter, params2)
+    testPhi = phase_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
     res = np.dot(kpi.KerPhi, testPhi)
 
     if vis2:
-        res = vis2_binary(kpi.uv[:,0], kpi.uv[:,1], filter, params2)
+        res = vis2_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
     return res
+    
 # =========================================================================
 # =========================================================================
 def binary_KPD_model(kpo, params):
@@ -206,7 +207,7 @@ def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,n
 
     ivar = np.array(ivar)  # initial parameters for model-fit
 
-    p0 = [ivar + 0.05*ivar*np.random.rand(ndim) for i in range(nwalkers)] # initialise walkers in a ball
+    p0 = np.array([ivar + 0.1*ivar*np.random.rand(ndim) for i in range(nwalkers)]) # initialise walkers in a ball
 
     print 'Running emcee now!'
 

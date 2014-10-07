@@ -94,7 +94,7 @@ class kpo():
     # [AL, 2014.04.17] use_main_header option added to replace individual headers from the datacube by the main one
     # [AL, 2014.05.06] Extract bispectrum (bsp)
     # [AL, 2014.05.28] Adjust sampling points in pupil plane to make coordinates in uv-plane integer (increases quality)
-    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, bsp=False, use_main_header=False, adjust_sampling=True):
+    def extract_kpd(self, path, plotim=False, ave="none",manual=0, re_center=True, window=True, sg_ld=1.0, D=0.0, bsp=False, use_main_header=False, adjust_sampling=False):
         ''' extract kernel-phase data from one or more files (use regexp).
 
         If the path leads to a fits data cube, or to multiple single frame
