@@ -7,7 +7,7 @@ import sys
 from numpy.random import rand, randn
 from random import choice, shuffle
 import emcee
-# import pymultinest ###### Removed temporary ! #######
+import pymultinest ###### Removed temporary ! #######
 import time
 
 # =========================================================================
