@@ -6,8 +6,7 @@ from kpi import *
 import sys
 from numpy.random import rand, randn
 from random import choice, shuffle
-import emcee
-import pymultinest ###### Removed temporary ! #######
+import emcee 
 import time
 
 # =========================================================================
@@ -304,6 +303,7 @@ def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.
     boost of ~ 20-30%. 
 
     '''
+    import pymultinest # importing here so you don't have to unless you use nest!
 
     # make sure you're using the right number of parameters
     nbands = kpo.kpd.shape[0]
