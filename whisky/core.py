@@ -1040,5 +1040,5 @@ def load_cube(fname,sg_rad=-1):
            
         ims[j,:,:] = recenter(dcube[j,:,:], sg_rad=sg_rad, verbose=False, nbit=20,manual=False)
 
-    return ims 
+    return ims, hdr
 
