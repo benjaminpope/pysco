@@ -1027,12 +1027,18 @@ def load_cube(fname,sg_rad=-1):
     Windows with a super-Gaussian window of radius sg_rad. If sg_rad is, as 
     is default, set to a negative umber, this makes the radius the size of the image'''
 
-    im0 = pf.getdata(fname)
+    dcube = pf.getdata(fnames[0])
     hdr = pf.getheader(fname)
+   
+    nslices = hdr['NAXIS3']
 
-    if sg_rad<=0 : sg_rad=im0.shape[1]
+    if sg_rad<=0 : sg_rad=dcube.shape[1]
+
+    ims = np.zeros(np.shape(dcube))
+
+    for j in range(nslices):
            
-    ims = recenter(im0, sg_rad=sg_rad, verbose=False, nbit=20,manual=False)
+        ims[j,:,:] = recenter(dcube[j,:,:], sg_rad=sg_rad, verbose=False, nbit=20,manual=False)
 
     return ims 
 
