@@ -1027,7 +1027,7 @@ def load_cube(fname,sg_rad=-1):
     Windows with a super-Gaussian window of radius sg_rad. If sg_rad is, as 
     is default, set to a negative umber, this makes the radius the size of the image'''
 
-    dcube = pf.getdata(fnames[0])
+    dcube = pf.getdata(fname)
     hdr = pf.getheader(fname)
    
     nslices = hdr['NAXIS3']
