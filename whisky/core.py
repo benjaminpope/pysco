@@ -537,7 +537,7 @@ def get_simu_keywords(hdr):
 # [AL, 2014.05.28] The same definitions (except hdr) for extract_from_array and extract_from_fits_frame functions
 # [AL, 2014.05.29] Description updated
 # [AL, 2014.10.07] unwrap_kp flag added. Kernel phases unwrapping is off by default
-def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True, unwrap_kp=False):
+def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, rev=-1.0, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True, unwrap_kp=False):
     ''' Extract the Kernel-phase signal from a ndarray + header info.
     
     ----------------------------------------------------------------
@@ -584,10 +584,9 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     if 'simu'    in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
     if 'Hale'    in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
 					
-    rev = -1.0	
-    if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
-                                                                    # [AL, 04.07.2014] removed reverse from simulation		
-        rev = 1.0								
+    # if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
+    #                                                                 # [AL, 04.07.2014] removed reverse from simulation		
+    #     rev = 1.0								
     								
     # [AL, 2014.04.16] Added calculation of super gaussian radius in sg_ld*lambda/D
     if sg_ld*D>0 :							
@@ -1018,3 +1017,22 @@ def clip_signal(signal,threshold=3):
 
 def reject_outliers(data, m=2):
     return data[abs(data - np.median(data)) < m * np.std(data)]
+
+# =========================================================================
+# =========================================================================
+
+def load_cube(fname,sg_rad=-1):
+    '''Load and centre a data cube, returning a cube of square images.
+
+    Windows with a super-Gaussian window of radius sg_rad. If sg_rad is, as 
+    is default, set to a negative umber, this makes the radius the size of the image'''
+
+    im0 = pf.getdata(fname)
+    hdr = pf.getheader(fname)
+
+    if sg_rad<=0 : sg_rad=im0.shape[1]
+           
+    ims = recenter(im0, sg_rad=sg_rad, verbose=False, nbit=20,manual=False)
+
+    return ims 
+
