@@ -46,7 +46,7 @@ fitsfile = 'ann.fits'
 #full_p_kpi = pysco.kpi(ddir+txtdir+kpifile_txt)
 #full_p_kpi.save_to_file(ddir+kpidir+kpifile)
 
-a = pysco.kpo(ddir+kpidir+kpifile,'ann')
+a = pysco.kpo(ddir+kpidir+kpifile)
 
 a.extract_kpd(ddir+fitsdir+fitsfile,manual=64)
 
