@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# written by Guillaume Schworer, 2014
+
+
+echo ""
+echo "Do you want to automatically generate the docs? (y|N)"
+read -n 10000 dothedocs
+
+
+if [ "$dothedocs" == "Y" ] || [ "$dothedocs" == "y" ]; then
+    ./dodocs
+fi
+
+
+if [ -z "$1" ] && [ -z "$2" ]; then
+    echo "ERROR: You need to write a comment to commit: ./docommit 'why this commit is great'"
+else
+    if [ "$1" == "r" ] || [ "$1" == "R" ] || [ "$2" == "r" ] || [ "$2" == "R" ]; then
+        echo "Removing *.pyc files"
+        find . -name "*.pyc" -exec rm -f '{}' +
+        echo "Removing *~ files"
+        find . -name "*~" -exec rm -f '{}' +
+    fi
+    
+    echo "Adding all files to git..."
+    git add .
+    echo "done"
+    
+    echo "Commiting all files to git..."
+    git commit -am "$1"
+    echo "done"
+
+    echo ""
+    echo "Now you might want to type:"
+    echo "> git pull whisky branchename"
+    echo "in case changes were done by somebody else since your last pull, then"
+    echo "> git push whisky branchename"
+    echo ""
+fi

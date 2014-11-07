@@ -1,0 +1,11 @@
+# same as http://www.stsci.edu/hst/nicmos/tools/conversion_form.html
+# Band central_wl delta_wl Jansky W/m2/m
+#to be imported with import_filters function
+U 3.60e-7 5.40e-8 1810 4.186e-2
+B 4.40e-7 9.68e-8 4260 6.596e-2
+V 5.50e-7 8.80e-8 3540 3.508e-2
+R 7.00e-7 1.47e-7 2880 1.762e-2
+I 9.00e-7 1.50e-7 2250 8.327e-3
+J 1.25e-6 2.02e-7 1670 3.204e-3
+H 1.65e-6 3.68e-7 0981 1.080e-3
+K 2.20e-6 5.11e-7 0620 3.840e-4

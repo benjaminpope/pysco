@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# written by Guillaume Schworer, 2014
+
+echo ""
+
+old=$(ls ./docs/*.rst | grep -v index.rst | wc -l)
+if [ "$old" -ne 0 ]; then
+    ls ./docs/*.rst | grep -v index.rst | xargs rm
+    echo "Removed $old old docs (.rst) files"
+else
+    echo "No old docs files found."
+fi
+
+
+sphinx-apidoc -F -o ./docs/ ./code/
+echo ""
+echo "Created new docs (.rst) files"
+
+cd docs
+make latexpdf
+cd ..
+echo ""
+echo "Compiled into pdf"
+
+mv ./Whisky*.pdf ./docs/old_docs/
+echo ""
+echo "Moved old Whisky pdfs to docs/old_docs"
+
+now="$(date +'%Y_%m_%dx%H_%M_%S')"
+cp ./docs/_build/latex/Whisky.pdf "./Whisky_$now.pdf"
+echo ""
+echo "Copied latest Whisky pdf to root"
+
+echo ""
+echo "All done"
+echo ""

@@ -1,0 +1,8 @@
+*.pyc
+*~
+*~lock*
+*fuse_hidden*
+docs/_build/**
+docs/_static/**
+docs/_templates/**
+
