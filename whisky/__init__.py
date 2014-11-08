@@ -30,8 +30,8 @@ import copy
 import pickle
 import os
 import sys
-import pdb
-import oifits
+# import pdb
+# import oifits
 
 shift = np.fft.fftshift
 fft   = np.fft.fft2
