@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pdb
+# import pdb
 from scipy.signal import medfilt2d as medfilt
 from scipy.io.idl import readsav
 import pyfits as pf
