@@ -470,46 +470,47 @@ def get_simu_keywords(hdr):
     This is a special version for simulated data. '''
     	
     # [AL,21.02.2014] Header parser was modified to support wider range of simulations	
-    keys = hdr.ascardlist().keys()		
-    if 'PSCALE' in keys :
+    #BJSP 13/11/14 changed to try-except framework as old version of pyfits is deprecated
+
+    try:
         pscale=hdr['PSCALE']
-    else :
+    except:
 	  pscale=11.5
-    if 'FNAME' in keys :
+    try:
         fname=hdr['FNAME']
-    else :
+    except:
 	  fname='simulation'
-    if 'ODATE' in keys :
+    try:
         odate=hdr['ODATE']
-    else :
+    except:
 	  odate='Jan 1, 2000'
-    if 'OTIME' in keys :
+    try:
         otime=hdr['OTIME']
-    else :
+    except:
 	  otime='0:00:00.00'	
-    if 'TINT' in keys :
+    try:
         tint=hdr['TINT']
-    else :
+    except:
 	  tint=1.0		
-    if 'COADDS' in keys :
+    try:
         coadds=hdr['COADDS']
-    else :
+    except:
 	  coadds=1		
-    if 'RA' in keys :
+    try:
         RA=hdr['RA']
-    else :
+    except:
 	  RA=0.0
-    if 'DEC' in keys :
+    try:
         DEC=hdr['DEC']
-    else :
+    except:
 	  DEC=0.0	
-    if 'FILTER' in keys :
+    try:
         filter=hdr['FILTER']
-    else :
+    except:
 	  filter=1.6* 1e-6
-    if 'ORIENT' in keys :
+    try:
         orient=hdr['ORIENT']
-    else :
+    except:
 	  orient=0.0				
     data = {
         'tel'    : hdr['TELESCOP'],        # telescope
