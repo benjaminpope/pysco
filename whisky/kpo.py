@@ -197,6 +197,8 @@ class kpo():
 
             if nf>1 or fits_hdr['NAXIS'] == 3:
                 self.hdr = hdrs[0]
+                self.kpd = np.median(kpds, 0)
+                self.vis2 = np.median(vis2s,0)                
                 if bsp : 
                     self.bsp=np.median(bsps,0)																
             else :
