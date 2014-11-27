@@ -585,9 +585,9 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     if 'simu'    in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
     if 'Hale'    in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
 					
-    # if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
-    #                                                                 # [AL, 04.07.2014] removed reverse from simulation		
-    #     rev = 1.0								
+    if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
+                                                                     # [AL, 04.07.2014] removed reverse from simulation		
+        rev = 1.0								
     								
     # [AL, 2014.04.16] Added calculation of super gaussian radius in sg_ld*lambda/D
     if sg_ld*D>0 :							
