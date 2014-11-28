@@ -914,7 +914,7 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
 # deg - return result in degrees 
 # rng - upper and lower bounds for bsp to be extracted. Used to reduce the resources usage
 # nonred - extract non-redundant Bsp only. Much slower
-def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False):
+def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False, showMessages=True):
     # determining number of sampling points
     nsp=uvrel.shape[0]
     # creating a relationship								
@@ -948,8 +948,9 @@ def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False):
         total=0							
         for i in range(0,nsp) :									
             if total>=u :
-                break									
-            sys.stdout.write("\r                                     | Extracting bsp from img %d of %d" % (total+1-l,u))																													
+                break	
+            if showMessages :
+		     sys.stdout.write("\r                                     | Extracting bsp from img %d of %d" % (total+1-l,u))																														
             for j in range(i+1,nsp) :													
                 if total>=u :
                     break														
