@@ -23,6 +23,7 @@ def detec_sim_loopfit(everything):
     #single separation and full angle, contrast lists.
     chi2_diff = np.zeros((everything['nth'],everything['ncon'],everything['nsim']))
     kpo = everything['kpo']
+    bsp = everything['bsp']
     # [AL, 2014.04.17] Restructured headers to make everything uniform in the loop
     heads=[]
     if kpo.nsets == 1:	   				
@@ -34,21 +35,36 @@ def detec_sim_loopfit(everything):
             head_info.append({'tel' : head['tel'],'filter' : head['filter']})
         heads = np.unique(np.array(head_info)) # [AL, 2014.04.17] removing calculating load by reducing a number of headers to process
         count = np.bincount(heads.searchsorted(head_info)) # [AL, 2014.04.17] removing calculation load by reducing a number of headers to process
-    rnd_err=kpo.kpe[:,np.newaxis]*everything['rands']											
+    if bsp :
+        rnd_err=kpo.bspe[:,np.newaxis]*everything['rands']	#bsp								
+    else :
+        rnd_err=kpo.kpe[:,np.newaxis]*everything['rands']	#kp										    						
     for j,th in enumerate(everything['ths']):
         for k,con in enumerate(everything['cons']):
             chi2_sngl = 0
             chi2_binr = 0												            
             num=0														
             for head in heads:
-                bin_kp = binary_model([everything['sep'],th,con],kpo.kpi, head)																
+                if bsp :	
+                    bin_kp=extract_bsp(cvis_binary(kpo.uv[:,0], kpo.uv[:,1], kpo.wavel,[everything['sep'],th,con]),uvrel=kpo.kpi.uvrel,rng=(0,len(kpo.bsp)),showMessages=False) #bsp
+                else :																				
+                    bin_kp = binary_model([everything['sep'],th,con],kpo.kpi, head) #kp
+																
                 #-----------------------
                 # binary cp model
                 # ----------------------
                 rnd_kp = bin_kp[:,np.newaxis] + rnd_err # [AL, 2014.04.17] rnd_err is now generated outside of the loop
-                chi2_sngl += np.sum(((rnd_kp/ kpo.kpe[:,np.newaxis])**2),axis=0)*count[num]
+
+                if bsp :																
+                    chi2_sngl += np.sum(((rnd_kp/ kpo.bspe[:,np.newaxis])**2),axis=0)*count[num] #bsp	
+                else :																				
+                    chi2_sngl += np.sum(((rnd_kp/ kpo.kpe[:,np.newaxis])**2),axis=0)*count[num] #kp																				
                 #chi2_binr += np.sum((((rnd_kp-bin_kp[:,np.newaxis]) / kpo.kpe[:,np.newaxis])**2),axis=0)
-                chi2_binr += np.sum(((rnd_err / kpo.kpe[:,np.newaxis])**2),axis=0)*count[num] # [AL, 2014.04.17] simplified
+
+                if bsp :																					
+                    chi2_binr += np.sum(((rnd_err / kpo.bspe[:,np.newaxis])**2),axis=0)*count[num] # [AL, 2014.04.17] simplified #bsp	
+                else :	
+                    chi2_binr += np.sum(((rnd_err / kpo.kpe[:,np.newaxis])**2),axis=0)*count[num] # [AL, 2014.04.17] simplified #kp																				
                 num+=1																
             chi2_diff[j,k] = chi2_binr-chi2_sngl # note not i,j,k - i is for seps
 
@@ -68,8 +84,9 @@ def detec_sim_loopfit(everything):
 
 ''' [AL, 2014.03.10]'''
 ''' added draw, D and name parameter in order to prevent drawing or/and display separation in lambda/D units'''
+# [AL, 2014.11.28] Added closure (bsp)/kernel phases flag for limits calculations
 def detec_limits(kpo,nsim=10000,nsep=32,nth=20,ncon=32,smin='Default',smax='Default',
-    cmin=1.0001,cmax=500.,addederror=0,threads=1,save=False, draw=True, D=0.0,name=''):
+    cmin=1.0001,cmax=500.,addederror=0,threads=1,save=False, draw=True, D=0.0,name='',bsp=False):
 
     '''uses a Monte Carlo simulation to establish contrast-separation 
     detection limits given an array of standard deviations per closure phase.
@@ -93,13 +110,14 @@ def detec_limits(kpo,nsim=10000,nsep=32,nth=20,ncon=32,smin='Default',smax='Defa
     # first, load your data!
     #------------------------
 
-    error = kpo.kpe + addederror
-
     u,v = kpo.uv[:,0],kpo.uv[:,1]
 
     wavel = kpo.wavel
 
-    ndata = kpo.kpi.nkphi
+    if bsp :
+        ndata = len(kpo.bspe)
+    else :								
+        ndata = kpo.kpi.nkphi
 
     w = np.array(np.sqrt(u**2 + v**2))/np.max(wavel)
 
@@ -143,7 +161,7 @@ def detec_limits(kpo,nsim=10000,nsep=32,nth=20,ncon=32,smin='Default',smax='Defa
         for ix in range(nsep):
             everything={'sep':seps[ix],'cons':cons,'ths':ths, 'ix':ix,
                 'nsep':nsep,'ncon':ncon,'nth':nth,'nsim':nsim,
-                'rands':rands,'kpo':kpo, 'tic':tic}
+                'rands':rands,'kpo':kpo, 'tic':tic, 'bsp':bsp}
             all_vars.append(everything)
         pool = multiprocessing.Pool(processes=threads)
         chi2_diff=pool.map(detec_sim_loopfit,all_vars)
