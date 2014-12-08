@@ -7,7 +7,7 @@ def rad2mas(rad):
 	return rad*(3600*180/np.pi) * (10**3)
 
 class kerphimobj():
-	def __init__(self, kpi, kws=None):
+	def __init__(self, kpi, kws=[]):
 		"""
 		kerphimobj takes a kpi object from pysco and key words
 
@@ -17,16 +17,16 @@ class kerphimobj():
 		pitch: radians/pixel
 		"""
 		if 'FOV' in kws:
-	        self.fov = kws['FOV']
+			self.fov = kws['FOV']
 		else:
 			self.fov=80
 			print "Default FOV assigned: {0} pixels".format(self.fov)
 		if 'wavl' in kws:
-	        self.wavl = kws['pitch']
+			self.wavl = kws['pitch']
 		else:
 			print "Warning: please assign a wavelength for this dataset"
 		if 'pitch' in kws:
-	        self.pitch = kws['pitch']
+			self.pitch = kws['pitch']
 		else:
 			print "Warning: please assign a pixel pitch in radians/pixel"
 		if 'kerph' in kws:
@@ -39,7 +39,7 @@ class kerphimobj():
 		else:
 			print "Warning: please assign a set of kernel phase errors\
 				   before proceeding"
-        self.Kmat = kpi.KerPhi
+		self.Kmat = kpi.KerPhi
 		self.nkphi = kpi.nkphi
 		self.ctrs = kpi.mask
 		self.uv = kpi.uv
@@ -50,9 +50,9 @@ class kerphimobj():
 		Returns sine given the kx,ky image coordinates in pixels
 		"""
 		return np.sin(2*np.pi*self.pitch*((kx - self.off[0])*(self.rcoord[0]) + 
-					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
+						(ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
-    def kerph2im(self):
+	def kerph2im(self):
 		"""
 		adds up the sine transform for uv phases & then multiplies Kmat,
 		the transfer matrix from uv phases to kernel phases.
