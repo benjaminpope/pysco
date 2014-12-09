@@ -438,3 +438,62 @@ def correlation_plot_bsp(kpo, params=[250., 0., 5.], plot_error=True,bsp_model=[
 
 # =========================================================================
 # =========================================================================				
+# [AL, 2014.02.12] Correlation plot for regular phases
+# input - datacube with phases (n frames x number of phases)
+# =========================================================================
+# =========================================================================
+def correlation_plot_phases(phases, kpo, params=[250., 0., 5.], plot_error=True,phase_model=[]):
+    '''Correlation plot between KP object and a KP binary model
+    
+    Parameters are:
+    --------------
+    - kpo: one instance of kernel-phase object
+    - params: a 3-component array describing the binary (sep, PA and contrast)
+
+    Option:
+    - plot_error: boolean, errorbar or regular plot
+    --------------------------------------------------------------------------
+    '''
+    params2 = np.copy(params)
+
+    if 'Hale' in kpo.hdr['tel']: params2[1] -= 220.0 + kpo.hdr['orient']
+    if 'HST'  in kpo.hdr['tel']: params2[1] += kpo.hdr['orient']
+    else:                    params2[1] += 0.0
+    if True:        
+        ph_data=np.mean(phases,axis=0)					
+        if len(phase_model)==0 :								
+            ph=phase_binary(kpo.uv[:,0], kpo.uv[:,1], kpo.wavel, params)						
+        else :								
+            ph=phase_model
+        mm_data = np.round(np.max(np.abs(ph_data)), -1)
+        mm_model = np.round(np.max(np.abs(ph)), -1)
+        mm=max(mm_data,mm_model)
+        if mm==0 :
+            mm=max(np.max(np.abs(ph_data)),np.max(np.abs(ph)))
+        mm*=1.05 # adding 5% from both sides												
+        f1 = plt.figure()
+        sp0 = f1.add_subplot(111)
+        if plot_error:
+            sp0.errorbar(ph,  ph_data,
+                         yerr=np.std(phases-ph_data, axis=0)/np.sqrt(phases.shape[0]), linestyle='None')
+        else:
+            sp0.plot(ph, ph_data, 'bo')
+        sp0.plot([-mm,mm],[-mm,mm], 'g')
+        sp0.axis([-mm,mm,-mm,mm])
+        msg  = "Model:\n sep = %6.2f mas" % (params[0],)
+        msg += "\n   PA = %6.2f deg" % (params[1],)
+        msg += "\n  con = %6.2f" % (params[2],)                
+        plt.text(0.0*mm, -0.75*mm, msg, 
+                 bbox=dict(facecolor='white'), fontsize=14)                
+        msg = "Target: %s\nTelescope: %s\nWavelength = %.2f um" % (
+            kpo.kpi.name, kpo.hdr['tel'], kpo.hdr['filter']*1e6)               
+        plt.text(-0.75*mm, 0.5*mm, msg,
+                  bbox=dict(facecolor='white'), fontsize=14)        
+        plt.ylabel('Data bispectal-phase signal (deg)')
+        plt.xlabel('Bispectral-phase binary model (deg)')
+        plt.draw()
+        plt.show()
+        return None
+
+# =========================================================================
+# =========================================================================	
