@@ -7,7 +7,7 @@ def rad2mas(rad):
 	return rad*(3600*180/np.pi) * (10**3)
 
 class kerphimobj():
-	def __init__(self, kpi, kws=[]):
+	def __init__(self, kpi, kws=None):
 		"""
 		kerphimobj takes a kpi object from pysco and key words
 

@@ -52,7 +52,7 @@ class MemImage():
 	
 	"""
 
-	def __init__(self, input_kpi, dataobj=None, **kwargs):
+	def __init__(self, filename, dataobj=None, **kwargs):
 		"""
 		Initializing this function requires a set of keyword arguments:
 			imsize
@@ -66,30 +66,7 @@ class MemImage():
 		# alpha: A starting value for the MEM functional multiplier (default=1.0)
 		# gain: The servo gain for adjusting alpha to achieve chi^2=1
 		# niter: The number of iterations. 
-		self.filename = input_kpi
-		try:
-			self.read_data(input_kpi)
-		except:
-			self.pxscale = hdulist[0].header['PXSCALE']
-		
-			self.kp2pm = hdulist[0].data
-			self.imsize = input_kpi.kp2pm.shape[1]
-			
-			# Sizes will be used later maybe?
-			self.dimx = input_kpi.kp2pm.shape[2]
-			self.dimy = input_kpi.kp2pm.shape[1]
-			
-			# for plotting
-			self.extent = [input_kpi.dimx/2*input_kpi.pxscale,-input_kpi.dimx/2*input_kpi.pxscale,\
-						   -input_kpi.dimy/2*input_kpi.pxscale,input_kpi.dimy/2*input_kpi.pxscale]
-			
-			# Now flatten
-			self.kp2pm = self.kp2pm.reshape([self.kp2pm.shape[0],self.dimx*self.dimy])
-			try:
-				self.kpd = dataobj.kpd
-				self.kperr = dataobj.kpe
-			except: 
-				print 'No data!'
+		self.filename = filename
 
 		keys = kwargs.keys()
 		if ('alpha' in keys):
