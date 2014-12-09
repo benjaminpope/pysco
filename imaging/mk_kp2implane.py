@@ -1,5 +1,5 @@
 """
-Should be able to give this a kpo or something like that.
+Should be able to give this a kpo or something like that eventually.
 """
 import numpy as np
 
@@ -52,6 +52,13 @@ class kerphimobj():
 		return np.sin(2*np.pi*self.pitch*((kx - self.off[0])*(self.rcoord[0]) + 
 					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
+	def ffc(self, kx,ky):
+		"""
+		Returns sine given the kx,ky image coordinates in pixels
+		"""
+		return np.cos(2*np.pi*self.pitch*((kx - self.off[0])*(self.rcoord[0]) + 
+					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
+
     def kerph2im(self):
 		"""
 		adds up the sine transform for uv phases & then multiplies Kmat,
@@ -63,24 +70,33 @@ class kerphimobj():
 		off = np.array([0.5, 0.5])
 		# empty sine transform matrix:
 		self.ph2im = np.zeros((self.len(uv), self.fov,self.fov))
+		self.vis2im = np.zeros((self.len(uv), self.fov,self.fov))
 		for q,uv in enumerate(self.uv):
 			self.rcoord = self.uv
 			self.ph2im[q,:,:] = self.red[q]*np.fromfunction(self.ffs, (self.fov, self.fov))
+			self.vis2im[q,:,:] = self.red[q]*np.fromfunction(self.ffc, (self.fov,self.fov))
 		# flatten for matrix multiplication
 		self.ph2im = self.ph2im.reshape(len(self.uuvs), fov*fov)
 		# Matrix multiply Kmat & sin transform matrix
 		self.kerim = np.dot(self.Kmat, self.ph2im)
 		# Reshape back to image dimensions
 		self.kerim = self.kerim.reshape(len(self.Kmat), fov,fov)
-		return self.kerim
+		return self.kerim, self.vis2im
 
 	def write(self, fn = 'kerphim.fits'):
 		"""
 		Writes file out into fits
 		optional file name suffix, default = kerphim
 		"""
-		hdulist = fits.PrimaryHDU(data=self.kerim)
+		# primary extension is the kerphi x image transfer matrix
+		imhdu = fits.PrimaryHDU(data=self.kerim)
 		# mem code needs PXSCALE header keyword in mas/pixel
-		hdulist.header.update('PXSCALE', rad2mas(self.pitch), "mas per pixel")
-		hdulist.header.update('WAVL', self.wavl, "monochromatic wavelength")
+		imhdu.header.update('PXSCALE', rad2mas(self.pitch), "mas per pixel")
+		imhdu.header.update('WAVL', self.wavl, "monochromatic wavelength")
+
+		# extra extension stores kernel phase measurements
+		datahdu = fits.ImageHDU(data=[self.kerph, self.kerpherr])
+
+		# put it all together and write it out
+		hdulist = fits.HDUList(hdus = [imhdu,datahdu])
 		hdulist.writeto(self.name+"_"+fn, clobber=True)
