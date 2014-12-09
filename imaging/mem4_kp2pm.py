@@ -52,7 +52,7 @@ class MemImage():
 	
 	"""
 
-	def __init__(self, filename, **kwargs):
+	def __init__(self, filename, dataobj=None, **kwargs):
 		"""
 		Initializing this function requires a set of keyword arguments:
 			imsize
@@ -67,7 +67,6 @@ class MemImage():
 		# gain: The servo gain for adjusting alpha to achieve chi^2=1
 		# niter: The number of iterations. 
 		self.filename = filename
-		self.read_data(filename)
 
 		keys = kwargs.keys()
 		if ('alpha' in keys):
@@ -95,23 +94,32 @@ class MemImage():
 		gets out the relevant info from 
 		"""
 		hdulist = pyfits.open(filename)
+		
 		# the only necessary header data
 		self.pxscale = hdulist[0].header['PXSCALE']
+		
 		# load in the kp data, we'll have to flatten this 
 		self.kp2pm = hdulist[0].data
 		self.imsize = self.kp2pm.shape[1]
+		
 		# Sizes will be used later maybe?
 		self.dimx = self.kp2pm.shape[2]
 		self.dimy = self.kp2pm.shape[1]
+		
 		# for plotting
 		self.extent = [self.dimx/2*self.pxscale,-self.dimx/2*self.pxscale,\
 					   -self.dimy/2*self.pxscale,self.dimy/2*self.pxscale]
+		
 		# Now flatten
 		self.kp2pm = self.kp2pm.reshape([self.kp2pm.shape[0],self.dimx*self.dimy])
+		
 		# Now store the kernel phases and errors
-		kpdata = hdulist[1].data
-		self.kp = kpdata[0]
-		self.kperr = kpdata[1]
+		try:
+			kpdata = hdulist[1].data
+			self.kp = kpdata[0]
+			self.kperr = kpdata[1]
+		except: 
+			print 'no kp data in',filename
 		hdulist.close()
 
 	def mem_image(self):

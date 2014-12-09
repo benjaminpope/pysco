@@ -163,10 +163,14 @@ class kpo():
             for i in xrange(nslices):
                 sys.stdout.write(
                     "\rextracting kp from img %3d/%3d" % (i+1,nslices))																				
-                sys.stdout.flush()															
+                sys.stdout.flush()
+                # [AL, 2014.12.09] correction to avoid uv-points readjustment																
+                if adjust_sampling and i==0 :
+                    adj=True
+                else : adj=False	                
                 res = extract_from_array(dcube[i], fits_hdr, self.kpi, 
                                                  save_im=False, re_center=re_center,
-                                                 wrad=50.0, plotim=plotim,sg_ld=sg_ld,D=D,bsp=bsp,adjust_sampling=adjust_sampling,unwrap_kp=unwrap_kp)# [AL, 2014.04.16] Added plotim parameter
+                                                 wrad=50.0, plotim=plotim,sg_ld=sg_ld,D=D,bsp=bsp,adjust_sampling=adj,unwrap_kp=unwrap_kp)# [AL, 2014.04.16] Added plotim parameter
 																	#[AL, 2014.04.16] Added D and sg_ld parameters
 																	# [AL, 2014.03.21] changed re_center default value 
                 if bsp :

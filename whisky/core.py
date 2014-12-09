@@ -538,7 +538,7 @@ def get_simu_keywords(hdr):
 # [AL, 2014.05.28] The same definitions (except hdr) for extract_from_array and extract_from_fits_frame functions
 # [AL, 2014.05.29] Description updated
 # [AL, 2014.10.07] unwrap_kp flag added. Kernel phases unwrapping is off by default
-def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, rev=-1.0, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True, unwrap_kp=False):
+def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, rev=1.0, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True, unwrap_kp=False):
     ''' Extract the Kernel-phase signal from a ndarray + header info.
     
     ----------------------------------------------------------------
@@ -585,9 +585,9 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     if 'simu'    in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
     if 'Hale'    in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
 					
-    if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
+    if ('Hale' in hdr['TELESCOP']):# P3K PA are clockwise
                                                                      # [AL, 04.07.2014] removed reverse from simulation		
-        rev = 1.0								
+        rev = -1.0								
     								
     # [AL, 2014.04.16] Added calculation of super gaussian radius in sg_ld*lambda/D
     if sg_ld*D>0 :							

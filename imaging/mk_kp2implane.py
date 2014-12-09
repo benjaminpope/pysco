@@ -17,16 +17,16 @@ class kerphimobj():
 		pitch: radians/pixel
 		"""
 		if 'FOV' in kws:
-	        self.fov = kws['FOV']
+			self.fov = kws['FOV']
 		else:
 			self.fov=80
 			print "Default FOV assigned: {0} pixels".format(self.fov)
 		if 'wavl' in kws:
-	        self.wavl = kws['pitch']
+			self.wavl = kws['pitch']
 		else:
 			print "Warning: please assign a wavelength for this dataset"
 		if 'pitch' in kws:
-	        self.pitch = kws['pitch']
+			self.pitch = kws['pitch']
 		else:
 			print "Warning: please assign a pixel pitch in radians/pixel"
 		if 'kerph' in kws:
@@ -39,7 +39,7 @@ class kerphimobj():
 		else:
 			print "Warning: please assign a set of kernel phase errors\
 				   before proceeding"
-        self.Kmat = kpi.KerPhi
+		self.Kmat = kpi.KerPhi
 		self.nkphi = kpi.nkphi
 		self.ctrs = kpi.mask
 		self.uv = kpi.uv
@@ -50,16 +50,16 @@ class kerphimobj():
 		Returns sine given the kx,ky image coordinates in pixels
 		"""
 		return np.sin(2*np.pi*self.pitch*((kx - self.off[0])*(self.rcoord[0]) + 
-					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
+						(ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
 	def ffc(self, kx,ky):
 		"""
-		Returns sine given the kx,ky image coordinates in pixels
+		Returns cosine given the kx,ky image coordinates in pixels
 		"""
 		return np.cos(2*np.pi*self.pitch*((kx - self.off[0])*(self.rcoord[0]) + 
 					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
-    def kerph2im(self):
+	def kerph2im(self):
 		"""
 		adds up the sine transform for uv phases & then multiplies Kmat,
 		the transfer matrix from uv phases to kernel phases.
@@ -70,18 +70,18 @@ class kerphimobj():
 		off = np.array([0.5, 0.5])
 		# empty sine transform matrix:
 		self.ph2im = np.zeros((self.len(uv), self.fov,self.fov))
-		self.vis2im = np.zeros((self.len(uv), self.fov,self.fov))
+		self.sym2im = np.zeros((self.len(uv), self.fov,self.fov))
 		for q,uv in enumerate(self.uv):
 			self.rcoord = self.uv
 			self.ph2im[q,:,:] = self.red[q]*np.fromfunction(self.ffs, (self.fov, self.fov))
-			self.vis2im[q,:,:] = self.red[q]*np.fromfunction(self.ffc, (self.fov,self.fov))
+			self.sym2im[q,:,:] = self.red[q]*np.fromfunction(self.ffc, (self.fov,self.fov))
 		# flatten for matrix multiplication
 		self.ph2im = self.ph2im.reshape(len(self.uuvs), fov*fov)
 		# Matrix multiply Kmat & sin transform matrix
 		self.kerim = np.dot(self.Kmat, self.ph2im)
 		# Reshape back to image dimensions
 		self.kerim = self.kerim.reshape(len(self.Kmat), fov,fov)
-		return self.kerim, self.vis2im
+		return self.kerim, self.sym2im
 
 	def write(self, fn = 'kerphim.fits'):
 		"""
