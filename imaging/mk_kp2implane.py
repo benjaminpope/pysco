@@ -2,6 +2,7 @@
 Should be able to give this a kpo or something like that.
 """
 import numpy as np
+import pyfits as fits 
 
 def rad2mas(rad):
 	return rad*(3600*180/np.pi) * (10**3)
@@ -60,18 +61,18 @@ class kerphimobj():
 		Returns image to kernel phase transfer matrix.
 		"""
 		# To make the image pixel centered:
-		off = np.array([0.5, 0.5])
+		self.off = np.array([0.5, 0.5])
 		# empty sine transform matrix:
-		self.ph2im = np.zeros((self.len(uv), self.fov,self.fov))
+		self.ph2im = np.zeros((self.uv.shape[0], self.fov,self.fov))
 		for q,uv in enumerate(self.uv):
-			self.rcoord = self.uv
+			self.rcoord = uv
 			self.ph2im[q,:,:] = self.red[q]*np.fromfunction(self.ffs, (self.fov, self.fov))
 		# flatten for matrix multiplication
-		self.ph2im = self.ph2im.reshape(len(self.uuvs), fov*fov)
+		self.ph2im = self.ph2im.reshape((self.uv.shape[0], self.fov*self.fov))
 		# Matrix multiply Kmat & sin transform matrix
 		self.kerim = np.dot(self.Kmat, self.ph2im)
 		# Reshape back to image dimensions
-		self.kerim = self.kerim.reshape(len(self.Kmat), fov,fov)
+		self.kerim = self.kerim.reshape(len(self.Kmat), self.fov,self.fov)
 		return self.kerim
 
 	def write(self, fn = 'kerphim.fits'):

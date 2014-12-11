@@ -82,6 +82,10 @@ class MemImage():
 			self.niter = kwargs['niter']
 		else:
 			self.niter = 200
+		if ('imsize' in keys):
+			self.imsize = kwargs['imsize']
+		else:
+			self.imsize = 80
 		if ('prior' in keys):
 			self.prior = kwargs['prior']
 		else:
