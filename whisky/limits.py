@@ -118,6 +118,11 @@ def detec_limits(kpo,nsim=10000,nsep=32,nth=20,ncon=32,smin='Default',smax='Defa
         ndata = len(kpo.bspe)
     else :								
         ndata = kpo.kpi.nkphi
+        
+    correc_coeff=1.						
+    # [AL, 2014.12.10] Correction for closure phases								
+    if bsp :
+        correc_coeff=1./np.sqrt(kpo.kpi.nbh/3.)	        
 
     w = np.array(np.sqrt(u**2 + v**2))/np.max(wavel)
 
@@ -134,7 +139,7 @@ def detec_limits(kpo,nsim=10000,nsep=32,nth=20,ncon=32,smin='Default',smax='Defa
 
     seps = smin + (smax-smin) * np.linspace(0,1,nsep)
     ths  = 0.0 + 360.0  * np.linspace(0,1,nth)
-    cons = cmin  + (cmax-cmin)  * np.linspace(0,1,ncon)
+    cons = cmin  + (cmax/correc_coeff-cmin)  * np.linspace(0,1,ncon)
 
     rands = np.random.randn(ndata,nsim)
 
@@ -184,6 +189,11 @@ def detec_limits(kpo,nsim=10000,nsep=32,nth=20,ncon=32,smin='Default',smax='Defa
     nbtot = nsim * nth
 
     ndetec /= float(nbtot)
+    
+    # [AL, 2014.12.10] Correction for closure phases								
+    if bsp :					
+        for i in range(len(cons)) :
+            cons[i]*=correc_coeff	    
 
     print 'ndetec',ndetec
 		
