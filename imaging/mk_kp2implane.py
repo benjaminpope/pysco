@@ -22,7 +22,7 @@ class kerphimobj():
 			self.fov=80
 			print "Default FOV assigned: {0} pixels".format(self.fov)
 		if 'wavl' in kws:
-			self.wavl = kws['pitch']
+			self.wavl = kws['wavl']
 		else:
 			print "Warning: please assign a wavelength for this dataset"
 		if 'pitch' in kws:
@@ -49,7 +49,7 @@ class kerphimobj():
 		"""
 		Returns sine given the kx,ky image coordinates in pixels
 		"""
-		return np.sin(2*np.pi*self.pitch*((kx - self.off[0])*(self.rcoord[0]) + 
+		return np.sin(2*np.pi*self.pitch*((kx - self.off[0])*(self.rcoord[0]) + \
 						(ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
 	def ffc(self, kx,ky):
@@ -67,20 +67,20 @@ class kerphimobj():
 		Returns image to kernel phase transfer matrix.
 		"""
 		# To make the image pixel centered:
-		off = np.array([0.5, 0.5])
+		self.off = np.array([0.5, 0.5])
 		# empty sine transform matrix:
-		self.ph2im = np.zeros((self.len(uv), self.fov,self.fov))
-		self.sym2im = np.zeros((self.len(uv), self.fov,self.fov))
+		self.ph2im = np.zeros((len(self.uv), self.fov,self.fov))
+		self.sym2im = np.zeros((len(self.uv), self.fov,self.fov))
 		for q,uv in enumerate(self.uv):
-			self.rcoord = self.uv
+			self.rcoord = uv
 			self.ph2im[q,:,:] = self.red[q]*np.fromfunction(self.ffs, (self.fov, self.fov))
 			self.sym2im[q,:,:] = self.red[q]*np.fromfunction(self.ffc, (self.fov,self.fov))
 		# flatten for matrix multiplication
-		self.ph2im = self.ph2im.reshape(len(self.uuvs), fov*fov)
+		self.ph2im = self.ph2im.reshape(len(self.uuvs), self.fov*self.fov)
 		# Matrix multiply Kmat & sin transform matrix
 		self.kerim = np.dot(self.Kmat, self.ph2im)
 		# Reshape back to image dimensions
-		self.kerim = self.kerim.reshape(len(self.Kmat), fov,fov)
+		self.kerim = self.kerim.reshape(len(self.Kmat), self.fov,self.fov)
 		return self.kerim, self.sym2im
 
 	def write(self, fn = 'kerphim.fits'):
