@@ -52,14 +52,14 @@ class kerphimobj():
 		Returns sine given the kx,ky image coordinates in pixels
 		kx,ky are visibility (transform) coordinates
 		"""
-		return -np.sin(np.pi*mas2rad(self.pitch)*((kx - self.off[0])*(self.rcoord[0]) + \
+		return -np.sin(2*np.pi*mas2rad(self.pitch)*((kx - self.off[0])*(self.rcoord[0]) + \
 						(ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
 	def ffc(self, kx,ky):
 		"""
 		Returns cosine given the kx,ky image coordinates in pixels
 		"""
-		return np.cos(np.pi*mas2rad(self.pitch)*((kx - self.off[0])*(self.rcoord[0]) + 
+		return np.cos(2*np.pi*mas2rad(self.pitch)*((kx - self.off[0])*(self.rcoord[0]) + 
 					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
 	def kerph2im(self):
@@ -70,7 +70,7 @@ class kerphimobj():
 		Returns image to kernel phase transfer matrix.
 		"""
 		# To make the image pixel centered:
-		self.off = np.array([0.5, 0.5])
+		self.off = np.array([self.fov/2.-0.5, self.fov/2.-0.5])
 		# empty sine transform matrix:
 		self.ph2im = np.zeros((len(self.uv), self.fov,self.fov))
 		self.sym2im = np.zeros((len(self.uv), self.fov,self.fov))
