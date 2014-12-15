@@ -34,18 +34,26 @@ class kerphimobj():
 		self.nkphi = kpo.kpi.nkphi
 		self.ctrs = kpo.kpi.mask
 		self.uv = kpo.kpi.uv
-		print self.uv
-		sys.exit()
 		self.red = kpo.kpi.RED
 
-		# Measured (kpd) stuff
-		self.nframes = kpo.kpd.shape[0] # how many frames
-		self.kerph = np.mean(kpo.kpd, axis=0)*np.pi/180. # mean kernel phase
-		#print kpo.kpd.shape
-		#sys.exit()
-		self.kerpherr = kpo.kpe*np.sqrt(self.nframes)*np.pi/180. # standard deviation
-		self.pitch = kpo.hdr[0]['pscale'] # mas/pixel
-		self.wavl = kpo.hdr[0]['filter'] # in m
+		# Measured (kpd) stuff - BJSP - Alex, I'm cutting this bit out so it takes pre-reduced kernel phases
+		# self.nframes = kpo.kpd.shape[0] # how many frames
+		# self.kerph = np.mean(kpo.kpd, axis=0)*np.pi/180. # mean kernel phase
+		# #print kpo.kpd.shape
+		# #sys.exit()
+		# self.kerpherr = kpo.kpe*np.sqrt(self.nframes)*np.pi/180. # standard deviation
+		try:
+			self.nframes = 1
+			self.kerph = kpo.kpd
+			self.kerpherr = kpo.kpe
+		except:
+			print 'Failed to load kernel phase data'
+		try:
+			self.pitch = kpo.hdr[0]['pscale'] # mas/pixel
+			self.wavl = kpo.hdr[0]['filter'] # in m
+		except:
+			self.pitch = kpo.hdr['pscale']
+			self.wavl = kpo.hdr['filter']
 		
 	def ffs(self, kx,ky):
 		"""
@@ -98,7 +106,7 @@ class kerphimobj():
 		imhdu.header.update('WAVL', self.wavl, "monochromatic wavelength")
 
 		# extra extension stores kernel phase measurements
-		datahdu = fits.ImageHDU(data=[self.kerph, self.kerpherr])
+		datahdu = fits.ImageHDU(data=np.array([self.kerph, self.kerpherr]))
 
 		# put it all together and write it out
 		hdulist = fits.HDUList(hdus = [imhdu,datahdu])

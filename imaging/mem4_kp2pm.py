@@ -67,6 +67,7 @@ class MemImage():
 		# gain: The servo gain for adjusting alpha to achieve chi^2=1
 		# niter: The number of iterations. 
 		self.filename = filename
+		self.read_data(filename)
 
 		keys = kwargs.keys()
 		if ('alpha' in keys):
@@ -91,7 +92,7 @@ class MemImage():
 		else:
 			# This was default set in the original code
 			self.prior = np.ones(self.imsize**2)/self.imsize**2.0/50
-		#print "Initialized:", self.imsize, self.kp.shape, self.kperr.shape
+		print "Initialized:", self.imsize, self.kp.shape, self.kperr.shape
 
 	def read_data(self, filename):
 		"""
