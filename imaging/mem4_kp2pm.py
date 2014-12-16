@@ -146,7 +146,7 @@ class MemImage():
 			#Lower values of alpha give lower chi^2. Not knowing how to do this,
 			#lets use a servo-loop approach.
 			if (i >= start_i):
-				chi2diff = 1 - self.chi2/len(self.kp) #The difference in chi-squared
+				chi2diff = 1 - self.chi2/(len(self.kp)) #The difference in chi-squared
 				self.alpha = self.alpha*np.exp(self.gain * chi2diff)
 			# =======================================================================
 			self.make_iterstep()
@@ -180,7 +180,7 @@ class MemImage():
 		# Now set alpha to zero and keep everything else you've worked so hard to get
 		self.alpha=0
 		self.make_iterstep()
-		print "Reduced Chi2: " + str(self.chi2/len(self.kp))
+		print "Reduced Chi2: " + str(self.chi2/(len(self.kp)))
 		self.reconstructedimage = self.pm.reshape(self.imsize, self.imsize)
 		return self.reconstructedimage
 
