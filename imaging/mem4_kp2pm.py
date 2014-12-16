@@ -92,7 +92,7 @@ class MemImage():
 		else:
 			# This was default set in the original code
 			self.prior = np.ones(self.imsize**2)/self.imsize**2.0/50
-		print "Initialized:", self.imsize, self.kp.shape, self.kperr.shape
+		print "Initialized: image size", self.imsize
 
 	def read_data(self, filename):
 		"""
@@ -138,7 +138,8 @@ class MemImage():
 			# Give the user a print statement every 10 iteration to see how they are doing
 			if ( (i+1) % 10 == 0):
 				print 'Done: ' + str(i+1) + ' of ' + str(self.niter) +\
-				' iterations. Chi^2: ' + str(self.chi2) + ' alpha: ' +str(self.alpha)
+				' iterations. Chi^2: ' + str(self.chi2) + ' alpha: ' +str(self.alpha) +\
+				' chi2diff: '+str(chi2diff)
 			# =======================================================================
 			#---- From original code: ---- 
 			#While this loop runs, we need to adjust alpha so that chi^2=1.
