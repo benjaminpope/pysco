@@ -179,7 +179,7 @@ class MemImage():
 		# Now set alpha to zero and keep everything else you've worked so hard to get
 		self.alpha=0
 		self.make_iterstep()
-		print "Chi2: " + str(self.chi2/len(self.kp))
+		print "Reduced Chi2: " + str(self.chi2/len(self.kp))
 		self.reconstructedimage = self.pm.reshape(self.imsize, self.imsize)
 		return self.reconstructedimage
 
