@@ -7,4 +7,19 @@ At present, these functions are not all merged: contains both a sub-folder whisk
 
 This has been built upon https://code.google.com/p/pysco/, written principally by Frantz Martinache, Mike Ireland and on pyker by Frantz Martinache and Benjamin Pope, and includes the deprecated pyscosour additions by Benjamin Pope. This is the product of a collaborative team.
 
-We do not make this software available for commercial purposes.
+
+
+Copyright (C) 2014 Pope, Martinache, Ireland, Cheetham, Greenbaum, Latyshev
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
