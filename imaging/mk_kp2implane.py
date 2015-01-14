@@ -4,6 +4,7 @@ Should be able to give this a kpo or something like that eventually.
 import numpy as np
 from astropy.io import fits
 import sys, os
+from numba import jit
 
 def rad2mas(rad):
 	return rad*(3600*180/np.pi) * (10**3)
@@ -70,6 +71,7 @@ class kerphimobj():
 		return np.cos(2*np.pi*mas2rad(self.pitch)*((kx - self.off[0])*(self.rcoord[0]) + 
 					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
+	@jit
 	def kerph2im(self):
 		"""
 		adds up the sine transform for uv phases & then multiplies Kmat,
