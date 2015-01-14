@@ -181,34 +181,82 @@ class kpi(object):
         # of duplicates.
 
         nbh = self.nbh # local representation of the class variable
-        uvx = np.zeros(nbh * (nbh-1)) # prepare empty arrays to store
-        uvy = np.zeros(nbh * (nbh-1)) # the baselines
 
-        k = 0 # index for possible combinations (k = f(i,j))
-        
-        uvi = np.zeros(nbh * (nbh-1), dtype=int) # arrays to store the possible
-        uvj = np.zeros(nbh * (nbh-1), dtype=int) # combinations k=f(i,j) !!
+        try:
+            from numba import jit
+            print 'Using numba to compile'
+
+            @jit
+            def do_combinations(nbh,mask):
+                tic = time.time()
+                uvx = np.zeros(nbh * (nbh-1)) # prepare empty arrays to store
+                uvy = np.zeros(nbh * (nbh-1)) # the baselines
+
+                k = 0 # index for possible combinations (k = f(i,j))
+                
+                uvi = np.zeros(nbh * (nbh-1), dtype=int) # arrays to store the possible
+                uvj = np.zeros(nbh * (nbh-1), dtype=int) # combinations k=f(i,j) !!
+
+                for i in range(nbh):     # do all the possible combinations of
+                    for j in range(nbh): # sub-apertures
+                        if i != j:
+                            uvx[k] = mask[i,0] - mask[j,0]
+                            uvy[k] = mask[i,1] - mask[j,1]
+                            # ---
+                            uvi[k], uvj[k] = i, j
+                            k+=1
+                return uvi, uvj, uvx, uvy
+            toc = time.time()
+            print "%.3f seconds elapsed" % (toc-tic)
+
+            uvi, uvj, uvx, uvy = do_combinations(nbh,self.mask)
+
+        except:
+            uvx = np.zeros(nbh * (nbh-1)) # prepare empty arrays to store
+            uvy = np.zeros(nbh * (nbh-1)) # the baselines
+
+            k = 0 # index for possible combinations (k = f(i,j))
+            
+            uvi = np.zeros(nbh * (nbh-1), dtype=int) # arrays to store the possible
+            uvj = np.zeros(nbh * (nbh-1), dtype=int) # combinations k=f(i,j) !!
+
+            for i in range(nbh):     # do all the possible combinations of
+                for j in range(nbh): # sub-apertures
+                    if i != j:
+                        uvx[k] = self.mask[i,0] - self.mask[j,0]
+                        uvy[k] = self.mask[i,1] - self.mask[j,1]
+                        # ---
+                        uvi[k], uvj[k] = i, j
+                        k+=1
+
+        try:
+            a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
+            nbx    = a.shape[0]                # number of distinct u-components
+
+            @jit
+            def fill_uv_sel(nbx,uvx,uvy,a,prec,ndgt):
+                uv_sel = np.zeros((0,2)) # array for "selected" baselines
+                for i in range(nbx):     # identify distinct v-coords and fill uv_sel
+                    b = np.where(np.abs(uvx - a[i]) <= prec)
+                    c = np.unique(np.round(uvy[b], ndgt))
+                    nby = np.shape(c)[0] # number of distinct v-compoments
+                    for j in range(nby):
+                        uv_sel = np.append(uv_sel, [[a[i],c[j]]], axis=0)
+                return uv_sel
+            uv_sel = fill_uv_sel(nbx,uvx,uvy,a,prec,ndgt)
 
 
-        for i in range(nbh):     # do all the possible combinations of
-            for j in range(nbh): # sub-apertures
-                if i != j:
-                    uvx[k] = self.mask[i,0] - self.mask[j,0]
-                    uvy[k] = self.mask[i,1] - self.mask[j,1]
-                    # ---
-                    uvi[k], uvj[k] = i, j
-                    k+=1
+        except:
+            a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
+            nbx    = a.shape[0]                # number of distinct u-components
+            uv_sel = np.zeros((0,2))           # array for "selected" baselines
 
-        a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
-        nbx    = a.shape[0]                # number of distinct u-components
-        uv_sel = np.zeros((0,2))           # array for "selected" baselines
-
-        for i in range(nbx):     # identify distinct v-coords and fill uv_sel
-            b = np.where(np.abs(uvx - a[i]) <= prec)
-            c = np.unique(np.round(uvy[b], ndgt))
-            nby = np.shape(c)[0] # number of distinct v-compoments
-            for j in range(nby):
-                uv_sel = np.append(uv_sel, [[a[i],c[j]]], axis=0)
+            for i in range(nbx):     # identify distinct v-coords and fill uv_sel
+                b = np.where(np.abs(uvx - a[i]) <= prec)
+                c = np.unique(np.round(uvy[b], ndgt))
+                nby = np.shape(c)[0] # number of distinct v-compoments
+                for j in range(nby):
+                    uv_sel = np.append(uv_sel, [[a[i],c[j]]], axis=0)
 
         self.nbuv = np.shape(uv_sel)[0]/2 # actual number of distinct uv points
         self.uv   = uv_sel[:self.nbuv,:]  # discard second half (symmetric)
