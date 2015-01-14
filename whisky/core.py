@@ -8,7 +8,6 @@ import sys
 import multiprocessing
 from scipy.interpolate import griddata
 from numba import jit
-
 ''' ================================================================
     Tools and functions useful for manipulating kernel phase data.
     ================================================================ '''
@@ -188,7 +187,7 @@ def centroid(image, threshold=0, binarize=0):
 
 # =========================================================================
 # =========================================================================
-@jit
+
 def find_psf_center(img, verbose=False, nbit=10):                     
     ''' Name of function self explanatory: locate the center of a PSF.
 
@@ -277,7 +276,7 @@ def window_image(im0,sg_rad) :
 # =========================================================================
 
 # [AL, 2014.07.28] extended to 3-d case
-@jit
+
 def recenter(im0, sg_rad=25.0, verbose=False, nbit=10, manual = 0):
     ''' ------------------------------------------------------------
          The ultimate image centering algorithm... eventually...
@@ -760,7 +759,7 @@ def extract_from_fits_frame(fname, kpi, save_im=True, wfs=False, plotim=True, ma
 # m2pix - conversion factor meters to pixels
 # sz - image size
 # save_kpi - save changes in the initial kpi
-def adjust_samp(uv_samp,kpi,m2pix,sz,save_kpi=True) :
+def adjust_samp(uv_samp,kpi,m2pix,sz,save_kpi=True):
     dz=sz/2.
     idx=-np.ones((kpi.nbh-1),dtype='int') # indices of uv-points related to sampling point 0
     for i in range(1,kpi.nbh) :
@@ -797,6 +796,7 @@ def adjust_samp(uv_samp,kpi,m2pix,sz,save_kpi=True) :
 #return_image # return image with unwrapped phases
 # output :
 # - unwrapped phases for sampling at given uv-points
+
 def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
     two_pi=np.pi*2
     sz=data.shape[0] # square image size
