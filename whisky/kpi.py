@@ -184,7 +184,7 @@ class kpi(object):
 
         nbh = self.nbh # local representation of the class variable
 
-        if usejit = True:
+        if usejit == True:
             from numba import jit
             print 'Using numba to compile'
 
@@ -231,7 +231,7 @@ class kpi(object):
                         uvi[k], uvj[k] = i, j
                         k+=1
 
-        if usejit = True:
+        if usejit == True:
             a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
             nbx = a.shape[0]    # number of distinct u-components
 
@@ -280,7 +280,7 @@ class kpi(object):
         # [AL, 2014.05.22] keeping relations between uv points and sampling points
         # --------------------------------------------------------------
 
-        if usejit = True:
+        if usejit == True:
             print 'Using numba to create transfer and redundancy matrices'
 
             @jit
