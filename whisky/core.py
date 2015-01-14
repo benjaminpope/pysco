@@ -7,6 +7,7 @@ import pyfits as pf
 import sys
 import multiprocessing
 from scipy.interpolate import griddata
+from numba import jit
 
 ''' ================================================================
     Tools and functions useful for manipulating kernel phase data.
@@ -187,8 +188,8 @@ def centroid(image, threshold=0, binarize=0):
 
 # =========================================================================
 # =========================================================================
-
-def find_psf_center(img, verbose=True, nbit=10):                     
+@jit
+def find_psf_center(img, verbose=False, nbit=10):                     
     ''' Name of function self explanatory: locate the center of a PSF.
 
     ------------------------------------------------------------------
@@ -211,7 +212,7 @@ def find_psf_center(img, verbose=True, nbit=10):
         signal[mfilt > 10] = 1.0
     else: 
         signal[mfilt>0] = 1.0
-        print 'Warning - weak signal! Centering may not work.'
+        if verbose: print 'Warning - weak signal! Centering may not work.'
 
     for it in xrange(nbit):
         sz = sx/2/(1.0+(0.1*sx/2*it/(4*nbit)))
@@ -276,7 +277,8 @@ def window_image(im0,sg_rad) :
 # =========================================================================
 
 # [AL, 2014.07.28] extended to 3-d case
-def recenter(im0, sg_rad=25.0, verbose=True, nbit=10, manual = 0):
+@jit
+def recenter(im0, sg_rad=25.0, verbose=False, nbit=10, manual = 0):
     ''' ------------------------------------------------------------
          The ultimate image centering algorithm... eventually...
 
