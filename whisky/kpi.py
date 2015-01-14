@@ -14,8 +14,8 @@
       --> name   : name of the model (HST, Keck, Annulus_19, ...)
       --> mask   : array of coordinates for pupil sample points
       --> uv     : matching array of coordinates in uv plane (baselines)
-      --> RED    : vector coding the redundancy of these baselines
-      --> TFM    : transfer matrix, linking pupil-phase to uv-phase
+      --> RED   : vector coding the redundancy of these baselines
+      --> TFM   : transfer matrix, linking pupil-phase to uv-phase
       --> KerPhi : array storing the kernel-phase relations
       --> uvrel :  matrix storing the relations between sampling points and uv-points
       -------------------------------------------------------------------- '''
@@ -34,6 +34,8 @@ import gzip
 from core import *
 
 from scipy.io.idl import readsav
+
+usejit = False
 
 class kpi(object):
     ''' Fundamental kernel-phase relations
@@ -73,7 +75,7 @@ class kpi(object):
             try:    self.name = data['name']
             except: self.name = "UNKNOWN"
 
-            self.uv     = data['uv']
+            self.uv  = data['uv']
             self.mask   = data['mask']
             self.RED    = data['RED']
             self.KerPhi = data['KerPhi']
@@ -137,7 +139,7 @@ class kpi(object):
 
         # 2. Calculate the transfer matrix and the redundancy vector
         # --------------------------------------------------------------
-        self.RED = np.ones(self.nbuv, dtype=float)             # Redundancy
+        self.RED = np.ones(self.nbuv, dtype=float)       # Redundancy
 
         self.nkphi  = mfdata.n_bispect # number of Ker-phases
 
@@ -182,7 +184,7 @@ class kpi(object):
 
         nbh = self.nbh # local representation of the class variable
 
-        try:
+        if usejit = True:
             from numba import jit
             print 'Using numba to compile'
 
@@ -211,7 +213,7 @@ class kpi(object):
 
             uvi, uvj, uvx, uvy = do_combinations(nbh,self.mask)
 
-        except:
+        else:
             uvx = np.zeros(nbh * (nbh-1)) # prepare empty arrays to store
             uvy = np.zeros(nbh * (nbh-1)) # the baselines
 
@@ -229,9 +231,9 @@ class kpi(object):
                         uvi[k], uvj[k] = i, j
                         k+=1
 
-        try:
+        if usejit = True:
             a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
-            nbx    = a.shape[0]                # number of distinct u-components
+            nbx = a.shape[0]    # number of distinct u-components
 
             @jit
             def fill_uv_sel(nbx,uvx,uvy,a,prec,ndgt):
@@ -246,9 +248,9 @@ class kpi(object):
             uv_sel = fill_uv_sel(nbx,uvx,uvy,a,prec,ndgt)
 
 
-        except:
+        else:
             a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
-            nbx    = a.shape[0]                # number of distinct u-components
+            nbx = a.shape[0]    # number of distinct u-components
             uv_sel = np.zeros((0,2))           # array for "selected" baselines
 
             for i in range(nbx):     # identify distinct v-coords and fill uv_sel
@@ -277,20 +279,44 @@ class kpi(object):
         # 2. Calculate the transfer matrix and the redundancy vector
         # [AL, 2014.05.22] keeping relations between uv points and sampling points
         # --------------------------------------------------------------
-        self.TFM = np.zeros((self.nbuv, self.nbh), dtype=float) # matrix
-        self.RED = np.zeros(self.nbuv, dtype=float)             # Redundancy
-        # relations matrix (-1 = not connected. NB: only positive baselines are saved)
-        self.uvrel=-np.ones((nbh,nbh),dtype='int') 									
-        for i in range(self.nbuv):
-            a=np.where((np.abs(self.uv[i,0]-uvx) <= prec) *
-                       (np.abs(self.uv[i,1]-uvy) <= prec))
-            for k in range(len(a[0])) :
-                 self.uvrel[uvi[a][k],uvj[a][k]]=i	
-                 #self.uvrel[uvj[a][k],uvi[a][k]]=i
-																						
-            self.TFM[i, uvi[a]] +=  1.0
-            self.TFM[i, uvj[a]] -=  1.0
-            self.RED[i]         = np.size(a)
+
+        if usejit = True:
+            print 'Using numba to create transfer and redundancy matrices'
+
+            @jit
+            def make_tfm(uv,uvi,uvj,uvx,uvy,prec,nbuv,nbh):
+                TFM = np.zeros((nbuv, nbh), dtype=float) # matrix	
+                RED = np.zeros(nbuv, dtype=float)          # Redundancy		
+                uvrel=-np.ones((nbh,nbh),dtype='int') 		
+                for i in range(nbuv):
+                    a=np.where((np.abs(uv[i,0]-uvx) <= prec) * (np.abs(uv[i,1]-uvy) <= prec))
+                    for k in range(len(a[0])) :
+                        uvrel[uvi[a][k],uvj[a][k]]=i  
+                        #self.uvrel[uvj[a][k],uvi[a][k]]=i	
+                    TFM[i, uvi[a]] +=  1.0
+                    TFM[i, uvj[a]] -=  1.0
+                    RED[i]     = np.size(a)
+                return TFM, RED, uvrel
+
+            self.TFM, self.RED, self.uvrel = make_tfm(self.uv,uvi,uvj,uvx,uvy,prec,self.nbuv,self.nbh) 
+
+        else:
+            self.uvrel=-np.ones((nbh,nbh),dtype='int') 
+            self.TFM = np.zeros((self.nbuv, self.nbh), dtype=float) # matrix
+            self.RED = np.zeros(self.nbuv, dtype=float)    # Redundancy
+
+
+            print 'Transfer matrix and redundancy matrix initialised'
+
+            for i in range(self.nbuv):
+                a=np.where((np.abs(self.uv[i,0]-uvx) <= prec) *
+                           (np.abs(self.uv[i,1]-uvy) <= prec))
+                for k in range(len(a[0])) :
+                    self.uvrel[uvi[a][k],uvj[a][k]]=i  
+                    #self.uvrel[uvj[a][k],uvi[a][k]]=i
+                self.TFM[i, uvi[a]] +=  1.0
+                self.TFM[i, uvj[a]] += -1.0
+                self.RED[i]   = np.size(a)
         # converting to relations matrix
         											
 
@@ -313,7 +339,7 @@ class kpi(object):
         S1[0:nbh-1] = S
 
         self.nkphi  = np.size(np.where(abs(S1) < 1e-3)) # number of Ker-phases
-        KPhiCol     = np.where(abs(S1) < 1e-3)[0]
+        KPhiCol  = np.where(abs(S1) < 1e-3)[0]
         self.KerPhi = np.zeros((self.nkphi, self.nbuv)) # allocate the array
 
         for i in range(self.nkphi):
@@ -377,10 +403,10 @@ class kpi(object):
             data = {'name'   : self.name,
                     'mask'   : self.mask,
                     'uv'     : self.uv,
-                    'TFM'    : self.TFM,
+                    'TFM'   : self.TFM,
                     'KerPhi' : self.KerPhi,
-                    'RED'    : self.RED,
-                    'uvrel'    : self.uvrel}																				
+                    'RED'   : self.RED,
+                    'uvrel' : self.uvrel}																				
         except:
             print("KerPhase_Relation data structure is incomplete")
             print("File %s wasn't saved!" % (file,))

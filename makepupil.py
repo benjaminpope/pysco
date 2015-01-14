@@ -18,4 +18,6 @@ tic = time.time()
 a = pysco.kpi(ddir+pupil+'.txt')
 toc = time.time()
 
+print 'Took', toc-tic,'seconds'
+
 a.save_to_file(kpdir+pupil+'model.pick')

@@ -29,7 +29,7 @@ import numpy as np
 import pylab as plt
 import pyfits
 import sys
-from numba import jit
+# from numba import jit
 
 HOME = "/Users/agreenba/"
 
@@ -185,7 +185,7 @@ class MemImage():
 		self.reconstructedimage = self.pm.reshape(self.imsize, self.imsize)
 		return self.reconstructedimage
 
-	@jit
+	# @jit
 	def make_iterstep(self):
 		"""
 		"This is the function we are trying to minimize." - original code
@@ -218,7 +218,7 @@ class MemImage():
 					self.alpha*entropy(tmppm,self.prior)
 		return newchi2
 
-	@jit
+	# @jit
 	def line_search(self):
 		#---- from original code: ----
 		#This is a golden section search with a fixed 30 iterations.

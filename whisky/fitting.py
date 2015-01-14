@@ -40,6 +40,7 @@ def binary_model(params, kpi, hdr, vis2=False):
 
 # =========================================================================
 # =========================================================================
+
 def binary_KPD_model(kpo, params):
     ''' Returns a 1D or 2D array of binary models.
     
@@ -61,6 +62,7 @@ def binary_KPD_model(kpo, params):
 
 # =========================================================================
 # =========================================================================
+
 def binary_KPD_fit_residuals(params, kpo):
     ''' Function to evaluate fit residuals, to be used in a leastsq
     fitting procedure. '''
@@ -75,6 +77,7 @@ def binary_KPD_fit_residuals(params, kpo):
 
 # =========================================================================
 # =========================================================================
+
 def binary_KPD_fit(kpo, p0):
     '''Performs a best binary fit search for the datasets.
     
