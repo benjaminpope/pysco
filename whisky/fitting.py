@@ -212,7 +212,7 @@ def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,n
 
     def lnprior(params):
         if paramlimits[0] < params[0] < paramlimits[1] and paramlimits[2] < params[1] < paramlimits[3] and paramlimits[4] < params[2] < paramlimits[5]:
-            return 0.0
+            return 1./params[0]*1./params[2]
         return -np.inf
 
     def lnprob(params,kpo):
