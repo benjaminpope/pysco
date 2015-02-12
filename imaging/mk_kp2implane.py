@@ -72,7 +72,7 @@ class kerphimobj():
 					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
 	# @jit
-	def kerph2im(self):
+	def kerph2im(self,theta=0):
 		"""
 		adds up the sine transform for uv phases & then multiplies Kmat,
 		the transfer matrix from uv phases to kernel phases.
@@ -84,8 +84,10 @@ class kerphimobj():
 		# empty sine transform matrix:
 		self.ph2im = np.zeros((len(self.uv), self.fov,self.fov))
 		self.sym2im = np.zeros((len(self.uv), self.fov,self.fov))
+		rotMatrix = np.array([[np.cos(theta), -np.sin(theta)], 
+                         [np.sin(theta),  np.cos(theta)]])
 		for q,one_uv in enumerate(self.uv):
-			self.rcoord = one_uv
+			self.rcoord = np.dot(rotMatrix,one_uv)
 			self.ph2im[q,:,:] = self.red[q]*np.fromfunction(self.ffs, (self.fov, self.fov))
 			self.sym2im[q,:,:] = self.red[q]*np.fromfunction(self.ffc, (self.fov,self.fov))
 		# flatten for matrix multiplication
