@@ -90,7 +90,7 @@ def cvis_binary(u, v, wavel, p, norm=False):
 
     cvis = l1 * v1 + l2 * v2 * phi
     if norm :
-        cvis/=(l1+l2)					
+        cvis/=(l1+l2)               
     return cvis
 
 # =========================================================================
@@ -111,8 +111,8 @@ def phase_binary(u, v, wavel, p):
     - u,v: baseline coordinates (meters)
     - wavel: wavelength (meters)
     ---------------------------------------------------------------- '''
-				
-    #[AL: 2014.05.15] Duplicated code was cleaned			
+                
+    #[AL: 2014.05.15] Duplicated code was cleaned         
     phase = np.angle(cvis_binary(u, v, wavel, p), deg=True)
     return np.mod(phase + 10980., 360.) - 180.0
 
@@ -134,8 +134,8 @@ def vis2_binary(u, v, wavel, p):
     u,v: baseline coordinates (meters)
     wavel: wavelength (meters)
     ---------------------------------------------------------------- '''
-    #[AL: 2014.05.15] Duplicated code was cleaned	
-    cvis=cvis_binary(u, v, wavel, p, norm=True)				
+    #[AL: 2014.05.15] Duplicated code was cleaned   
+    cvis=cvis_binary(u, v, wavel, p, norm=True)    
     vis2 = np.real(cvis*cvis.conjugate())
     
     return vis2
@@ -149,7 +149,7 @@ def super_gauss(xs, ys, x0, y0, w):
     Parameters:
     - (xs, ys) : array size
     - (x0, y0) : center of the Super-Gaussian
-    - w        : width of the Super-Gaussian 
+    - w  : width of the Super-Gaussian 
     ------------------------------------------ '''
 
     x = np.outer(np.arange(xs), np.ones(ys))-x0
@@ -162,22 +162,22 @@ def super_gauss(xs, ys, x0, y0, w):
 # =========================================================================
 # =========================================================================
 
-def centroid(image, threshold=0, binarize=0):                        
+def centroid(image, threshold=0, binarize=0):                  
     ''' ------------------------------------------------------
         simple determination of the centroid of a 2D array
     ------------------------------------------------------ '''
 
     signal = np.where(image > threshold)
     sy, sx = image.shape[0], image.shape[1] # size of "image"
-    bkg_cnt = np.median(image)                                       
+    bkg_cnt = np.median(image)                     
 
     temp = np.zeros((sy, sx))
     if (binarize == 1): temp[signal] = 1.0
-    else:               temp[signal] = image[signal]
+    else:            temp[signal] = image[signal]
 
     profx = 1.0 * temp.sum(axis=0)
     profy = 1.0 * temp.sum(axis=1)
-    profx -= np.min(profx)                                           
+    profx -= np.min(profx)                       
     profy -= np.min(profy)
 
     x0 = (profx*np.arange(sx)).sum() / profx.sum()
@@ -188,7 +188,7 @@ def centroid(image, threshold=0, binarize=0):
 # =========================================================================
 # =========================================================================
 
-def find_psf_center(img, verbose=False, nbit=10):                     
+def find_psf_center(img, verbose=False, nbit=10):                
     ''' Name of function self explanatory: locate the center of a PSF.
 
     ------------------------------------------------------------------
@@ -204,7 +204,7 @@ def find_psf_center(img, verbose=False, nbit=10):
     temp -= bckg
     mfilt = medfilt(temp, 3) # median filtered, kernel size = 3
     (sy, sx) = mfilt.shape   # size of "image"
-    xc, yc = sx/2, sy/2      # first estimate for psf center
+    xc, yc = sx/2, sy/2   # first estimate for psf center
 
     signal = np.zeros_like(img)
     if np.max(mfilt) >= 10:
@@ -238,7 +238,7 @@ def find_psf_center(img, verbose=False, nbit=10):
         if verbose:
             print("it #%2d center = (%.2f, %.2f)" % (it+1, xc, yc))
             
-    return (xc, yc)                                                  
+    return (xc, yc)              
 
 # =========================================================================
 # =========================================================================
@@ -250,13 +250,13 @@ def window_image(im0,sg_rad) :
         szv = im0.shape[0] # vertic
     elif len(im0.shape)==3 :  
         szh = im0.shape[2] # horiz
-        szv = im0.shape[1] # vertic		
-    temp = max(szh,szv) # max dimension of image			
+        szv = im0.shape[1] # vertic  
+    temp = max(szh,szv) # max dimension of image            
     for sz in [64, 128, 256, 512, 1024, 2048]:
         if sz >= temp: break
-    dz = sz/2.           # image half-size
+    dz = sz/2.       # image half-size
     orih, oriv = (sz-szh)/2, (sz-szv)/2
-    sgmask = super_gauss(sz, sz, dz, dz, sg_rad)				
+    sgmask = super_gauss(sz, sz, dz, dz, sg_rad)                
     if len(im0.shape)==2 :  
         im = np.zeros((sz, sz))
         im[oriv:oriv+szv,orih:orih+szh] = im0
@@ -308,13 +308,13 @@ def recenter(im0, sg_rad=25.0, verbose=False, nbit=10, manual = 0):
         szv = im0.shape[0] # vertic
     elif len(im0.shape)==3 :  
         szh = im0.shape[2] # horiz
-        szv = im0.shape[1] # vertic		
-    temp = max(szh,szv) # max dimension of image			
+        szv = im0.shape[1] # vertic  
+    temp = max(szh,szv) # max dimension of image            
     for sz in [64, 128, 256, 512, 1024, 2048]:
         if sz >= temp: break
-    dz = sz/2.           # image half-size
+    dz = sz/2.       # image half-size
     orih, oriv = (sz-szh)/2, (sz-szv)/2
-    sgmask = super_gauss(sz, sz, dz, dz, sg_rad)	
+    sgmask = super_gauss(sz, sz, dz, dz, sg_rad)    
     
     x,y = np.meshgrid(np.arange(sz)-dz, np.arange(sz)-dz)
     wedge_x, wedge_y = x*np.pi/dz, y*np.pi/dz
@@ -330,11 +330,11 @@ def recenter(im0, sg_rad=25.0, verbose=False, nbit=10, manual = 0):
         dx, dy = (x0-dz), (y0-dz)
         # test
         #dx=1.0
-        #dy=1.0	
-        #print(" Test only! dx=%f, dy=%f " % (dx,dy))					
-        im = np.roll(np.roll(im, -int(dx), axis=1), -int(dy), axis=0)        
+        #dy=1.0 
+        #print(" Test only! dx=%f, dy=%f " % (dx,dy))               
+        im = np.roll(np.roll(im, -int(dx), axis=1), -int(dy), axis=0)      
         dx -= np.int(dx)
-        dy -= np.int(dy)					
+        dy -= np.int(dy)                    
         # array for Fourier-translation
         dummy = shift(-dx * wedge_x + dy * wedge_y)
         offset.real, offset.imag = np.cos(dummy), np.sin(dummy)
@@ -348,7 +348,7 @@ def recenter(im0, sg_rad=25.0, verbose=False, nbit=10, manual = 0):
             (x0, y0) = find_psf_center(im[i], verbose, nbit) 
             im[i] -= np.median(im[i])
             mynorm = (im[i] * sgmask).sum()
-            dx, dy = (x0-dz), (y0-dz)					
+            dx, dy = (x0-dz), (y0-dz)               
             im[i] = np.roll(np.roll(im[i], -int(dx), axis=1), -int(dy), axis=0)
             dx -= np.int(dx)
             dy -= np.int(dy)
@@ -369,15 +369,15 @@ def get_keck_keywords(hdr):
 
     This version is adapted to handle NIRC2 data. '''
     data = {
-        'tel'    : hdr['TELESCOP'],        # telescope
+        'tel'   : hdr['TELESCOP'],  # telescope
         'pscale' : 10.0,                   # NIRC2 narrow plate scale (mas)
-        'fname'  : hdr['FILENAME'],        # original file name
-        'odate'  : hdr['DATE-OBS'],        # UTC date of observation
-        'otime'  : hdr['UTC'     ],        # UTC time of observation
-        'tint'   : hdr['ITIME'   ],        # integration time (sec)
-        'coadds' : hdr['COADDS'  ],        # number of coadds
-        'RA'     : hdr['RA'      ],        # right ascension (deg)
-        'DEC'    : hdr['DEC'     ],        # declination (deg)
+        'fname'  : hdr['FILENAME'],  # original file name
+        'odate'  : hdr['DATE-OBS'],  # UTC date of observation
+        'otime'  : hdr['UTC'     ],  # UTC time of observation
+        'tint'   : hdr['ITIME'   ],  # integration time (sec)
+        'coadds' : hdr['COADDS'  ],  # number of coadds
+        'RA'     : hdr['RA'   ],  # right ascension (deg)
+        'DEC'   : hdr['DEC'     ],  # declination (deg)
         'filter' : hdr['CENWAVE' ] * 1e-6, # central wavelength (meters)
         # P.A. of the frame (deg) (formula from M. Ireland)
         'orient' : 360+hdr['PARANG']+hdr['ROTPOSN']-hdr['EL']-hdr['INSTANGL']
@@ -398,15 +398,15 @@ def get_nicmos_keywords(hdr):
     elif hdr['CAMERA'] == 2:
         pscale = 75.8667 # note - different by a couple of % between X and Y! - we ignore this here
     data = {
-        'tel'    : hdr['TELESCOP'],         # telescope
-        'pscale' : pscale,                    # HST NIC1 plate scale (mas)
-        'fname'  : hdr['FILENAME'],         # original file name
-        'odate'  : hdr['DATE-OBS'],         # UTC date of observation
-        'otime'  : hdr['TIME-OBS'],         # UTC time of observation
-        'tint'   : hdr['EXPTIME' ],         # integration time (sec)
-        'coadds' : 1,                       # as far as I can tell...
-        'RA'     : hdr['RA_TARG' ],         # right ascension (deg)
-        'DEC'    : hdr['DEC_TARG'],         # declination (deg)
+        'tel'   : hdr['TELESCOP'],   # telescope
+        'pscale' : pscale,          # HST NIC1 plate scale (mas)
+        'fname'  : hdr['FILENAME'],   # original file name
+        'odate'  : hdr['DATE-OBS'],   # UTC date of observation
+        'otime'  : hdr['TIME-OBS'],   # UTC time of observation
+        'tint'   : hdr['EXPTIME' ],   # integration time (sec)
+        'coadds' : 1,                  # as far as I can tell...
+        'RA'     : hdr['RA_TARG' ],   # right ascension (deg)
+        'DEC'   : hdr['DEC_TARG'],   # declination (deg)
         'filter' : hdr['PHOTPLAM'] * 1e-10, # central wavelength (meters)
         'orient' : hdr['ORIENTAT'] # P.A. of image y axis (deg e. of n.)
         }
@@ -437,27 +437,27 @@ def get_pharo_keywords(hdr):
     This version is adapted to handle PHARO data. '''
 
     data = {
-        'tel'      : hdr['TELESCOP'],         # telescope
-        'pscale'   : 25.2,                    # HST NIC1 plate scale (mas)
-        'odate'    : hdr['DATE-OBS'],         # UTC date of observation
-        'otime'    : hdr['TIME-OBS'],         # UTC time of observation
-        'tint'     : hdr['T_INT' ],           # integration time (sec)
-        'coadds'   : 1,                       # as far as I can tell...
-        'RA'       : hdr['CRVAL1'],           # right ascension (deg)
-        'DEC'      : hdr['CRVAL2'],           # declination (deg)
+        'tel'     : hdr['TELESCOP'],       # telescope
+        'pscale'   : 25.2,          # HST NIC1 plate scale (mas)
+        'odate' : hdr['DATE-OBS'],       # UTC date of observation
+        'otime' : hdr['TIME-OBS'],       # UTC time of observation
+        'tint'   : hdr['T_INT' ],     # integration time (sec)
+        'coadds'   : 1,        # as far as I can tell...
+        'RA'       : hdr['CRVAL1'],     # right ascension (deg)
+        'DEC'     : hdr['CRVAL2'],     # declination (deg)
         'filter'   : np.nan, # place-holder   # central wavelength (meters)
-        'filtname' : hdr['FILTER'],           # Filter name
-        'grism'    : hdr['GRISM'],            # additional filter/nd
-        'pupil'    : hdr['LYOT'],             # Lyot-pupil wheel position
+        'filtname' : hdr['FILTER'],     # Filter name
+        'grism' : hdr['GRISM'],      # additional filter/nd
+        'pupil' : hdr['LYOT'],          # Lyot-pupil wheel position
         'orient'   : hdr['CR_ANGLE']          # Cassegrain ring angle
         }
 
-    if 'H'       in data['filtname'] : data['filter'] = 1.635e-6
-    if 'K'       in data['filtname'] : data['filter'] = 2.196e-6
+    if 'H'     in data['filtname'] : data['filter'] = 1.635e-6
+    if 'K'     in data['filtname'] : data['filter'] = 2.196e-6
     if 'CH4_S'   in data['filtname'] : data['filter'] = 1.570e-6
     if 'K_short' in data['filtname'] : data['filter'] = 2.145e-6
     if 'BrG'     in data['filtname'] : data['filter'] = 2.180e-6
-    if 'FeII'     in data['grism']   : data['filter'] = 1.648e-6
+    if 'FeII'    in data['grism']   : data['filter'] = 1.648e-6
     
     if np.isnan(data['filter']):
         print("Filter configuration un-recognized. Analysis will fail.")
@@ -469,69 +469,69 @@ def get_simu_keywords(hdr):
     '''Extract the relevant keyword information from a fits header.
 
     This is a special version for simulated data. '''
-    	
-    # [AL,21.02.2014] Header parser was modified to support wider range of simulations	
+        
+    # [AL,21.02.2014] Header parser was modified to support wider range of simulations  
     #BJSP 13/11/14 changed to try-except framework as old version of pyfits is deprecated
 
     try:
         pscale=hdr['PSCALE']
     except:
-	  pscale=11.5
+      pscale=11.5
     try:
         fname=hdr['FNAME']
     except:
-	  fname='simulation'
+      fname='simulation'
     try:
         odate=hdr['ODATE']
     except:
-	  odate='Jan 1, 2000'
+      odate='Jan 1, 2000'
     try:
         otime=hdr['OTIME']
     except:
-	  otime='0:00:00.00'	
+      otime='0:00:00.00'    
     try:
         tint=hdr['TINT']
     except:
-	  tint=1.0		
+      tint=1.0    
     try:
         coadds=hdr['COADDS']
     except:
-	  coadds=1		
+      coadds=1    
     try:
         RA=hdr['RA']
     except:
-	  RA=0.0
+      RA=0.0
     try:
         DEC=hdr['DEC']
     except:
-	  DEC=0.0	
+      DEC=0.0   
     try:
         filter=hdr['FILTER']
     except:
-	  filter=1.6* 1e-6
+      filter=1.6* 1e-6
     try:
         orient=hdr['ORIENT']
     except:
-	  orient=0.0				
+      orient=0.0                
     data = {
-        'tel'    : hdr['TELESCOP'],        # telescope
-        'pscale' : pscale,                 # simulation plate scale (mas)
-        'fname'  : fname,           	   # original file name
-        'odate'  : odate,          	   # UTC date of observation
-        'otime'  : otime,                  # UTC time of observation
+        'tel'   : hdr['TELESCOP'],  # telescope
+        'pscale' : pscale,         # simulation plate scale (mas)
+        'fname'  : fname,              # original file name
+        'odate'  : odate,           # UTC date of observation
+        'otime'  : otime,              # UTC time of observation
         'tint'   : tint,                   # integration time (sec)
-        'coadds' : coadds,                 # number of coadds
-        'RA'     : RA,                     # right ascension (deg)
-        'DEC'    : DEC,                    # declination (deg)
-        'filter' : filter,                 # central wavelength (meters)
-        'orient' : orient                  # P.A. of the frame (deg)
+        'coadds' : coadds,         # number of coadds
+        'RA'     : RA,           # right ascension (deg)
+        'DEC'   : DEC,     # declination (deg)
+        'filter' : filter,         # central wavelength (meters)
+        'orient' : orient              # P.A. of the frame (deg)
         }
     return data
 
 # =========================================================================
 # =========================================================================
 # [AL, 2014.04.16] Added sg_ld and D parameters - window size in lambda/D
-#		       if D<=0 then use the shortest baseline instead
+#           if D<=0 then use the shortest baseline instead
 # [AL, 2014.04.16] windowing parameters added
 # [AL, 2014.05.06] Bispectrum angle (bsp)
 # [AL, 2014.05.28] Adjust sampling points in pupil plane to make coordinates in uv-plane integer (increases quality)
@@ -583,31 +583,31 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
 
     if 'Keck II' in hdr['TELESCOP']: kpd_info = get_keck_keywords(hdr)
     if 'HST'     in hdr['TELESCOP']: kpd_info = get_nicmos_keywords(hdr)
-    if 'simu'    in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
-    if 'Hale'    in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
-					
+    if 'simu'   in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
+    if 'Hale'   in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
+                    
     if ('Hale' in hdr['TELESCOP']):# P3K PA are clockwise
-                                                                     # [AL, 04.07.2014] removed reverse from simulation		
-        rev = -1.0								
-    								
+                                                                     # [AL, 04.07.2014] removed reverse from simulation  
+        rev = -1.0                
+                                    
     # [AL, 2014.04.16] Added calculation of super gaussian radius in sg_ld*lambda/D
-    if sg_ld*D>0 :							
+    if sg_ld*D>0 :              
         bl = D
         if D<=0 :
             bl=np.hypot(kpi.uv[:,0],kpi.uv[:,1]).min()
         wl=kpd_info['filter']
         pscale=kpd_info['pscale']
         sg_rad=int(rad2mas(wl/bl)/pscale)+1   
-        sg_rad*=sg_ld	
-        sg_rad+=(sg_rad%2)	
+        sg_rad*=sg_ld   
+        sg_rad+=(sg_rad%2)  
     elif wrad>0 :
         sg_rad=wrad
-					
-				
+                    
+                
     # read and fine-center the frame
     # [AL, 2014.04.16] sg_rad=wrad changed
     if sg_rad<=0 : sg_rad=array.shape[1]
-    if re_center:         
+    if re_center:       
         im = recenter(array, sg_rad=sg_rad, verbose=False, nbit=20,manual=manual)
     elif window:         
         im = window_image(im0=array, sg_rad=sg_rad)
@@ -626,9 +626,9 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
 
     uv_samp = kpi.uv * m2pix + dz # uv sample coordinates in pixels
     #uv_samp = uv_rot * m2pix + dz # uv sample coordinates in pixels
-				
+                
     if adjust_sampling: 
-        uv_samp=adjust_samp(uv_samp,kpi,m2pix,sz) # rounding if not integer							
+        uv_samp=adjust_samp(uv_samp,kpi,m2pix,sz) # rounding if not integer       
        
     # calculate and normalize Fourier Transform
     ac = shift(fft(shift(im)))
@@ -637,8 +637,8 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     # [AL, 2014.06.20] visibilities extraction
     uv_samp_rev=np.cast['int'](np.round(uv_samp))
     uv_samp_rev[:,0]*=rev
-    data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]				
-				
+    data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]                
+                
     vis = np.real(ac*ac.conjugate())
     viscen = vis.shape[0]/2
     vis2 = np.real(data_cplx*data_cplx.conjugate())
@@ -659,20 +659,20 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     
     
     kpd_signal = np.dot(kpi.KerPhi, kpd_phase) / dtor #[Al, 2014.05.12] Frantz's version
-						
+                        
     # [AL, 2014.05.06] Bispectrum (bsp)
-    if bsp :	   				
-        bsp_res=extract_bsp(data_cplx,kpi.uvrel) # robust to phase wrapping
+    if bsp :                    
+        bsp_res= np.dot(kpi.uv_to_bsp,kpd_phase) / dtor # robust to phase wrapping
        # bsp_res=extract_bsp(kpd_phase,kpi.uvrel,rng=(0,50000)) # works if unwrapping algorithm is fine. Can be used to check it as it is a requirement for kpd extraction
-								
+                                
     if bsp :   
         if (save_im): res = (kpd_info, kpd_signal,vis2, im, ac, bsp_res)
-        else:         res = (kpd_info, kpd_signal,vis2, bsp_res)
-        if (wfs):     res = (kpd_info, kpd_phase, bsp_res)					
+        else:       res = (kpd_info, kpd_signal,vis2, bsp_res)
+        if (wfs):    res = (kpd_info, kpd_phase, bsp_res)          
     else :
         if (save_im): res = (kpd_info, kpd_signal,vis2, im, ac)
-        else:         res = (kpd_info, kpd_signal,vis2)
-        if (wfs):     res = (kpd_info, kpd_phase)
+        else:       res = (kpd_info, kpd_signal,vis2)
+        if (wfs):    res = (kpd_info, kpd_phase)
 
     
     if plotim:
@@ -681,17 +681,17 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
         plt.figure(1, (15,5))
         f0 = plt.subplot(131)
         f0.imshow(im**0.5)
-				
-	#[AL, 2014.03.03 : Added power spectrum as well]				
-        f1 = plt.subplot(132)       
-        f1.imshow(np.abs(ac))								
+                
+    #[AL, 2014.03.03 : Added power spectrum as well]                
+        f1 = plt.subplot(132)      
+        f1.imshow(np.abs(ac))                        
         f1.plot(uv_samp_rev[:,0], uv_samp_rev[:,1], 'b.')
-        f1.axis((dz-uvw, dz+uvw, dz-uvw, dz+uvw))	
-								
+        f1.axis((dz-uvw, dz+uvw, dz-uvw, dz+uvw))   
+                                
         f2 = plt.subplot(133)
-        f2.imshow(np.angle(ac)) 								
+        f2.imshow(np.angle(ac))         
         f2.plot(uv_samp_rev[:,0], uv_samp_rev[:,1], 'b.')
-        f2.axis((dz-uvw, dz+uvw, dz-uvw, dz+uvw))								
+        f2.axis((dz-uvw, dz+uvw, dz-uvw, dz+uvw))                        
         plt.draw()
         plt.show()
 
@@ -701,7 +701,7 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
 # =========================================================================
 # [AL, 2014.03.10] Added plotim parameter
 # [AL, 2014.03.18] Added sg_ld and D parameters - window size in lambda/D
-#		       if D<=0 then use the shortest baseline instead
+#           if D<=0 then use the shortest baseline instead
 # [AL, 2014.03.20] Recentering and windowing parameters added
 # [AL, 2014.05.06] Bispectrum phases (bsp) 
 # [AL, 2014.05.20] Interpolation for image grid added. grid_size - size of the grid of the image to calculate interpolation on
@@ -788,7 +788,7 @@ def adjust_samp(uv_samp,kpi,m2pix,sz,save_kpi=True):
     # converting to pixels once again
     return uv * m2pix + dz
 
-# [AL, 2014.07.29]				
+# [AL, 2014.07.29]        
 # ---- this function unwraps phases for a given set of uv points by goint to each uv point from across a line from the center ------
 #data # initial array with phases or complex visibilities (square image)
 #uv0    # array with sampling points
@@ -803,51 +803,51 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
     dz=sz//2
     #shifting initial array
     uv=np.array(np.round(uv0-dz),dtype=int)
-    if data.dtype=='complex' :				
+    if data.dtype=='complex' :        
         phases=np.angle(data)
-    else : 	phases=np.copy(data)							
+    else :  phases=np.copy(data)                            
     res=np.empty((uv0.shape[0]),dtype=phases.dtype)
     # determining the line function between each of the sampling points and image center y=ax
     for i in range(uv.shape[0]) : 
         xShift=True
         if uv[i,1]==0 and uv[i,0]==0:
-            continue # no unwrapping in case of image center		
-        elif uv[i,1]==0 :           # going vertically along y axis
+            continue # no unwrapping in case of image center        
+        elif uv[i,1]==0 :         # going vertically along y axis
             dx=0.
             dy=np.sign(uv[i,0])
             xShift=False
-        elif uv[i,0]==0 :          # going horizontally along x axis
+        elif uv[i,0]==0 :        # going horizontally along x axis
             dx=np.sign(uv[i,1])
-            dy=0.																		
-        else :			   # determining x and y shifts
+            dy=0.                                                      
+        else :       # determining x and y shifts
             dy=np.abs(1.*uv[i,0]/uv[i,1])*np.sign(uv[i,0])
             if np.abs(dy)<=1 :
                 dx=np.sign(uv[i,1])
             else :
                 dx=np.abs(1.*uv[i,1]/uv[i,0])*np.sign(uv[i,1])
                 dy=np.sign(uv[i,0])
-                xShift=False								
-        if xShift:				
+                xShift=False                                
+        if xShift:        
             x=dz
             y1=dz
-            y2=dz				
+            y2=dz            
             while (np.abs(uv[i,1])>np.abs(x-dz)) :
                 x+=dx
                 y=np.int(np.abs(x-dz)*dy+dz)
                 if (np.abs(phases[x-dx,y1]-phases[x,y])>maxVar) or \
-		         (np.abs(phases[x-dx,y2]-phases[x,y])>maxVar) :
+                 (np.abs(phases[x-dx,y2]-phases[x,y])>maxVar) :
                     dist=np.abs(phases[x-dx,y1]-phases[x,y])%two_pi
                     if (dist%two_pi<=np.pi) :
                         phases[x,y]=phases[x-dx,y1]-np.sign(phases[x-dx,y1])*dist
                     else :
-                        phases[x,y]=phases[x-dx,y1]+np.sign(phases[x-dx,y1])*(two_pi-dist)													                    
-                    if (np.abs(phases[x,y]-phases[x,y+1])>maxVar)	:
+                        phases[x,y]=phases[x-dx,y1]+np.sign(phases[x-dx,y1])*(two_pi-dist)                                    
+                    if (np.abs(phases[x,y]-phases[x,y+1])>maxVar)   :
                         dist=np.abs(phases[x,y]-phases[x,y+1])%two_pi
                         if (dist%two_pi<=np.pi) :
                             phases[x,y+1]=phases[x,y]-dist*np.sign(phases[x,y])
                         else :
                             phases[x,y+1]=phases[x,y]+np.sign(phases[x,y])*(two_pi-dist)
-                    #print("1) f(%d,%d)=%f | f(%d,%d)=%f \n   f(%d,%d)=%f | f(%d,%d)=%f" % (x,y,phases[x,y],x,y+1,phases[x,y+1],x-dx,y1,phases[x-dx,y1],x-dx,y2,phases[x-dx,y2]))																								
+                    #print("1) f(%d,%d)=%f | f(%d,%d)=%f \n   f(%d,%d)=%f | f(%d,%d)=%f" % (x,y,phases[x,y],x,y+1,phases[x,y+1],x-dx,y1,phases[x-dx,y1],x-dx,y2,phases[x-dx,y2]))                                                                        
                 if (dy!=0) and \
                     ((np.abs(phases[x-dx,y1]-phases[x,y+1])>maxVar) or \
                     (np.abs(phases[x-dx,y2]-phases[x,y+1])>maxVar)) :
@@ -856,150 +856,60 @@ def unwrap_uv_phases(data,uv0,maxVar=np.pi,return_image=False) :
                         phases[x,y+1]=phases[x-dx,y1]-np.sign(phases[x-dx,y1])*dist
                     else :
                         phases[x,y+1]=phases[x-dx,y1]+np.sign(phases[x-dx,y1])*(two_pi-dist)
-                    if (np.abs(phases[x,y]-phases[x,y+1])>maxVar)	:
+                    if (np.abs(phases[x,y]-phases[x,y+1])>maxVar)   :
                         dist=np.abs(phases[x,y]-phases[x,y+1])%two_pi
                         if (dist%two_pi<=np.pi) :
                             phases[x,y]=phases[x,y+1]-dist*np.sign(phases[x,y+1])
                         else :
-                            phases[x,y]=phases[x,y+1]+np.sign(phases[x,y+1])*(two_pi-dist)																		
-                    #print("2) f(%d,%d)=%f | f(%d,%d)=%f | f(%d,%d)=%f" % (x,y+1,phases[x,y+1],x-dx,y1,phases[x-dx,y1],x-dx,y2,phases[x-dx,y2]))																					
-                y1=y        												
+                            phases[x,y]=phases[x,y+1]+np.sign(phases[x,y+1])*(two_pi-dist)                                    
+                    #print("2) f(%d,%d)=%f | f(%d,%d)=%f | f(%d,%d)=%f" % (x,y+1,phases[x,y+1],x-dx,y1,phases[x-dx,y1],x-dx,y2,phases[x-dx,y2]))                                                                                    
+                y1=y                                                        
                 y2=y+1   
-        else :				
+        else :        
             y=dz
             x1=dz
-            x2=dz				
+            x2=dz            
             while (np.abs(uv[i,0])>np.abs(y-dz)) :
                 y+=dy
                 x=np.int(np.abs(y-dz)*dx+dz)
                 if (np.abs(phases[x1,y-dy]-phases[x,y])>maxVar) or \
-                   (np.abs(phases[x2,y-dy]-phases[x,y])>maxVar) :																				
+                   (np.abs(phases[x2,y-dy]-phases[x,y])>maxVar) :                                                            
                     dist=np.abs(phases[x1,y-dy]-phases[x,y])%two_pi
                     if (dist%two_pi<=np.pi) :
                         phases[x,y]=phases[x1,y-dy]-dist*np.sign(phases[x1,y-dy])
                     else :
-                        phases[x,y]=phases[x1,y-dy]+np.sign(phases[x1,y-dy])*(two_pi-dist)													                    
-                    if (np.abs(phases[x,y]-phases[x+1,y])>maxVar)	:
+                        phases[x,y]=phases[x1,y-dy]+np.sign(phases[x1,y-dy])*(two_pi-dist)                                    
+                    if (np.abs(phases[x,y]-phases[x+1,y])>maxVar)   :
                         dist=np.abs(phases[x,y]-phases[x+1,y])%two_pi
                         if (dist%two_pi<=np.pi) :
                             phases[x+1,y]=phases[x,y]-dist*np.sign(phases[x,y])
                         else :
-                            phases[x+1,y]=phases[x,y]+np.sign(phases[x,y])*(two_pi-dist)																												
+                            phases[x+1,y]=phases[x,y]+np.sign(phases[x,y])*(two_pi-dist)                                                                                                                
                 if (dx!=0) and \
                    ((np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar) or \
-                    (np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar)):																				
+                    (np.abs(phases[x2,y-dy]-phases[x+1,y])>maxVar)):                                                                                
                     dist=np.abs(phases[x1,y-dy]-phases[x+1,y])%two_pi
                     if (dist%two_pi<=np.pi) :
                         phases[x+1,y]=phases[x1,y-dy]-dist*np.sign(phases[x1,y-dy])
                     else :
-                        phases[x+1,y]=phases[x1,y-dy]+np.sign(phases[x1,y-dy])*(two_pi-dist)	
-                    if (np.abs(phases[x,y]-phases[x+1,y])>maxVar)	:
+                        phases[x+1,y]=phases[x1,y-dy]+np.sign(phases[x1,y-dy])*(two_pi-dist)    
+                    if (np.abs(phases[x,y]-phases[x+1,y])>maxVar)   :
                         dist=np.abs(phases[x,y]-phases[x+1,y])%two_pi
                         if (dist%two_pi<=np.pi) :
                             phases[x,y]=phases[x+1,y]-dist*np.sign(phases[x+1,y])
                         else :
-                            phases[x,y]=phases[x+1,y]+np.sign(phases[x+1,y])*(two_pi-dist)																									
-                x1=x        												
-                x2=x+1																
-        res[i]=phases[uv[i,1]+dz,uv[i,0]+dz]																															
+                            phases[x,y]=phases[x+1,y]+np.sign(phases[x+1,y])*(two_pi-dist)                                                  
+                x1=x                                                        
+                x2=x+1                                
+        res[i]=phases[uv[i,1]+dz,uv[i,0]+dz]                                                                                                                            
     if not return_image : 
         return res  
     else :
-        return res,phases						
+        return res,phases                  
 
 # =========================================================================
 # =========================================================================
 
-#[AL, 07.05.2014] Extract bispectral phases for a given set of visibilities
-# vis - input visibilities or phases (in radians!!!)
-# uvrel - relations matrix between uv points and sampling points 
-# deg - return result in degrees 
-# rng - upper and lower bounds for bsp to be extracted. Used to reduce the resources usage
-# nonred - extract non-redundant Bsp only. Much slower
-def extract_bsp(vis,uvrel,deg=True,rng=(0,50000),nonred=False, showMessages=True):
-    # determining number of sampling points
-    nsp=uvrel.shape[0]
-    # creating a relationship								
-    # maximum number of triangles								
-    n=nsp*(nsp-1)*(nsp-2)/6	
-    # number of uv points				
-    nuv=uvrel.max()+1
-    # a matrix to avoid redundancy
-    if nonred : red=np.zeros((nuv**3,),dtype='bool')				
-    # determining lower limit				
-    if rng[0]>=0 and rng[0]<n:
-        l=rng[0]
-    elif rng[0]<0 :
-        l=0
-    else:
-        l=n
-    # determining upper limit								
-    if rng[1]>l and rng[1]<=n:
-        u=rng[1]
-    elif rng[1]<l :
-        u=l
-    else:
-        u=n							
-    bsp_res=[]
-    # visibilities or phases?
-    isComplex=True				
-    if nsp>0 :
-        if vis[0].dtype!='complex' :
-            isComplex=False									
-    if u-l>0 :				
-        total=0							
-        for i in range(0,nsp) :									
-            if total>=u :
-                break	
-            if showMessages :
-		     sys.stdout.write("\r                                     | Extracting bsp from img %d of %d" % (total+1-l,u))																														
-            for j in range(i+1,nsp) :													
-                if total>=u :
-                    break														
-                for k in range(j+1,nsp) :																	
-                    if total>=l:
-                        uv1=max(uvrel[i,j],uvrel[j,i])																						
-                        uv2=max(uvrel[j,k],uvrel[k,j])																						
-                        uv3=max(uvrel[i,k],uvrel[k,i])
-                        isRed=False																								
-                        if nonred : 
-                            redidx=uv1*nuv*nuv+uv2*nuv+uv3
-                            isRed=red[redidx]																												
-                        if uv1>-1 and uv2>-1 and uv3>-1 and (not isRed):		
-                            if nonred : red[redidx]=True
-                            # Dealing with baseline directions for each of the three visibilities																					
-                            if uvrel[i,j]>=0 :																											
-                                v1=vis[uv1]																												
-                            else :																							
-                                if isComplex : v1=np.conjugate(vis[uv1])
-                                else : v1=-vis[uv1]
-                            if uvrel[j,k]>=0 :																									
-                                v2=vis[uv2]
-                            else :																								
-                                if isComplex : v2=np.conjugate(vis[uv2])
-                                else : v2=-vis[uv2] 
-                            # the 3rd visibility is reverted to form a triangle																																
-                            if uvrel[i,k]>=0 :
-                                if isComplex : v3=np.conjugate(vis[uv3])
-                                else : v3=-vis[uv3]																														
-                            else :																									
-                                v3=vis[uv3]																							
-                            if isComplex :																					
-                                bsp_res.append(np.angle(v1*v2*v3))
-                            else :
-                                bsp_res.append(v1+v2+v3)																												
-                            total+=1																											
-                    if total>=u :
-                        break
-    res=np.asarray(bsp_res)
-    if deg :																							
-        return res/dtor
-    else :
-        return res			
-
-# =========================================================================
-# =========================================================================
-		
 def clip_signal(signal,threshold=3):
     '''Cut out bad points'''
 

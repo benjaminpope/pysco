@@ -29,10 +29,13 @@ class kerphimobj():
 			self.name = kpo.kpi.name
 		except:
 			self.name = ''
-		
-		# Geometry (kpi) stuff
-		self.Kmat = kpo.kpi.KerPhi
-		self.nkphi = kpo.kpi.nkphi
+		if 'bsp' in self.keys:
+			self.Kmat = kpo.kpi.uv_to_bsp
+			self.nkphi = kpo.kpi.nbsp
+		else:
+			# Geometry (kpi) stuff
+			self.Kmat = kpo.kpi.KerPhi
+			self.nkphi = kpo.kpi.nkphi
 		self.ctrs = kpo.kpi.mask
 		self.uv = kpo.kpi.uv
 		self.red = kpo.kpi.RED

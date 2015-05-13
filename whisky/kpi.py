@@ -30,12 +30,12 @@ import pickle
 import os
 import sys
 import gzip
+import time 
+from scipy.sparse.linalg import svds
 
 from core import *
 
 from scipy.io.idl import readsav
-
-usejit = False
 
 class kpi(object):
     ''' Fundamental kernel-phase relations
@@ -80,12 +80,13 @@ class kpi(object):
             self.RED    = data['RED']
             self.KerPhi = data['KerPhi']
             self.TFM    = data['TFM']
+            self.uv_to_bsp = data['uv_to_bsp']
         
             self.nbh   = self.mask.shape[0]
             self.nbuv  = self.uv.shape[0]
             self.nkphi = self.KerPhi.shape[0]
-        												
-            try : self.uvrel = data['uvrel']	
+                                                        
+            try : self.uvrel = data['uvrel']    
             except: self.uvrel = np.array([])
         
         except: 
@@ -153,7 +154,7 @@ class kpi(object):
     # =========================================================================
     # =========================================================================
 
-    def from_coord_file(self, file, array_name="", Ns=3):
+    def from_coord_file(self, file, array_name="", Ns=3,verbose=False):
         ''' Creation of the KerPhase_Relation object from a pupil mask file:
 
         ----------------------------------------------------------------
@@ -163,8 +164,8 @@ class kpi(object):
         coordinates per line. Coordinates are in meters. From this, all 
         the intermediate products that lead to the kernel-phase matrix 
         KerPhi are calculated.
-								
-	  Set Ns < 2 for undersampled data [AL, 20.02.2014]
+                                
+      Set Ns < 2 for undersampled data [AL, 20.02.2014]
         ---------------------------------------------------------------- '''
         self.mask = 1.0 * np.loadtxt(file) # sub-Ap. coordinate files 
         self.nbh  = self.mask.shape[0]   # number of sub-Ap
@@ -183,82 +184,34 @@ class kpi(object):
         # of duplicates.
 
         nbh = self.nbh # local representation of the class variable
+        uvx = np.zeros(nbh * (nbh-1)) # prepare empty arrays to store
+        uvy = np.zeros(nbh * (nbh-1)) # the baselines
 
-        if usejit == True:
-            from numba import jit
-            print 'Using numba to compile'
-
-            @jit
-            def do_combinations(nbh,mask):
-                tic = time.time()
-                uvx = np.zeros(nbh * (nbh-1)) # prepare empty arrays to store
-                uvy = np.zeros(nbh * (nbh-1)) # the baselines
-
-                k = 0 # index for possible combinations (k = f(i,j))
-                
-                uvi = np.zeros(nbh * (nbh-1), dtype=int) # arrays to store the possible
-                uvj = np.zeros(nbh * (nbh-1), dtype=int) # combinations k=f(i,j) !!
-
-                for i in range(nbh):     # do all the possible combinations of
-                    for j in range(nbh): # sub-apertures
-                        if i != j:
-                            uvx[k] = mask[i,0] - mask[j,0]
-                            uvy[k] = mask[i,1] - mask[j,1]
-                            # ---
-                            uvi[k], uvj[k] = i, j
-                            k+=1
-                return uvi, uvj, uvx, uvy
-            toc = time.time()
-            print "%.3f seconds elapsed" % (toc-tic)
-
-            uvi, uvj, uvx, uvy = do_combinations(nbh,self.mask)
-
-        else:
-            uvx = np.zeros(nbh * (nbh-1)) # prepare empty arrays to store
-            uvy = np.zeros(nbh * (nbh-1)) # the baselines
-
-            k = 0 # index for possible combinations (k = f(i,j))
-            
-            uvi = np.zeros(nbh * (nbh-1), dtype=int) # arrays to store the possible
-            uvj = np.zeros(nbh * (nbh-1), dtype=int) # combinations k=f(i,j) !!
-
-            for i in range(nbh):     # do all the possible combinations of
-                for j in range(nbh): # sub-apertures
-                    if i != j:
-                        uvx[k] = self.mask[i,0] - self.mask[j,0]
-                        uvy[k] = self.mask[i,1] - self.mask[j,1]
-                        # ---
-                        uvi[k], uvj[k] = i, j
-                        k+=1
-
-        if usejit == True:
-            a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
-            nbx = a.shape[0]    # number of distinct u-components
-
-            @jit
-            def fill_uv_sel(nbx,uvx,uvy,a,prec,ndgt):
-                uv_sel = np.zeros((0,2)) # array for "selected" baselines
-                for i in range(nbx):     # identify distinct v-coords and fill uv_sel
-                    b = np.where(np.abs(uvx - a[i]) <= prec)
-                    c = np.unique(np.round(uvy[b], ndgt))
-                    nby = np.shape(c)[0] # number of distinct v-compoments
-                    for j in range(nby):
-                        uv_sel = np.append(uv_sel, [[a[i],c[j]]], axis=0)
-                return uv_sel
-            uv_sel = fill_uv_sel(nbx,uvx,uvy,a,prec,ndgt)
+        k = 0 # index for possible combinations (k = f(i,j))
+        
+        uvi = np.zeros(nbh * (nbh-1), dtype=int) # arrays to store the possible
+        uvj = np.zeros(nbh * (nbh-1), dtype=int) # combinations k=f(i,j) !!
 
 
-        else:
-            a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
-            nbx = a.shape[0]    # number of distinct u-components
-            uv_sel = np.zeros((0,2))           # array for "selected" baselines
+        for i in range(nbh):     # do all the possible combinations of
+            for j in range(nbh): # sub-apertures
+                if i != j:
+                    uvx[k] = self.mask[i,0] - self.mask[j,0]
+                    uvy[k] = self.mask[i,1] - self.mask[j,1]
+                    # ---
+                    uvi[k], uvj[k] = i, j
+                    k+=1
 
-            for i in range(nbx):     # identify distinct v-coords and fill uv_sel
-                b = np.where(np.abs(uvx - a[i]) <= prec)
-                c = np.unique(np.round(uvy[b], ndgt))
-                nby = np.shape(c)[0] # number of distinct v-compoments
-                for j in range(nby):
-                    uv_sel = np.append(uv_sel, [[a[i],c[j]]], axis=0)
+        a = np.unique(np.round(uvx, ndgt)) # distinct u-component of baselines
+        nbx = a.shape[0]    # number of distinct u-components
+        uv_sel = np.zeros((0,2))           # array for "selected" baselines
+
+        for i in range(nbx):     # identify distinct v-coords and fill uv_sel
+            b = np.where(np.abs(uvx - a[i]) <= prec)
+            c = np.unique(np.round(uvy[b], ndgt))
+            nby = np.shape(c)[0] # number of distinct v-compoments
+            for j in range(nby):
+                uv_sel = np.append(uv_sel, [[a[i],c[j]]], axis=0)
 
         self.nbuv = np.shape(uv_sel)[0]/2 # actual number of distinct uv points
         self.uv   = uv_sel[:self.nbuv,:]  # discard second half (symmetric)
@@ -279,46 +232,22 @@ class kpi(object):
         # 2. Calculate the transfer matrix and the redundancy vector
         # [AL, 2014.05.22] keeping relations between uv points and sampling points
         # --------------------------------------------------------------
-
-        if usejit == True:
-            print 'Using numba to create transfer and redundancy matrices'
-
-            @jit
-            def make_tfm(uv,uvi,uvj,uvx,uvy,prec,nbuv,nbh):
-                TFM = np.zeros((nbuv, nbh), dtype=float) # matrix	
-                RED = np.zeros(nbuv, dtype=float)          # Redundancy		
-                uvrel=-np.ones((nbh,nbh),dtype='int') 		
-                for i in range(nbuv):
-                    a=np.where((np.abs(uv[i,0]-uvx) <= prec) * (np.abs(uv[i,1]-uvy) <= prec))
-                    for k in range(len(a[0])) :
-                        uvrel[uvi[a][k],uvj[a][k]]=i  
-                        #self.uvrel[uvj[a][k],uvi[a][k]]=i	
-                    TFM[i, uvi[a]] +=  1.0
-                    TFM[i, uvj[a]] -=  1.0
-                    RED[i]     = np.size(a)
-                return TFM, RED, uvrel
-
-            self.TFM, self.RED, self.uvrel = make_tfm(self.uv,uvi,uvj,uvx,uvy,prec,self.nbuv,self.nbh) 
-
-        else:
-            self.uvrel=-np.ones((nbh,nbh),dtype='int') 
-            self.TFM = np.zeros((self.nbuv, self.nbh), dtype=float) # matrix
-            self.RED = np.zeros(self.nbuv, dtype=float)    # Redundancy
-
-
-            print 'Transfer matrix and redundancy matrix initialised'
-
-            for i in range(self.nbuv):
-                a=np.where((np.abs(self.uv[i,0]-uvx) <= prec) *
-                           (np.abs(self.uv[i,1]-uvy) <= prec))
-                for k in range(len(a[0])) :
-                    self.uvrel[uvi[a][k],uvj[a][k]]=i  
-                    #self.uvrel[uvj[a][k],uvi[a][k]]=i
-                self.TFM[i, uvi[a]] +=  1.0
-                self.TFM[i, uvj[a]] += -1.0
-                self.RED[i]   = np.size(a)
+        self.TFM = np.zeros((self.nbuv, self.nbh), dtype=float) # matrix
+        self.RED = np.zeros(self.nbuv, dtype=float)    # Redundancy
+        # relations matrix (-1 = not connected. NB: only positive baselines are saved)
+        self.uvrel=-np.ones((nbh,nbh),dtype='int')                  
+        for i in range(self.nbuv):
+            a=np.where((np.abs(self.uv[i,0]-uvx) <= prec) *
+                       (np.abs(self.uv[i,1]-uvy) <= prec))
+            for k in range(len(a[0])) :
+                 self.uvrel[uvi[a][k],uvj[a][k]]=i  
+                 #self.uvrel[uvj[a][k],uvi[a][k]]=i
+                                                                                        
+            self.TFM[i, uvi[a]] +=  1.0
+            self.TFM[i, uvj[a]] -=  1.0
+            self.RED[i]   = np.size(a)
         # converting to relations matrix
-        											
+                                                    
 
         # 3. Determine the kernel-phase relations
         # ----------------------------------------
@@ -332,7 +261,7 @@ class kpi(object):
         # as a reference?
 
         self.TFM = self.TFM[:,1:] # cf. explanation
-        self.TFM = np.dot(np.diag(1./self.RED), self.TFM) # experiment #[Al, 2014.05.12] Frantz's version									
+        self.TFM = np.dot(np.diag(1./self.RED), self.TFM) # experiment #[Al, 2014.05.12] Frantz's version                           
         U, S, Vh = np.linalg.svd(self.TFM.T, full_matrices=1) 
 
         S1 = np.zeros(self.nbuv)
@@ -345,10 +274,16 @@ class kpi(object):
         for i in range(self.nkphi):
             self.KerPhi[i,:] = (Vh)[KPhiCol[i],:]
 
-        print '-------------------------------'
-        print 'Singular values for this array:\n', np.round(S, ndgt)
-        print '\nRedundancy Vector:\n', self.RED
+        if verbose:
+            print '-------------------------------'
+            print 'Singular values for this array:\n', np.round(S, ndgt)
+            print '\nRedundancy Vector:\n', self.RED
+        else:
+            print '%d Kernel Phases identified.' % self.nkphi
         self.name = array_name
+
+        print 'Now calculating bispectrum'
+        self.generate_bispectrum_matrix2()
 
     # =========================================================================
     # =========================================================================
@@ -406,7 +341,9 @@ class kpi(object):
                     'TFM'   : self.TFM,
                     'KerPhi' : self.KerPhi,
                     'RED'   : self.RED,
-                    'uvrel' : self.uvrel}																				
+                    'uvrel' : self.uvrel,
+                    'uv_to_bsp': self.uv_to_bsp} 
+            print 'KerPhase_Relation data structure was saved.'                                                                               
         except:
             print("KerPhase_Relation data structure is incomplete")
             print("File %s wasn't saved!" % (file,))
@@ -425,3 +362,114 @@ class kpi(object):
 ###############################################################################
 ###############################################################################
 ###############################################################################
+
+###############################################################################
+        
+    def generate_bispectrum_matrix2(self,n=5,n_guess_bsp=5e5):
+        ''' Calculates the matrix to convert from uv phases to bispectra.
+        This version iterates through the sampling points in a vectorized way.
+        It saves all of the triangles, then removes the duplicates every 'n'
+        iterations. Reduce the number to save on ram but make it much slower.
+        
+        n_guess_bsp: guess the number of bispectra and pre-allocate the memory
+        to save millions of 'append' calls (which was the slowest part). It must
+        be large enough to contain all of the bispectra, or you will get an error.
+        '''
+        nbsp=self.nbuv*(self.nbuv-1)*(self.nbuv-2) / 6
+        uv_to_bsp = np.zeros((n_guess_bsp,self.nbuv),dtype=np.long)
+        bsp_u = np.zeros((n_guess_bsp,3)) # the u points of each bispectrum point
+        bsp_v = np.zeros((n_guess_bsp,3)) # the v points of each bispectrum point
+        already_done = np.zeros((n_guess_bsp)) # to track the sets of uv points that have already been counted    
+        bsp_ix=0
+        
+        print 'Calculating bispectrum matrix. Will take a few minutes.'
+        
+        # Loop over the first pupil sampling point
+        tstart=time.time()
+        for ix1 in range(self.nbh):
+            
+            # Loop over the second pupil sampling point
+            for ix2 in range(ix1+1,self.nbh):
+                # Rather than a for loop, vectorize it!
+                ix3s=np.arange(ix2+1,self.nbh)
+                n_ix3s=ix3s.size
+                
+                if (bsp_ix+n_ix3s) > n_guess_bsp:
+                    raise IndexError('Number of calculated bispectra exceeds the initial guess for the matrix size!')
+                
+                # Find the baseline indices
+                b1_ix=self.uvrel[ix1,ix2]
+                b2_ixs=self.uvrel[ix2,ix3s]
+                b3_ixs=self.uvrel[ix1,ix3s] # we actually want the negative of this baseline
+                b1_ixs=np.repeat(b1_ix,n_ix3s)
+                
+                # What uv points are these?
+                uv1=self.uv[b1_ixs,:]
+                uv2=self.uv[b2_ixs,:]
+                uv3=self.uv[b3_ixs,:]
+                    
+                # Are they already in the array? (any permutation of these baselines is the same)
+                # Convert to a single number to find out.
+                bl_ixs=np.array([b1_ixs,b2_ixs,b3_ixs])
+                bl_ixs=np.sort(bl_ixs,axis=0)
+                these_triplet_nums=(self.nbuv+1)**2*bl_ixs[2,:]+ (self.nbuv+1)*bl_ixs[1,:]+bl_ixs[0,:]
+
+                # Just add them all and remove the duplicates later.
+                already_done[bsp_ix:bsp_ix+n_ix3s]=these_triplet_nums
+                    
+                # add to all the arrays
+                uv_to_bsp_line=np.zeros((n_ix3s,self.nbuv))
+                diag=np.arange(n_ix3s)
+                uv_to_bsp_line[diag,b1_ixs]+=1
+                uv_to_bsp_line[diag,b2_ixs]+=1
+                uv_to_bsp_line[diag,b3_ixs]+=-1
+                uv_to_bsp[bsp_ix:bsp_ix+n_ix3s,:]=uv_to_bsp_line
+
+                bsp_u[bsp_ix:bsp_ix+n_ix3s,:]=np.transpose(np.array([uv1[:,0],uv2[:,0],uv3[:,0]]))
+                bsp_v[bsp_ix:bsp_ix+n_ix3s,:]=np.transpose(np.array([uv1[:,1],uv2[:,1],uv3[:,1]]))
+                bsp_ix+=n_ix3s
+                
+            # remove the duplicates every n loops
+            if (ix1 % n) == ((self.nbh-1) % n):
+                # the (nbh-1 mod n) ensures we do this on the last iteration as well
+                dummy,unique_ix=np.unique(already_done[0:bsp_ix+n_ix3s],return_index=True)
+                bsp_ix=len(unique_ix)
+                already_done[0:bsp_ix]=already_done[unique_ix]
+                already_done[bsp_ix:]=0
+                uv_to_bsp[0:bsp_ix]=uv_to_bsp[unique_ix]
+                bsp_u[0:bsp_ix]=bsp_u[unique_ix]
+                bsp_v[0:bsp_ix]=bsp_v[unique_ix]
+                
+                # Only print the status every 5*n iterations
+                if (ix1 % (5*n)) == ((self.nbh-1) % n):
+                    print 'Done',ix1,'of',self.nbh,'. ',bsp_ix,' bispectra found. Time taken:',np.round(time.time()-tstart,decimals=1),'sec'
+            
+        print 'Initial matrix calculated.'
+        print 'Total time taken:',np.round((time.time()-tstart)/60.,decimals=1),'mins'
+        
+        # Remove the excess parts of each array and attach them to the kpi.
+        nbsp=bsp_ix
+        uv_to_bsp=uv_to_bsp[0:bsp_ix]
+        self.bsp_u=bsp_u[0:bsp_ix]
+        self.bsp_v=bsp_v[0:bsp_ix]
+
+        print 'Found',nbsp,'bispectra'
+
+        t_start2 = time.time()
+
+        try:
+            rank = np.linalg.matrix_rank(uv_to_bsp)
+
+            print 'Matrix rank:',rank
+
+            u, s, vt = svds(uv_to_bsp.astype('float').T,k=rank)
+
+            self.uv_to_bsp = u.T
+            self.nbsp = rank 
+
+            print 'Reduced-rank bispectrum matrix calculated.'
+            print 'Time taken:',np.round((time.time()-t_start2)/60.,decimals=1),'mins'
+        except:
+            print 'SVD failed. Using raw matrix.'
+            self.uv_to_bsp = uv_to_bsp 
+            self.nbsp = nbsp 

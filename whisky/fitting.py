@@ -12,7 +12,7 @@ import time
 # =========================================================================
 # =========================================================================
 #[Al, 2014.05.12] Frantz's version	
-def binary_model(params, kpi, hdr, vis2=False):
+def binary_model(params, kpi, hdr, vis2=False,bispec=False):
     ''' Creates a binary Kernel-phase model.
     
     ------------------------------------------------------------------ 
@@ -27,15 +27,17 @@ def binary_model(params, kpi, hdr, vis2=False):
     params2 = np.copy(params)
     if 'Hale' in hdr['tel']: params2[1] += 220.0 + hdr['orient']
     if 'HST'  in hdr['tel']: params2[1] -= hdr['orient']
-    else:                    params2[1] += 0.0
+    else:         params2[1] += 0.0
 
-    wavel = hdr['filter']
-    
+    wavel = hdr['filter']  
     testPhi = phase_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
-    res = np.dot(kpi.KerPhi, testPhi)
 
     if vis2:
         res = vis2_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
+    elif bispec:
+        res = np.dot(kpi.uv_to_bsp, testPhi)
+    else:
+        res = np.dot(kpi.KerPhi, testPhi)
     return res
 
 # =========================================================================
@@ -115,7 +117,7 @@ def correlation_plot(kpo, params=[250., 0., 5.],b=None, plot_error=True):
 
     if 'Hale' in kpo.hdr['tel']: params2[1] -= 220.0 + kpo.hdr['orient']
     if 'HST'  in kpo.hdr['tel']: params2[1] += kpo.hdr['orient']
-    else:                    params2[1] += 0.0
+    else:         params2[1] += 0.0
     if b == None:
 
         mm = np.round(np.max(np.abs(kpo.kpd)), -1)
@@ -133,7 +135,7 @@ def correlation_plot(kpo, params=[250., 0., 5.],b=None, plot_error=True):
         rms = np.std(binary_KPD_fit_residuals(params2, kpo))
         msg  = "Model:\n sep = %6.2f mas" % (params[0],)
         msg += "\n   PA = %6.2f deg" % (params[1],)
-        msg += "\n  con = %6.2f" % (params[2],)        
+        msg += "\n  con = %6.2f" % (params[2],)  
         msg += "\n(rms = %.2f deg)" % (rms,)
                 
         plt.text(0.0*mm, -0.75*mm, msg, 
@@ -194,8 +196,35 @@ def kp_loglikelihood(params,kpo):
 # =========================================================================
 # =========================================================================
 
+def bispec_chi2(params,bsp,kpe,kpi,hdr):
+    '''Calculate chi2 for single band kernel phase data.
+    Used both in the MultiNest and MCMC Hammer implementations.'''
+    cps = binary_model(params,kpi,hdr,bispec=True)
+    chi2 = np.sum(((bsp-cps)/kpe)**2)
+    return chi2
+
+# =========================================================================
+# =========================================================================
+
+def bispec_loglikelihood(params,kpo):
+    '''Calculate loglikelihood for kernel phase data.
+    Used both in the MultiNest and MCMC Hammer implementations.'''
+    if kpo.nsets == 1:
+        params = [params[0],params[1],params[2]]
+        chi2 = bispec_chi2(params,kpo.bsp,kpo.bspe,kpo.kpi,kpo.hdr)
+        loglike = -chi2/2.
+    else:
+        loglike = 0
+        for j,band in enumerate(kpo.hdr):
+            chi2 = bispec_chi2([params[0],params[1],params[j+2]],kpo.bsp[j],kpo.bspe,kpo.kpi,band)
+            loglike += -chi2/2.
+    return loglike
+
+# =========================================================================
+# =========================================================================
+
 def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,nsteps=1000,
-    paramlimits=[40,250,0,360,1.1,50.]):
+    paramlimits=[40,250,0,360,1.1,50.],bispec=False):
 
     '''Default implementation of emcee, the MCMC Hammer, for kernel phase
     fitting. Requires a kernel phase object kpo, and is best called with 
@@ -212,11 +241,15 @@ def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,n
 
     def lnprior(params):
         if paramlimits[0] < params[0] < paramlimits[1] and paramlimits[2] < params[1] < paramlimits[3] and paramlimits[4] < params[2] < paramlimits[5]:
-            return 1./params[0]*1./params[2]
+            return -np.log(params[0]) -np.log(params[2])
         return -np.inf
 
-    def lnprob(params,kpo):
-        return lnprior(params) + kp_loglikelihood(params,kpo)
+    if bispec != True:
+        def lnprob(params,kpo):
+            return lnprior(params) + kp_loglikelihood(params,kpo)
+    else:
+        def lnprob(params,kpo):
+            return lnprior(params) + bispec_loglikelihood(params,kpo)
 
     ivar = np.array(ivar)  # initial parameters for model-fit
 
@@ -291,7 +324,7 @@ def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,n
 # =========================================================================
 
 def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.3,multi=True,
-    max_iter=0):
+    max_iter=0,bispec=False):
 
     '''Default implementation of a MultiNest fitting routine for kernel 
     phase data. Requires a kernel phase kpo object, parameter limits and 
@@ -326,9 +359,14 @@ def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.
         for j in range(2,ndim):
             cube[j] = (paramlimits[5] - paramlimits[4])*cube[j]+paramlimits[4]
 
-    def myloglike(cube,ndim,n_params):
-        loglike = kp_loglikelihood(cube,kpo)
-        return loglike
+    if bispec:
+        def myloglike(cube,ndim,n_params):
+            loglike = bispec_loglikelihood(cube,kpo)
+            return loglike
+    else:
+        def myloglike(cube,ndim,n_params):
+            loglike = kp_loglikelihood(cube,kpo)
+            return loglike
 
     tic = time.time() # start timing
 
@@ -360,7 +398,7 @@ def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.
 
     if 'Hale' in kpo.hdr['tel']: params[1]['median'] += 220.0 + kpo.hdr['orient']
     elif 'HST'  in kpo.hdr['tel']: params[1]['median'] -= kpo.hdr['orient']
-    else:                    params[1]['median'] += 0.0
+    else:         params[1]['median'] += 0.0
 
     params[1]['median'] = np.mod(params[1]['median'],360.)
 
@@ -403,10 +441,11 @@ def correlation_plot_bsp(kpo, params=[250., 0., 5.], plot_error=True,bsp_model=[
 
     if 'Hale' in kpo.hdr['tel']: params2[1] -= 220.0 + kpo.hdr['orient']
     if 'HST'  in kpo.hdr['tel']: params2[1] += kpo.hdr['orient']
-    else:                    params2[1] += 0.0
+    else:         params2[1] += 0.0
     if True:        
         if len(bsp_model)==0 :								
-            bsp=extract_bsp(cvis_binary(kpo.uv[:,0], kpo.uv[:,1], kpo.wavel, params),uvrel=kpo.kpi.uvrel,rng=(0,len(kpo.bsp)))								
+            bsp=extract_bsp(cvis_binary(kpo.uv[:,0], kpo.uv[:,1], kpo.wavel, params),\
+                uvrel=kpo.kpi.uvrel,rng=(0,len(kpo.bsp)))								
         else :								
             bsp=bsp_model
         mm_data = np.round(np.max(np.abs(kpo.bsp)), -1)
@@ -426,9 +465,9 @@ def correlation_plot_bsp(kpo, params=[250., 0., 5.], plot_error=True,bsp_model=[
         sp0.axis([-mm,mm,-mm,mm])
         msg  = "Model:\n sep = %6.2f mas" % (params[0],)
         msg += "\n   PA = %6.2f deg" % (params[1],)
-        msg += "\n  con = %6.2f" % (params[2],)                
+        msg += "\n  con = %6.2f" % (params[2],) 
         plt.text(0.0*mm, -0.75*mm, msg, 
-                 bbox=dict(facecolor='white'), fontsize=14)                
+                 bbox=dict(facecolor='white'), fontsize=14) 
         msg = "Target: %s\nTelescope: %s\nWavelength = %.2f um" % (
             kpo.kpi.name, kpo.hdr['tel'], kpo.hdr['filter']*1e6)               
         plt.text(-0.75*mm, 0.5*mm, msg,
@@ -461,7 +500,7 @@ def correlation_plot_phases(phases, kpo, params=[250., 0., 5.], plot_error=True,
 
     if 'Hale' in kpo.hdr['tel']: params2[1] -= 220.0 + kpo.hdr['orient']
     if 'HST'  in kpo.hdr['tel']: params2[1] += kpo.hdr['orient']
-    else:                    params2[1] += 0.0
+    else:         params2[1] += 0.0
     if True:        
         ph_data=np.mean(phases,axis=0)					
         if len(phase_model)==0 :								
@@ -485,9 +524,9 @@ def correlation_plot_phases(phases, kpo, params=[250., 0., 5.], plot_error=True,
         sp0.axis([-mm,mm,-mm,mm])
         msg  = "Model:\n sep = %6.2f mas" % (params[0],)
         msg += "\n   PA = %6.2f deg" % (params[1],)
-        msg += "\n  con = %6.2f" % (params[2],)                
+        msg += "\n  con = %6.2f" % (params[2],) 
         plt.text(0.0*mm, -0.75*mm, msg, 
-                 bbox=dict(facecolor='white'), fontsize=14)                
+                 bbox=dict(facecolor='white'), fontsize=14) 
         msg = "Target: %s\nTelescope: %s\nWavelength = %.2f um" % (
             kpo.kpi.name, kpo.hdr['tel'], kpo.hdr['filter']*1e6)               
         plt.text(-0.75*mm, 0.5*mm, msg,
