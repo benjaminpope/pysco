@@ -85,6 +85,7 @@ class kpi(object):
             self.nbh   = self.mask.shape[0]
             self.nbuv  = self.uv.shape[0]
             self.nkphi = self.KerPhi.shape[0]
+            self.nbsp = self.uv_to_bsp.shape[0]
                                                         
             try : self.uvrel = data['uvrel']    
             except: self.uvrel = np.array([])

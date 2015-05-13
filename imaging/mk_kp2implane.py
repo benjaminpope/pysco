@@ -30,9 +30,23 @@ class kerphimobj():
 		except:
 			self.name = ''
 		if 'bsp' in self.keys:
+			print 'Doing bispectrum'
 			self.Kmat = kpo.kpi.uv_to_bsp
 			self.nkphi = kpo.kpi.nbsp
+
+			try:
+				self.nframes = 1
+				self.kerph = kpo.bsp
+				self.kerpherr = kpo.bspe
+			except:
+				print 'Failed to load bispectrum data'
 		else:
+			try:
+				self.nframes = 1
+				self.kerph = kpo.kpd
+				self.kerpherr = kpo.kpe
+			except:
+				print 'Failed to load kernel phase data'
 			# Geometry (kpi) stuff
 			self.Kmat = kpo.kpi.KerPhi
 			self.nkphi = kpo.kpi.nkphi
@@ -46,12 +60,7 @@ class kerphimobj():
 		# #print kpo.kpd.shape
 		# #sys.exit()
 		# self.kerpherr = kpo.kpe*np.sqrt(self.nframes)*np.pi/180. # standard deviation
-		try:
-			self.nframes = 1
-			self.kerph = kpo.kpd
-			self.kerpherr = kpo.kpe
-		except:
-			print 'Failed to load kernel phase data'
+
 		try:
 			self.pitch = kpo.hdr[0]['pscale'] # mas/pixel
 			self.wavl = kpo.hdr[0]['filter'] # in m
