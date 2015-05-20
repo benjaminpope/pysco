@@ -465,7 +465,7 @@ class kpi(object):
 
             u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
 
-            self.us_to_bsp_raw = np.copy(uv_to_bsp)
+            self.uv_to_bsp_raw = np.copy(uv_to_bsp)
 
             self.uv_to_bsp = u.T
             self.nbsp = rank 
