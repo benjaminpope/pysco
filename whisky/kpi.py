@@ -155,7 +155,7 @@ class kpi(object):
     # =========================================================================
     # =========================================================================
 
-    def from_coord_file(self, file, array_name="", Ns=3,verbose=False,bsp_mat='sparse'):
+    def from_coord_file(self, file, array_name="", Ns=3,verbose=False, bsp_mat='sparse'):
         ''' Creation of the KerPhase_Relation object from a pupil mask file:
 
         ----------------------------------------------------------------
@@ -459,12 +459,10 @@ class kpi(object):
         t_start2 = time.time()
 
         try:
-            
-            print 'Matrix rank:',rank
-
             if bsp_mat == 'sparse':
                 print 'Doing sparse svd'
                 rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = 1e-17)
+                print 'Matrix rank:',rank
                 u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
 
             elif bsp_mat == 'full':
