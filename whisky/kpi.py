@@ -466,6 +466,7 @@ class kpi(object):
                 print 'Doing sparse svd'
                 rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = 1e-17)
                 u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
+
             elif bsp_mat == 'full':
                 print 'Attempting full svd'
                 u, s, vt = np.linalg.svd(uv_to_bsp,full_matrices=False)
@@ -474,6 +475,7 @@ class kpi(object):
 
             self.uv_to_bsp = u.T
             self.nbsp = rank 
+            self.bsp_s = s
 
             print 'Reduced-rank bispectrum matrix calculated.'
             print 'Time taken:',np.round((time.time()-t_start2)/60.,decimals=1),'mins'
