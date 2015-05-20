@@ -366,7 +366,7 @@ class kpi(object):
 
 ###############################################################################
         
-    def generate_bispectrum_matrix2(self,n=5,n_guess_bsp=5e5):
+    def generate_bispectrum_matrix2(self,n=5,n_guess_bsp=5e5,verbose=False):
         ''' Calculates the matrix to convert from uv phases to bispectra.
         This version iterates through the sampling points in a vectorized way.
         It saves all of the triangles, then removes the duplicates every 'n'
@@ -459,17 +459,23 @@ class kpi(object):
         t_start2 = time.time()
 
         try:
-            rank = np.linalg.matrix_rank(uv_to_bsp, tol = 1e-17)
+            rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = 1e-17)
 
             print 'Matrix rank:',rank
 
             u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
+
+            self.us_to_bsp_raw = np.copy(uv_to_bsp)
 
             self.uv_to_bsp = u.T
             self.nbsp = rank 
 
             print 'Reduced-rank bispectrum matrix calculated.'
             print 'Time taken:',np.round((time.time()-t_start2)/60.,decimals=1),'mins'
+
+            if verbose:
+                print np.log(s) 
+                return s
         except:
             print 'SVD failed. Using raw matrix.'
             self.uv_to_bsp = uv_to_bsp 
