@@ -459,11 +459,11 @@ class kpi(object):
         t_start2 = time.time()
 
         try:
-            rank = np.linalg.matrix_rank(uv_to_bsp)
+            rank = np.linalg.matrix_rank(uv_to_bsp, tol = 1e-17)
 
             print 'Matrix rank:',rank
 
-            u, s, vt = svds(uv_to_bsp.astype('float').T,k=rank)
+            u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
 
             self.uv_to_bsp = u.T
             self.nbsp = rank 
