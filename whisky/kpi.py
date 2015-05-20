@@ -459,11 +459,16 @@ class kpi(object):
         t_start2 = time.time()
 
         try:
-            rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = 1e-17)
-
+            
             print 'Matrix rank:',rank
 
-            u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
+            if bsp_mat == 'sparse':
+                print 'Doing sparse svd'
+                rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = 1e-17)
+                u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
+            elif bsp_mat == 'full':
+                print 'Attempting full svd'
+                u, s, vt = np.linalg.svd(uv_to_bsp,full_matrices=False)
 
             self.uv_to_bsp_raw = np.copy(uv_to_bsp)
 

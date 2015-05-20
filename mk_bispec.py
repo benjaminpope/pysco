@@ -1,0 +1,10 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import whisky as pysco
+
+import fitsio
+import triangle
+from time import time
+
+a = pysco.kpi('./geometry/medcross.txt',bsp_mat = 'full')
+
