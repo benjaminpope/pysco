@@ -155,7 +155,7 @@ class kpi(object):
     # =========================================================================
     # =========================================================================
 
-    def from_coord_file(self, file, array_name="", Ns=3,verbose=False):
+    def from_coord_file(self, file, array_name="", Ns=3,verbose=False,bsp_mat='sparse'):
         ''' Creation of the KerPhase_Relation object from a pupil mask file:
 
         ----------------------------------------------------------------
@@ -284,7 +284,7 @@ class kpi(object):
         self.name = array_name
 
         print 'Now calculating bispectrum'
-        self.generate_bispectrum_matrix2()
+        self.generate_bispectrum_matrix2(bsp_mat = bsp_mat)
 
     # =========================================================================
     # =========================================================================
@@ -366,7 +366,7 @@ class kpi(object):
 
 ###############################################################################
         
-    def generate_bispectrum_matrix2(self,n=5,n_guess_bsp=5e5,verbose=False):
+    def generate_bispectrum_matrix2(self,n=5,n_guess_bsp=5e5,verbose=False,bsp_mat='sparse'):
         ''' Calculates the matrix to convert from uv phases to bispectra.
         This version iterates through the sampling points in a vectorized way.
         It saves all of the triangles, then removes the duplicates every 'n'
