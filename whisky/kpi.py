@@ -51,7 +51,7 @@ class kpi(object):
     # =========================================================================
     # =========================================================================
 
-    def __init__(self, file=None, maskname=None):
+    def __init__(self, file=None, maskname=None,bsp_mat='sparse'):
         ''' Default instantiation of a KerPhase_Relation object:
 
         -------------------------------------------------------------------
@@ -95,7 +95,7 @@ class kpi(object):
             try: 
                 if maskname == None:
                     print 'Creating from coordinate file'
-                    self.from_coord_file(file)
+                    self.from_coord_file(file,bsp_mat = bsp_mat)
                 else:
                     print 'Creating from mfdata file'
                     self.from_mf(file,maskname)
