@@ -478,7 +478,7 @@ class kpi(object):
             self.bsp_s = s
 
             print 'Reduced-rank bispectrum matrix calculated.'
-            print print 'Matrix shape',self.uv_to_bsp.shape
+            print 'Matrix shape',self.uv_to_bsp.shape
             print 'Time taken:',np.round((time.time()-t_start2)/60.,decimals=1),'mins'
 
             if verbose:
