@@ -469,6 +469,8 @@ class kpi(object):
                 print 'Attempting full svd'
                 u, s, vt = np.linalg.svd(uv_to_bsp,full_matrices=False)
 
+            rank = np.sum(s>1e-17)
+
             self.uv_to_bsp_raw = np.copy(uv_to_bsp)
 
             self.uv_to_bsp = u.T
