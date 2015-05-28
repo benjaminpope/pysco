@@ -81,6 +81,7 @@ class kpi(object):
             self.KerPhi = data['KerPhi']
             self.TFM    = data['TFM']
             self.uv_to_bsp = data['uv_to_bsp']
+            self.bsp_s = data['bsp_s']
         
             self.nbh   = self.mask.shape[0]
             self.nbuv  = self.uv.shape[0]
@@ -343,7 +344,8 @@ class kpi(object):
                     'KerPhi' : self.KerPhi,
                     'RED'   : self.RED,
                     'uvrel' : self.uvrel,
-                    'uv_to_bsp': self.uv_to_bsp} 
+                    'uv_to_bsp': self.uv_to_bsp,
+                    'bsp_s': self.bsp_s} 
             print 'KerPhase_Relation data structure was saved.'                                                                               
         except:
             print("KerPhase_Relation data structure is incomplete")
@@ -460,10 +462,12 @@ class kpi(object):
         print 'Found',nbsp,'bispectra'
         t_start2 = time.time()
 
+        tol = 1e-10
+
         try:
             if bsp_mat == 'sparse':
                 print 'Doing sparse svd'
-                rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = 1e-17)
+                rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = tol)
                 print 'Matrix rank:',rank
                 u, s, vt = svds(uv_to_bsp.astype('double').T, k=rank)
 
@@ -471,7 +475,7 @@ class kpi(object):
                 print 'Attempting full svd'
                 u, s, vt = np.linalg.svd(uv_to_bsp.astype('double').T,full_matrices=False)
 
-            rank = np.sum(s>1e-17)
+            rank = np.sum(s>tol)
 
             self.uv_to_bsp_raw = np.copy(uv_to_bsp)
 
