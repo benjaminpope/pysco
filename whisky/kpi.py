@@ -92,16 +92,16 @@ class kpi(object):
         
         except: 
             print("File %s isn't a valid Ker-phase data structure" % (file))
-            try: 
-                if maskname == None:
-                    print 'Creating from coordinate file'
-                    self.from_coord_file(file,bsp_mat = bsp_mat)
-                else:
-                    print 'Creating from mfdata file'
-                    self.from_mf(file,maskname)
-            except:
-                print("Failed.")
-                return None
+            # try: 
+            if maskname == None:
+                print 'Creating from coordinate file'
+                self.from_coord_file(file,bsp_mat = bsp_mat)
+            else:
+                print 'Creating from mfdata file'
+                self.from_mf(file,maskname)
+            # except:
+            #     print("Failed.")
+            #     return None
 
     # =========================================================================
     # =========================================================================
