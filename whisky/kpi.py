@@ -380,8 +380,11 @@ class kpi(object):
         uv_to_bsp = np.zeros((n_guess_bsp,self.nbuv),dtype=np.long)
         bsp_u = np.zeros((n_guess_bsp,3)) # the u points of each bispectrum point
         bsp_v = np.zeros((n_guess_bsp,3)) # the v points of each bispectrum point
-        already_done = np.zeros((n_guess_bsp)) # to track the sets of uv points that have already been counted    
+        already_done = np.zeros((n_guess_bsp),dtype=np.longlong) # to track the sets of uv points that have already been counted        
         bsp_ix=0
+        uvrel=self.uvrel+np.transpose(self.uvrel)+1
+        
+        nbits=np.longlong(np.ceil(np.log(self.nbuv)/np.log(10)))
         
         print 'Calculating bispectrum matrix. Will take a few minutes.'
         
@@ -399,9 +402,9 @@ class kpi(object):
                     raise IndexError('Number of calculated bispectra exceeds the initial guess for the matrix size!')
                 
                 # Find the baseline indices
-                b1_ix=self.uvrel[ix1,ix2]
-                b2_ixs=self.uvrel[ix2,ix3s]
-                b3_ixs=self.uvrel[ix1,ix3s] # we actually want the negative of this baseline
+                b1_ix=uvrel[ix1,ix2]
+                b2_ixs=uvrel[ix2,ix3s]
+                b3_ixs=uvrel[ix1,ix3s] # we actually want the negative of this baseline
                 b1_ixs=np.repeat(b1_ix,n_ix3s)
                 
                 # What uv points are these?
@@ -413,8 +416,8 @@ class kpi(object):
                 # Convert to a single number to find out.
                 bl_ixs=np.array([b1_ixs,b2_ixs,b3_ixs])
                 bl_ixs=np.sort(bl_ixs,axis=0)
-                these_triplet_nums=(self.nbuv+1)**2*bl_ixs[2,:]+ (self.nbuv+1)*bl_ixs[1,:]+bl_ixs[0,:]
-
+                these_triplet_nums=(10**(2*nbits))*bl_ixs[2,:]+ (10**nbits)*bl_ixs[1,:]+bl_ixs[0,:]
+                
                 # Just add them all and remove the duplicates later.
                 already_done[bsp_ix:bsp_ix+n_ix3s]=these_triplet_nums
                     
@@ -445,17 +448,16 @@ class kpi(object):
                 if (ix1 % (5*n)) == ((self.nbh-1) % n):
                     print 'Done',ix1,'of',self.nbh,'. ',bsp_ix,' bispectra found. Time taken:',np.round(time.time()-tstart,decimals=1),'sec'
             
-        print 'Initial matrix calculated.'
-        print 'Total time taken:',np.round((time.time()-tstart)/60.,decimals=1),'mins'
+        print 'Done. Total time taken:',np.round((time.time()-tstart)/60.,decimals=1),'mins'
         
         # Remove the excess parts of each array and attach them to the kpi.
         nbsp=bsp_ix
-        uv_to_bsp=uv_to_bsp[0:bsp_ix]
+        self.already_done=already_done
+        self.nbsp=bsp_ix
+        self.uv_to_bsp=uv_to_bsp[0:bsp_ix]
         self.bsp_u=bsp_u[0:bsp_ix]
         self.bsp_v=bsp_v[0:bsp_ix]
-
         print 'Found',nbsp,'bispectra'
-
         t_start2 = time.time()
 
         try:
@@ -463,11 +465,11 @@ class kpi(object):
                 print 'Doing sparse svd'
                 rank = np.linalg.matrix_rank(uv_to_bsp.astype('double'), tol = 1e-17)
                 print 'Matrix rank:',rank
-                u, s, vt = svds(uv_to_bsp.astype('float').T, k=rank)
+                u, s, vt = svds(uv_to_bsp.astype('double').T, k=rank)
 
             elif bsp_mat == 'full':
                 print 'Attempting full svd'
-                u, s, vt = np.linalg.svd(uv_to_bsp,full_matrices=False)
+                u, s, vt = np.linalg.svd(uv_to_bsp.astype('double').T,full_matrices=False)
 
             rank = np.sum(s>1e-17)
 
