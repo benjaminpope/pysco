@@ -11,8 +11,8 @@ import numpy as np, matplotlib.pyplot as plt
 import time
 
 nr     = 50            # rings within the pupil (should be ~> 50)
-rmax   = 5.093  * 15.4/16.88        # outer diameter:      5.093 m
-rmin   = 1.829 * 7.6/6.08         # central obstruction: 1.829 m
+rmax   = 5.093/2.  * 15.4/16.88        # outer diameter:      5.093 m
+rmin   = 1.829/2. * 7.6/6.08         # central obstruction: 1.829 m
 thick  = 2*0.257            # adopted spider thickness (meters)
 
 srad = 0.33          # segment "radius"
