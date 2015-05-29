@@ -10,12 +10,12 @@
 import numpy as np, matplotlib.pyplot as plt
 import time
 
-nr     = 50             # rings within the pupil (should be ~> 50)
-rmax   = 5.093  * 15.4/16.88         # outer diameter:      5.093 m
+nr     = 50            # rings within the pupil (should be ~> 50)
+rmax   = 5.093  * 15.4/16.88        # outer diameter:      5.093 m
 rmin   = 1.829 * 7.6/6.08         # central obstruction: 1.829 m
 thick  = 2*0.257            # adopted spider thickness (meters)
 
-srad = 0.3          # segment "radius"
+srad = 0.33          # segment "radius"
 rad = np.sqrt(3)*srad  # radius of the first hex ring in meters
 
 xs = np.array(())
@@ -75,6 +75,9 @@ for i in range(xs.size):
     ax.fill(hx, hy, fc='none', linewidth=1)
 
 ax.plot(xs, ys, 'r.')
+plt.xlabel('m')
+plt.ylabel('m')
+plt.title('Hale 200-Inch Telescope Medium Cross Pupil Model')
 
 np.savetxt("./geometry/medcross.txt", np.transpose((xs,ys)), 
            fmt='%12.9f')

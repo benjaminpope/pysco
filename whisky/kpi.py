@@ -475,7 +475,7 @@ class kpi(object):
         print 'Found',nbsp,'bispectra'
         t_start2 = time.time()
 
-        tol = 1e-10
+        tol = 1e-5
 
         try:
             if bsp_mat == 'sparse':

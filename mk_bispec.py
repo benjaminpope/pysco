@@ -6,7 +6,7 @@ from time import time
 
 a = pysco.kpi('./geometry/medcross.txt', bsp_mat = 'full',verbose=True)
 
-a.save_to_file('./geometry/medcrossmodel_full.pick')
+a.save_to_file('./geometry/medcrossmodel.pick')
 
 plt.clf()
 plt.hist(np.log10(a.bsp_s))
