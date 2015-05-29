@@ -80,14 +80,18 @@ class kpi(object):
             self.RED    = data['RED']
             self.KerPhi = data['KerPhi']
             self.TFM    = data['TFM']
-            self.uv_to_bsp = data['uv_to_bsp']
-            self.bsp_s = data['bsp_s']
+            try:
+                self.uv_to_bsp = data['uv_to_bsp']
+                self.bsp_s = data['bsp_s']
+                self.nbsp = self.uv_to_bsp.shape[0]
+                                             
+            except:
+                print 'No bispec'
         
             self.nbh   = self.mask.shape[0]
             self.nbuv  = self.uv.shape[0]
             self.nkphi = self.KerPhi.shape[0]
-            self.nbsp = self.uv_to_bsp.shape[0]
-                                                        
+       
             try : self.uvrel = data['uvrel']    
             except: self.uvrel = np.array([])
         
