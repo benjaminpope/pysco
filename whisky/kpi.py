@@ -341,16 +341,25 @@ class kpi(object):
         it obvious that the file is a gzipped kpi data structure.
         ----------------------------------------------------------------  '''
         try: 
-            data = {'name'   : self.name,
-                    'mask'   : self.mask,
-                    'uv'     : self.uv,
-                    'TFM'   : self.TFM,
-                    'KerPhi' : self.KerPhi,
-                    'RED'   : self.RED,
-                    'uvrel' : self.uvrel,
-                    'uv_to_bsp': self.uv_to_bsp,
-                    'bsp_s': self.bsp_s} 
-            print 'KerPhase_Relation data structure was saved.'                                                                               
+            try:
+                data = {'name'   : self.name,
+                        'mask'   : self.mask,
+                        'uv'     : self.uv,
+                        'TFM'   : self.TFM,
+                        'KerPhi' : self.KerPhi,
+                        'RED'   : self.RED,
+                        'uvrel' : self.uvrel,
+                        'uv_to_bsp': self.uv_to_bsp,
+                        'bsp_s': self.bsp_s} 
+                print 'KerPhase_Relation data structure was saved.'         
+            except:
+                data = {'name'   : self.name,
+                        'mask'   : self.mask,
+                        'uv'     : self.uv,
+                        'TFM'   : self.TFM,
+                        'KerPhi' : self.KerPhi,
+                        'RED'   : self.RED,
+                print 'KerPhase_Relation data structure was saved. No bispectrum!'                                                                                         
         except:
             print("KerPhase_Relation data structure is incomplete")
             print("File %s wasn't saved!" % (file,))
