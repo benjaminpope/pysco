@@ -358,7 +358,7 @@ class kpi(object):
                         'uv'     : self.uv,
                         'TFM'   : self.TFM,
                         'KerPhi' : self.KerPhi,
-                        'RED'   : self.RED,
+                        'RED'   : self.RED}
                 print 'KerPhase_Relation data structure was saved. No bispectrum!'                                                                                         
         except:
             print("KerPhase_Relation data structure is incomplete")
