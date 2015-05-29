@@ -10,12 +10,12 @@
 import numpy as np, matplotlib.pyplot as plt
 import time
 
-nr     = 50            # rings within the pupil (should be ~> 50)
+nr     = 100            # rings within the pupil (should be ~> 50)
 rmax   = 5.093/2.  * 15.4/16.88        # outer diameter:      5.093 m
 rmin   = 1.829/2. * 7.6/6.08         # central obstruction: 1.829 m
-thick  = 0.83*15.4/16.88/2.          # adopted spider thickness (meters)
+thick  = 0.83 *15.4/16.88/4.         # adopted spider thickness (meters)
 
-srad = 0.30/2.          # segment "radius"
+srad = 0.33/2.          # segment "radius"
 rad = np.sqrt(3)*srad  # radius of the first hex ring in meters
 
 xs = np.array(())
@@ -46,7 +46,7 @@ xs, ys = np.array(()), np.array(())  # start from scratch again
 
 for i in range(xx.size):
     thisrad = np.sqrt(xx[i]**2 + yy[i]**2)
-    if (1.05 * rmin < thisrad < (0.94 * rmax)):# + 0.1*srad)):
+    if (1.02 * rmin < thisrad < (0.98 * rmax)):# + 0.1*srad)):
         xs = np.append(xs, xx[i])
         ys = np.append(ys, yy[i])
 
