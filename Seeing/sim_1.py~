@@ -1,0 +1,24 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jun 16 11:43:28 2014
+
+@author: latyshev
+"""
+scale=100.
+pScale=25.0
+pupilSize=5.093
+innSize=1.829
+
+act_num=483	#0.8 strehl
+# act_num=128	#0.5 strehl
+# act_num=92	#0.4 strehl
+atmosphereSize=15.
+v=10.0
+#chip_px=1038		# number of elements per chip (1dim) (scaled to work correctly with kPhases code)
+chip_px=512		# number of elements per chip (1dim) (scaled to work correctly with kPhases code)
+
+exp_time=1.416		# exposure time in seconds
+exp_dens=200		# number of exposure screens per second	
+sfrq=0.5			# number of samples per second
+wl=1.57e-6 #CH4_s
+wl=2.15e-6 #ks band 
