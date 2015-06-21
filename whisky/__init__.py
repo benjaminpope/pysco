@@ -60,6 +60,9 @@ from grid import *
 import calibration
 from calibration import *
 
+import diffract_tools 
+from diffract_tools import *
+
 # -------------------------------------------------
 # set some defaults to display images that will
 # look more like the DS9 display....

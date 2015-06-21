@@ -3,9 +3,11 @@ import matplotlib.pyplot as plt
 import pyfits as pf
 from scipy.interpolate import RectBivariateSpline as interp 
 from frebin import *
-from wfirst import *
-from jwstpupil import *
+# from wfirst import *
+# from jwstpupil import *
+from simpupil import *
 import time
+from common_tasks import shift_image
 
 shift = np.fft.fftshift
 fft   = np.fft.fft2
@@ -37,68 +39,20 @@ def rad2mas(x):
 # =========================================================================
 # =========================================================================
 
-def screen(seeingfile):
-	'''Generate a phase screen'''
-	seeing = pf.getdata(seeingfile)
+def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.15e-6,sz=4096):
 
-	seeing = np.sqrt(shift(seeing)) + 0j # center and square root to get amplitudes; 0j to make it complex!
-	
-	seeingx = np.arange(2080)*0.5
-	seeingx -= seeingx.max()
-	sxx,syy = np.meshgrid(seeingx,seeingx)
+	psf, xx = diffract(wavel=wavel,spaxel=spaxel,sz=sz)
 
-	# #interpolate seeing to the correct basis
+	x,y = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 
-	noise = np.random.standard_normal(np.shape(seeing))+0j # generate noise in pupil plane
-	
-	noise = shift(fft(shift(noise)))
+	binary_image = psf + shift_image(psf,x=x,y=y,doRoll=False)/contrast
 
-	rprim = 36903.e-3/2. # E-ELT
-
-	seeing *= 2.*rprim*noise # multiply amplitudes by pupil plane noise
-	# remember seeing is normalised to the pupil diameter in metres!
-
-	seeing = shift(ifft(shift(seeing))).real
-
-	interpfun = interp(seeingx,seeingx,seeing)
-
-	return interpfun
+	return binary_image, xx
 
 # =========================================================================
 # =========================================================================
 
-def phase_jwst(pupil,xs,phases):
-	'''Generate a JWST phase screen. Format: piston, tip (x), tilt (y). Piston 
-	in rad, tip-tilt in total amplitude in radians. '''
-
-	tol = 0.01
-	d = 1.32
-	
-	pscreen = np.copy(pupil)
-	pscreen[pscreen>0.1] = 1 # make a screen object
-	tiptemplate = np.ones(np.shape(pscreen))*xs
-	tilttemplate = tiptemplate.T 
-
-	for j in range(18):
-		j+=1
-		piston, tip, tilt = phases[0,j], phases[1,j]/d, phases[2,j]/d
-		try:
-			pscreen[np.abs(pupil-j*1.)<=tol] += tip*tiptemplate[np.abs(pupil-j*1.)<=tol]
-			pscreen[np.abs(pupil-j*1.)<=tol] += tilt*tilttemplate[np.abs(pupil-j*1.)<=tol]
-			pscreen[np.abs(pupil-j*1.)<=tol] -= np.mean(pscreen[np.abs(pupil-j*1.)<=tol])
-			pscreen[np.abs(pupil-j*1.)<=tol] += piston
-		except:
-			print 'Failed'
-
-	pscreen[pupil<=tol] = 0
-
-	return pscreen
-
-# =========================================================================
-# =========================================================================
-
-def diffract(wavel=2.2e-6,spaxel=4.,seeingfile=None,rprim = 2.4,sz=4096,tel='wfirst',
-	jwstphases=np.zeros((3,19))):
+def diffract(wavel=2.2e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phases=False):
 	'''Run a diffraction simulation!'''
 
 	# wavel = params[0]
@@ -111,16 +65,17 @@ def diffract(wavel=2.2e-6,spaxel=4.,seeingfile=None,rprim = 2.4,sz=4096,tel='wfi
 	Calculate an input pupil.
 	----------------------------------------'''
 
-	# sz = 4096
-
-	if tel == 'wfirst':
+	if tel == 'palomar':
+		pupil,xs,m2pix = palomarpupil(sz=sz)#np.ones((sz,sz),dtype='complex')+0j
+		rprim = 5.093/2.  * 15.4/16.88 		
+	elif tel == 'wfirst':
 		pupil,xs,m2pix = wfirstpupil(sz=sz)#np.ones((sz,sz),dtype='complex')+0j
 		rprim = 2.4
 	elif tel == 'jwst':
 		pupil,xs,m2pix = jwstpupil(sz=sz)
 		rprim = 6.5/2.
 	else: 
-		print 'Telescope must be wfirst or jwst'
+		print 'Telescope must be palomar, wfirst or jwst'
 
 	reso = rad2mas(wavel/(2*rprim))
 
@@ -145,24 +100,39 @@ def diffract(wavel=2.2e-6,spaxel=4.,seeingfile=None,rprim = 2.4,sz=4096,tel='wfi
 	'''----------------------------------------
 	Apply a phase screen.
 	----------------------------------------'''
+	if phases:
+		if tel == 'jwst':
+			phases = jwstphases 
+			pscreen = phase_jwst(pupil,xs,phases)
+			pscreen = np.exp(1.j*(pscreen))
+			pupil[pupil>=0.01] = 1.+0j # normalise
+			pupil *= pscreen
 
-	if tel == 'jwst':
-		phases = jwstphases 
-		pscreen = phase_jwst(pupil,xs,phases)
-		pscreen = np.exp(1.j*(pscreen))
-		pupil[pupil>=0.01] = 1.+0j # normalise
-		pupil *= pscreen
+		else:
+			interpfun = screen(seeingfile)
 
-	else:
-		interpfun = screen(seeingfile)
+			seeing = interpfun(xs+xs.min(),ys+ys.min())
 
-		seeing = interpfun(xs+xs.min(),ys+ys.min())
+			seeing = np.exp(1.j*(seeing))
 
-		seeing = np.exp(1.j*(seeing))
+			pupil *= seeing 
 
-		pupil *= seeing 
+		pupil[np.abs(pupil.real)<=0.01] = 0+0j
 
-	pupil[np.abs(pupil.real)<=0.01] = 0+0j
+			# display image
+		plt.figure(0)
+		plt.clf()
+		plt.imshow(np.angle(pupil),extent=[xs.min(),xs.max(),xs.min(),xs.max()],
+			interpolation='none',origin='lower')
+		plt.xlabel('m')
+		plt.ylabel('m')
+		plt.title('Input Phase Screen')
+		cbar = plt.colorbar()
+		plt.draw()
+		plt.show()
+
+		rmsphase = np.sqrt(np.mean(np.angle(pupil[np.abs(pupil)>0]))**2)
+		print 'RMS Phase',rmsphase,'rad'
 
 	# # where do you poke the phases?
 	# angle = 45
@@ -175,17 +145,6 @@ def diffract(wavel=2.2e-6,spaxel=4.,seeingfile=None,rprim = 2.4,sz=4096,tel='wfi
 	# #phase piston a 1x1 m region cetred at the poke point
 	# pupil[np.sqrt((xx-poke[0])**2 +(yy-poke[1])**2)<3] *= np.exp(0+1j)
 
-	# display image
-	plt.figure(0)
-	plt.clf()
-	plt.imshow(np.angle(pupil),extent=[xs.min(),xs.max(),xs.min(),xs.max()],
-		interpolation='none',origin='lower')
-	plt.xlabel('m')
-	plt.ylabel('m')
-	plt.title('Input Phase Screen')
-	cbar = plt.colorbar()
-	plt.draw()
-	plt.show()
 
 	'''----------------------------------------
 	Apply the pupil mask.
@@ -213,9 +172,6 @@ def diffract(wavel=2.2e-6,spaxel=4.,seeingfile=None,rprim = 2.4,sz=4096,tel='wfi
 	# plt.ylabel('m')
 	# plt.title('Input Pupil')
 	# plt.show()
-
-	rmsphase = np.sqrt(np.mean(np.angle(pupil[np.abs(pupil)>0]))**2)
-	print 'RMS Phase',rmsphase,'rad'
 
 	# insert in a padded array
 
@@ -255,7 +211,7 @@ def diffract(wavel=2.2e-6,spaxel=4.,seeingfile=None,rprim = 2.4,sz=4096,tel='wfi
 
 	pscale = (focx.max()-focx.min())/focx.size
 
-	print 'plate scale = ', pscale
+	print 'Native plate scale = ', pscale
 	# spaxel = 4. # mas
 
 	# try:
@@ -267,3 +223,22 @@ def diffract(wavel=2.2e-6,spaxel=4.,seeingfile=None,rprim = 2.4,sz=4096,tel='wfi
 	rebinx = focx/pscale*spaxel
 
 	return rebin, rebinx
+
+def imageToFits(image,path='./',filename='image.fits',
+	tel='simu',pscale=25.2,odate='Jan 1, 2000', otime= "0:00:00.00",
+	tint=1.0,coadds=1,RA=0.0,DEC=0.0,wavel=2.15e-6,orient=0.0) :
+	''' saving generated image to a fits file '''
+	prihdr = fits.Header()
+	prihdr.append(('TELESCOP',tel))
+	prihdr.append(('PSCALE',pscale))
+	prihdr.append(('ODATE',odate))
+	prihdr.append(('OTIME',otime))
+	prihdr.append(('TINT',tint))
+	prihdr.append(('FNAME',filename))
+	prihdr.append(('COADDS',coadds))
+	prihdr.append(('RA',RA))
+	prihdr.append(('DEC',DEC))
+	prihdr.append(('FILTER',wavel))
+	prihdr.append(('ORIENT',orient))
+	hdu = fits.PrimaryHDU(image,prihdr)
+	hdu.writeto(path+filename)
