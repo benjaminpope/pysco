@@ -18,7 +18,7 @@ def palomarpupil(sz=1024,spiders=True):
 	#things to edit
 	rprim = 5.093/2.  * 15.4/16.88 
 	rsec = 1.829/2. * 7.6/6.08 
-	spiderthick = 0.83 *15.4/16.88/4.
+	spiderthick = 0.83 *15.4/16.88/4./2.
 
 	'''-------------------------------------------
 	Initialise your arrays

@@ -52,7 +52,7 @@ def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.15e-6,sz=4096):
 # =========================================================================
 # =========================================================================
 
-def diffract(wavel=2.2e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phases=False):
+def diffract(wavel=2.15e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phases=False):
 	'''Run a diffraction simulation!'''
 
 	# wavel = params[0]
