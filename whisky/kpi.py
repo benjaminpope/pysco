@@ -288,8 +288,9 @@ class kpi(object):
             print '%d Kernel Phases identified.' % self.nkphi
         self.name = array_name
 
-        print 'Now calculating bispectrum'
-        self.generate_bispectrum_matrix2(bsp_mat = bsp_mat)
+        if bsp_mat is not None:
+            print 'Now calculating bispectrum'
+            self.generate_bispectrum_matrix2(bsp_mat = bsp_mat)
 
     # =========================================================================
     # =========================================================================
