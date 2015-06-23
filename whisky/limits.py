@@ -169,7 +169,7 @@ def detec_limits(kpo,nsim=10000,nsep=32,nth=20,ncon=32,smin='Default',smax='Defa
                 'rands':rands,'kpo':kpo, 'tic':tic, 'bsp':bsp}
             all_vars.append(everything)
         pool = multiprocessing.Pool(processes=threads)
-        chi2_diff=pool.map(detec_sim_loopfit,all_vars)
+        chi2_diff= pool.map(detec_sim_loopfit,all_vars)
         chi2_diff = np.array(chi2_diff)
     tf = time.time()
     if tf-tic > 60:
@@ -420,7 +420,7 @@ def brute_force_detec_limits(kpo,nsim=100,nsep=32,nth=20,ncon=32,smin='Default',
                 'sim_kpo':sim_kpos[ix],'error':error,'wavel':wavel}
             all_vars.append(everything)
         pool = multiprocessing.Pool(processes=threads)
-        best_params=pool.map(brute_force_chi2_grid,all_vars)
+        best_params= pool.map(brute_force_chi2_grid,all_vars)
     tf = time.time()
     if tf-tic > 60:
         print 'Total time elapsed:',(tf-tic)/60.,'mins'

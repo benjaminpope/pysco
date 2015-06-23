@@ -15,7 +15,7 @@ kpdir = './kerphi/'
 Load the data as a row-phase object
 ----------------------------------------------------'''
 tic = time.time()
-a = pysco.kpi(ddir+pupil+'.txt',bsp_mat=None)
+a = pysco.kpi(ddir+pupil+'.txt',bsp_mat='sparse')
 toc = time.time()
 
 print 'Took', toc-tic,'seconds'
