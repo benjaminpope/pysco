@@ -317,7 +317,6 @@ def hammer(kpo,ivar=[131., 82., 27.],ndim=3,nwalkers=100,plot=False,burnin=100,n
 
         plt.show()
 
-
     return sampler.flatchain
 
 # =========================================================================
@@ -360,10 +359,12 @@ def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.
             cube[j] = (paramlimits[5] - paramlimits[4])*cube[j]+paramlimits[4]
 
     if bispec:
+        print 'Using a bispectral analysis'
         def myloglike(cube,ndim,n_params):
             loglike = bispec_loglikelihood(cube,kpo)
             return loglike
     else:
+        print 'Modelling kernel phases with nested sampling'
         def myloglike(cube,ndim,n_params):
             loglike = kp_loglikelihood(cube,kpo)
             return loglike
@@ -374,7 +375,9 @@ def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.
     # now run MultiNest!
     #---------------------------------
 
-    pymultinest.run(myloglike, myprior, n_params, wrapped_params=[1], resume=resume, verbose=True, sampling_efficiency=eff, multimodal=multi, n_iter_before_update=1000,max_iter=max_iter)
+    pymultinest.run(myloglike, myprior, n_params, wrapped_params=[1], resume=resume, 
+        verbose=True, sampling_efficiency=eff, multimodal=multi, 
+        n_iter_before_update=1000,max_iter=max_iter)
 
     # let's analyse the results
     a = pymultinest.Analyzer(n_params = n_params)

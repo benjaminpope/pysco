@@ -48,9 +48,12 @@ class kpo():
         set.
         ------------------------------------------------------------------- '''
 
-    def __init__(self, kp_fname):
+    def __init__(self, kp_fname,scale=1.0):
         # Default instantiation.
         self.kpi = kpi(kp_fname)
+        self.kpi.uv *= scale
+        self.kpi.mask *= scale
+        
         try :                               
             self.uv = self.kpi.uv # for convenience!
             self.name = self.kpi.name
@@ -157,6 +160,8 @@ class kpo():
             vis2s = np.zeros((fits_hdr['NAXIS3'],self.kpi.nbuv))    # [AL, 2014.04.16] Added                                                                                
             dcube = pf.getdata(fnames[0])
             nslices = fits_hdr['NAXIS3']
+            self.ims = []
+            self.acs = []
             #nslices=20 # hardcode                                                          
             if bsp:
                 bsps=[] 
@@ -169,19 +174,23 @@ class kpo():
                     adj=True
                 else : adj=False                    
                 res = extract_from_array(dcube[i], fits_hdr, self.kpi, 
-                                                 save_im=False, re_center=re_center,
+                                                 save_im=True, re_center=re_center,
                                                  wrad=50.0, plotim=plotim,sg_ld=sg_ld,D=D,bsp=bsp,adjust_sampling=adj,unwrap_kp=unwrap_kp)# [AL, 2014.04.16] Added plotim parameter
                                                                     #[AL, 2014.04.16] Added D and sg_ld parameters
                                                                     # [AL, 2014.03.21] changed re_center default value 
                 if bsp :
-                    (hdr, sgnl, vis2, bsp_res)=res
+                    (hdr, sgnl, vis2, im, ac, bsp_res)=res
                 else :
-                    (hdr, sgnl, vis2)=res                                                                                                                                                                                                       
+                    (hdr, sgnl, vis2, im, ac)=res                                                                                                                                                                                                       
                 kpds[i] = sgnl
                 vis2s[i]= vis2
+                self.ims.append(im)
+                self.acs.append(ac)
                 hdrs.append(hdr)
                 if bsp :
-                    bsps.append(bsp_res)       
+                    bsps.append(bsp_res) 
+            self.ims = np.array(self.ims)
+            self.acs = np.array(self.acs)      
         # [Al, 2014.05.02] kpe and vis2e definition changed 
         # [Al, 2014.05.29] kpe is standard error now    
         # [AL, 2014.08.26] fixed kpe calculation (shift to mean instead of zero)                                                                        

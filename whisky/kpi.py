@@ -51,7 +51,7 @@ class kpi(object):
     # =========================================================================
     # =========================================================================
 
-    def __init__(self, file=None, maskname=None,bsp_mat='sparse',verbose=False):
+    def __init__(self, file=None, maskname=None,bsp_mat='sparse',verbose=False,Ns=3):
         ''' Default instantiation of a KerPhase_Relation object:
 
         -------------------------------------------------------------------
@@ -100,7 +100,7 @@ class kpi(object):
             # try: 
             if maskname == None:
                 print 'Creating from coordinate file'
-                self.from_coord_file(file,bsp_mat = bsp_mat,verbose=verbose)
+                self.from_coord_file(file,bsp_mat = bsp_mat,verbose=verbose,Ns=Ns)
             else:
                 print 'Creating from mfdata file'
                 self.from_mf(file,maskname)
@@ -216,8 +216,8 @@ class kpi(object):
             b = np.where(np.abs(uvx - a[i]) <= prec)
             c = np.unique(np.round(uvy[b], ndgt))
             nby = np.shape(c)[0] # number of distinct v-compoments
-            for j in range(nby):
-                uv_sel = np.append(uv_sel, [[a[i],c[j]]], axis=0)
+            app = np.ones(nby)*a[i]
+            uv_sel = np.append(uv_sel, np.array([app,c]).T, axis=0)
 
         self.nbuv = np.shape(uv_sel)[0]/2 # actual number of distinct uv points
         self.uv   = uv_sel[:self.nbuv,:]  # discard second half (symmetric)
@@ -359,7 +359,8 @@ class kpi(object):
                         'uv'     : self.uv,
                         'TFM'   : self.TFM,
                         'KerPhi' : self.KerPhi,
-                        'RED'   : self.RED}
+                        'RED'   : self.RED,
+                        'uvrel' : self.uvrel}
                 print 'KerPhase_Relation data structure was saved. No bispectrum!'                                                                                         
         except:
             print("KerPhase_Relation data structure is incomplete")
