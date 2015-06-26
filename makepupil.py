@@ -8,7 +8,7 @@ makepupil.py - generate a pupil model
 ----------------------------------------------------'''
 
 ddir = './geometry/'
-pupil = 'medcrossmeas'
+pupil = 'medcrossmeas_2'
 kpdir = './kerphi/'
 
 '''----------------------------------------------------
