@@ -15,7 +15,7 @@ rmax   = 2.3918 # from optimization #5.093/2.  * 15.4/16.88        # outer diame
 rmin   = rmax/2.11885 # 1.829/2. * 7.6/6.08         # central obstruction: 1.829 m
 thick  = 0.2292*(rmax-rmin)# 0.83 *15.4/16.88/4.         # adopted spider thickness (meters)
 
-srad = 0.33/3.          # segment "radius"
+srad = 0.33/2.          # segment "radius"
 rad = np.sqrt(3)*srad  # radius of the first hex ring in meters
 
 xs = np.array(())
@@ -80,7 +80,7 @@ plt.xlabel('m')
 plt.ylabel('m')
 plt.title('Hale 200-Inch Telescope Medium Cross Pupil Model')
 
-np.savetxt("./geometry/medcrossmeas.txt", np.transpose((xs,ys)), 
+np.savetxt("./geometry/medcrossmeas_2.txt", np.transpose((xs,ys)), 
            fmt='%12.9f')
 
 print "--------------------------------------------------"
