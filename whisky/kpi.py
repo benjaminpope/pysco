@@ -383,7 +383,7 @@ class kpi(object):
 
 ###############################################################################
         
-    def generate_bispectrum_matrix2(self,n=5,n_guess_bsp=1e6,verbose=False,bsp_mat='sparse'):
+    def generate_bispectrum_matrix2(self,n=5,n_guess_bsp=5e6,verbose=False,bsp_mat='sparse'):
         ''' Calculates the matrix to convert from uv phases to bispectra.
         This version iterates through the sampling points in a vectorized way.
         It saves all of the triangles, then removes the duplicates every 'n'
