@@ -30,14 +30,13 @@ class kerphimobj():
 		except:
 			self.name = ''
 		if 'bsp' in self.keys:
-			print 'Doing bispectrum'
-			self.Kmat = kpo.kpi.uv_to_bsp
-			self.nkphi = kpo.kpi.nbsp
-
 			try:
-				self.nframes = 1
-				self.kerph = kpo.bsp
-				self.kerpherr = kpo.bspe
+				print 'Doing bispectrum'
+				self.Kmat = kpo.kpi.uv_to_bsp
+				self.nkphi = kpo.kpi.nbsp
+					self.nframes = 1
+					self.kerph = kpo.bsp
+					self.kerpherr = kpo.bspe
 			except:
 				print 'Failed to load bispectrum data'
 		else:

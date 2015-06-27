@@ -390,10 +390,11 @@ def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.
     else: 
         print 'Time elapsed =',(toc-tic)/60.,'mins'
 
+    null = -0.5*np.sum(((kpo.kpd)/kpo.kpe)**2)
     # json.dump(s, file('%s.json' % a.outputfiles_basename, 'w'), indent=2)
     print
     print "-" * 30, 'ANALYSIS', "-" * 30
-    print "Global Evidence:\n\t%.15e +- %.15e" % ( s['global evidence'], s['global evidence error'] )
+    print "Global Evidence:\n\t%.15e +- %.15e" % ( s['global evidence']-null, s['global evidence error'] )
     params = s['marginals']
 
     bestsep = params[0]['median']
