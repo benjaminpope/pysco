@@ -8,6 +8,7 @@ from frebin import *
 from simpupil import *
 import time
 from common_tasks import shift_image
+from astropy.io import fits
 
 shift = np.fft.fftshift
 fft   = np.fft.fft2
@@ -52,7 +53,7 @@ def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.15e-6,sz=4096):
 # =========================================================================
 # =========================================================================
 
-def diffract(wavel=2.2e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phases=False):
+def diffract(wavel=2.15e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phases=False):
 	'''Run a diffraction simulation!'''
 
 	# wavel = params[0]
@@ -221,6 +222,7 @@ def diffract(wavel=2.2e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phas
 	# except:
 	rebin = spaxel_scale(image,pscale,spaxel)
 	rebinx = focx/pscale*spaxel
+	rebin = rebin[rebin.shape[0]/2-128:rebin.shape[0]/2+128,rebin.shape[1]/2-128:rebin.shape[1]/2+128]
 
 	return rebin, rebinx
 

@@ -16,9 +16,10 @@ def palomarpupil(sz=1024,spiders=True):
 	------------------------------------------------'''
 
 	#things to edit
-	rprim = 5.093/2.  * 15.4/16.88 
-	rsec = 1.829/2. * 7.6/6.08 
-	spiderthick = 0.83 *15.4/16.88/4./2.
+	rmax   = 2.3918*1.01 # from optimization #5.093/2.  * 15.4/16.88        # outer diameter:      5.093 m
+	rmin   = rmax/2.11885 # 1.829/2. * 7.6/6.08         # central obstruction: 1.829 m
+	thick  = 0.2292*(rmax-rmin)/2.# 0.83 *15.4/16.88/4.         # adopted spider thickness (meters)
+
 
 	'''-------------------------------------------
 	Initialise your arrays

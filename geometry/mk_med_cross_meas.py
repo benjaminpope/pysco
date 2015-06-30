@@ -67,6 +67,11 @@ if rm_spiders:
 
 # plot segments
 # -------------
+
+rs = np.sqrt(xs**2+ys**2)
+xs *= rmax/rs.max()
+ys *= rmax/rs.max()
+
 r0 = srad/np.sqrt(3)
 th = 2*np.pi*np.arange(6)/6. + np.pi/6.
 
@@ -82,6 +87,7 @@ plt.title('Hale 200-Inch Telescope Medium Cross Pupil Model')
 
 np.savetxt("./geometry/medcrossmeas_2.txt", np.transpose((xs,ys)), 
            fmt='%12.9f')
+print 'Maximum radius',np.max(np.sqrt(xs**2+ys**2))
 
 print "--------------------------------------------------"
 print "%d pupil sample points were included in the pupil " % xs.size

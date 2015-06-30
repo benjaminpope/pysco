@@ -34,11 +34,16 @@ class kerphimobj():
 				print 'Doing bispectrum'
 				self.Kmat = kpo.kpi.uv_to_bsp
 				self.nkphi = kpo.kpi.nbsp
-					self.nframes = 1
-					self.kerph = kpo.bsp
-					self.kerpherr = kpo.bspe
+				self.nframes = 1
+				self.kerph = kpo.bsp
+				self.kerpherr = kpo.bspe
 			except:
 				print 'Failed to load bispectrum data'
+				self.nframes = 1
+				self.kerph = kpo.kpd
+				self.kerpherr = kpo.kpe
+				self.Kmat = kpo.kpi.KerPhi
+				self.nkphi = kpo.kpi.nkphi
 		else:
 			try:
 				self.nframes = 1
@@ -80,7 +85,7 @@ class kerphimobj():
 		Returns cosine given the kx,ky image coordinates in pixels
 		"""
 		return np.cos(2*np.pi*mas2rad(self.pitch)*((kx - self.off[0])*(self.rcoord[0]) + 
-					    (ky - self.off[1])*(self.rcoord[1]))/self.wavl)
+						(ky - self.off[1])*(self.rcoord[1]))/self.wavl)
 
 	# @jit
 	def kerph2im(self,theta=0):
@@ -96,7 +101,7 @@ class kerphimobj():
 		self.ph2im = np.zeros((len(self.uv), self.fov,self.fov))
 		self.sym2im = np.zeros((len(self.uv), self.fov,self.fov))
 		rotMatrix = np.array([[np.cos(theta), -np.sin(theta)], 
-                         [np.sin(theta),  np.cos(theta)]])
+						 [np.sin(theta),  np.cos(theta)]])
 		for q,one_uv in enumerate(self.uv):
 			self.rcoord = np.dot(rotMatrix,one_uv)
 			self.ph2im[q,:,:] = self.red[q]*np.fromfunction(self.ffs, (self.fov, self.fov))
