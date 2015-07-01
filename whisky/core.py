@@ -438,7 +438,7 @@ def get_pharo_keywords(hdr):
 
     data = {
         'tel'     : hdr['TELESCOP'],       # telescope
-        'pscale'   : 25.2,          # HST NIC1 plate scale (mas)
+        'pscale'   : 25.2,          # PHARO plate scale (mas)
         'odate' : hdr['DATE-OBS'],       # UTC date of observation
         'otime' : hdr['TIME-OBS'],       # UTC time of observation
         'tint'   : hdr['T_INT' ],     # integration time (sec)

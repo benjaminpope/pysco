@@ -16,7 +16,7 @@ def palomarpupil(sz=1024,spiders=True):
 	------------------------------------------------'''
 
 	#things to edit
-	rmax   = 2.3918*1.01 # from optimization #5.093/2.  * 15.4/16.88        # outer diameter:      5.093 m
+	rmax   = 2.3918*1.5 # from optimization #5.093/2.  * 15.4/16.88        # outer diameter:      5.093 m
 	rmin   = rmax/2.11885 # 1.829/2. * 7.6/6.08         # central obstruction: 1.829 m
 	thick  = 0.2292*(rmax-rmin)/2.# 0.83 *15.4/16.88/4.         # adopted spider thickness (meters)
 
@@ -29,8 +29,8 @@ def palomarpupil(sz=1024,spiders=True):
 
 	# get coordinates for the full un-cropped image
 	xs, ys = np.linspace(-sz/2,sz/2,sz), np.linspace(-sz/2,sz/2,sz)
-	xs *= 9*rprim/xs.max()
-	ys *= 9*rprim/ys.max()
+	xs *= 7*rmax/xs.max()
+	ys *= 7*rmax/ys.max()
 
 	xx,yy = np.meshgrid(xs,ys)
 	rr = np.sqrt(xx**2 + yy**2)
@@ -43,8 +43,8 @@ def palomarpupil(sz=1024,spiders=True):
 	-------------------------------------------'''
 
 	mask /= mask.max()
-	mask[rr>rprim] = 0
-	mask[rr<rsec] = 0
+	mask[rr>rmax] = 0
+	mask[rr<rmin] = 0
 
 	'''-------------------------------------------
 	Now do the spiders
@@ -59,10 +59,10 @@ def palomarpupil(sz=1024,spiders=True):
 			
 			angle *= np.pi/180.
 
-			start = 1.1*rprim*np.array([np.cos(angle),np.sin(angle)])-xx.min()
+			start = 1.1*rmax*np.array([np.cos(angle),np.sin(angle)])-xx.min()
 			stop = np.array([0,0])-xx.min()
 
-			normvec = np.array([start[1]-stop[1],stop[0]-start[0]])*spiderthick
+			normvec = np.array([start[1]-stop[1],stop[0]-start[0]])*thick
 			corners = np.round(m2pix*np.array([start+normvec,start-normvec,stop-normvec,stop+normvec]))
 
 			#convert to pixels

@@ -44,6 +44,7 @@ def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.15e-6,sz=4096):
 	psf, xx = diffract(wavel=wavel,spaxel=spaxel,sz=sz)
 
 	x,y = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
+	print x,y
 
 	binary_image = psf + shift_image(psf,x=x,y=y,doRoll=False)/contrast
 
@@ -67,7 +68,7 @@ def diffract(wavel=2.15e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',pha
 
 	if tel == 'palomar':
 		pupil,xs,m2pix = palomarpupil(sz=sz)#np.ones((sz,sz),dtype='complex')+0j
-		rprim = 5.093/2.  * 15.4/16.88 		
+		rprim = 2.3918# 5.093/2.  * 15.4/16.88 		
 	elif tel == 'wfirst':
 		pupil,xs,m2pix = wfirstpupil(sz=sz)#np.ones((sz,sz),dtype='complex')+0j
 		rprim = 2.4

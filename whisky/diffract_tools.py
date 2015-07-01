@@ -23,37 +23,60 @@ diffract_tools.py
 code to simulate a narrowband image
 ------------------------------------------------'''
 
+
+def subpix_fftshift(ftim,xy,shift):
+	"""Shift an image by fractional pixels using an FFT
+	(why isn't this in scipy?)"""
+
+	return np.fft.irfft2(ftim*np.exp(1j*(xy[0]*shift[0] + xy[1]*shift[1])))
+
+
+def shift_image_ft(image,shift):
+	"""Shift an image by fractional pixels using an FFT
+	(why isn't this in scipy?)"""
+
+	calim_ft = np.fft.rfft2(image[:,:])
+	x = np.arange(calim_ft.shape[1],dtype=np.double)
+	y = ((np.arange(calim_ft.shape[0]) + calim_ft.shape[0]/2.0) % calim_ft.shape[0]) - calim_ft.shape[0]/2.0
+	x *= 2*np.pi/calim_ft.shape[0]
+	y *= 2*np.pi/calim_ft.shape[0]
+	xy = np.meshgrid(x,y)
+
+	return subpix_fftshift(calim_ft,xy,shift)
+
 # =========================================================================
 # =========================================================================
 
 def mas2rad(x):
-    ''' Convenient little function to convert milliarcsec to radians '''
-    return x*np.pi/(180*3600*1000)
+	''' Convenient little function to convert milliarcsec to radians '''
+	return x*np.pi/(180*3600*1000)
 
 # =========================================================================
 # =========================================================================
 
 def rad2mas(x):
-    ''' Convenient little function to convert radians to milliarcseconds '''
-    return x/np.pi*(180*3600*1000)
+	''' Convenient little function to convert radians to milliarcseconds '''
+	return x/np.pi*(180*3600*1000)
 
 # =========================================================================
 # =========================================================================
 
-def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.15e-6,sz=4096):
+def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.145e-6,sz=4096):
 
 	psf, xx = diffract(wavel=wavel,spaxel=spaxel,sz=sz)
 
 	x,y = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 
-	binary_image = psf + shift_image(psf,x=x,y=y,doRoll=False)/contrast
+	print 'x',x,',y',y
+
+	binary_image = psf + shift_image_ft(psf,[-y,x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
 
 	return binary_image, xx
 
 # =========================================================================
 # =========================================================================
 
-def diffract(wavel=2.15e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phases=False):
+def diffract(wavel=2.145e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',phases=False):
 	'''Run a diffraction simulation!'''
 
 	# wavel = params[0]
@@ -202,7 +225,7 @@ def diffract(wavel=2.15e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',pha
 	# 	cmap=plt.cm.gray,interpolation='none')
 	# plt.xlabel('mas')
 	# plt.ylabel('mas')
-	# plt.title('HARMONI input PSF')
+	# plt.title('Input PSF')
 	# cbar = plt.colorbar()
 	# plt.show()
 
@@ -228,7 +251,7 @@ def diffract(wavel=2.15e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',pha
 
 def imageToFits(image,path='./',filename='image.fits',
 	tel='simu',pscale=25.2,odate='Jan 1, 2000', otime= "0:00:00.00",
-	tint=1.0,coadds=1,RA=0.0,DEC=0.0,wavel=2.15e-6,orient=0.0) :
+	tint=1.0,coadds=1,RA=0.0,DEC=0.0,wavel=2.145e-6,orient=0.0,clobber=True) :
 	''' saving generated image to a fits file '''
 	prihdr = fits.Header()
 	prihdr.append(('TELESCOP',tel))
@@ -243,4 +266,4 @@ def imageToFits(image,path='./',filename='image.fits',
 	prihdr.append(('FILTER',wavel))
 	prihdr.append(('ORIENT',orient))
 	hdu = fits.PrimaryHDU(image,prihdr)
-	hdu.writeto(path+filename)
+	hdu.writeto(path+filename,clobber=clobber)
