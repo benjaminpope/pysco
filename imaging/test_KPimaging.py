@@ -6,8 +6,8 @@ Goal: test Alexey's simulation (kpo files that have all kpi geometry + measured 
 
 import numpy as np
 import pickle
-from whisky import mas2rad
-import whisky
+from pysco import mas2rad
+import pysco
 from mk_kp2implane import kerphimobj
 from mem4_kp2pm import MemImage
 import matplotlib.pyplot as plt

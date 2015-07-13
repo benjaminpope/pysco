@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import json
 import time
 
-import whisky as pysco # for compatibility and ease of use
+import pysco 
 
 '''---------------------------------------------------------
 test.py - a script for analysing masking/kernel phase data 

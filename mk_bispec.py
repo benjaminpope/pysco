@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import whisky as pysco
+import pysco
 
 from time import time
 
