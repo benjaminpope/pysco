@@ -13,11 +13,11 @@ except ImportError:
     from distutils.core import setup
     setup
 
-setup(name='whisky',
+setup(name='pysco',
       version='0.1',
       description='Analysis code for kernel phase and non-redundant masking',
       author='Benjamin Pope',
       author_email='benjamin.pope@astro.ox.ac.uk',
-      url='https://github.com/benjaminpope/whisky',
-      packages=['whisky'],
+      url='https://github.com/benjaminpope/pysco',
+      packages=['pysco'],
       install_requires=['numpy','matplotlib','pyfits'])
