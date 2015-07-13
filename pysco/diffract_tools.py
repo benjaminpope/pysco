@@ -69,7 +69,7 @@ def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.145e-6,sz=4096):
 
 	print 'x',x,',y',y
 
-	binary_image = psf + shift_image_ft(psf,[-y,x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
+	binary_image = psf + shift_image_ft(psf,[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
 
 	return binary_image, xx
 
