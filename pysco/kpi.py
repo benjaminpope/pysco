@@ -51,7 +51,7 @@ class kpi(object):
     # =========================================================================
     # =========================================================================
 
-    def __init__(self, file=None, maskname=None,bsp_mat='sparse',verbose=False,Ns=3):
+    def __init__(self, file=None, maskname=None,bsp_mat=None,verbose=False,Ns=3):
         ''' Default instantiation of a KerPhase_Relation object:
 
         -------------------------------------------------------------------
