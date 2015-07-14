@@ -619,9 +619,6 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     # meter to pixel conversion factor
     m2pix = mas2rad(kpd_info['pscale']) * sz / kpd_info['filter']
 
-    print 'pscale',kpd_info['pscale']
-    print 'filter', kpd_info['filter']
-
     # rotation of samples according to header info
     #th = 90.0 * np.pi/180.
     #rmat = np.matrix([[np.cos(th), np.sin(th)], [np.sin(th), -np.cos(th)]])
@@ -630,8 +627,6 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     uv_samp = kpi.uv * m2pix + dz # uv sample coordinates in pixels
     #uv_samp = uv_rot * m2pix + dz # uv sample coordinates in pixels
     assert np.max(uv_samp) <= sz, 'UV samples lie outside the Fourier transform'
-
-    print 'uv_samp maximum', np.max(uv_samp)
                 
     if adjust_sampling: 
         uv_samp=adjust_samp(uv_samp,kpi,m2pix,sz) # rounding if not integer       
