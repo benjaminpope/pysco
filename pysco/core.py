@@ -619,6 +619,7 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     # meter to pixel conversion factor
     m2pix = mas2rad(kpd_info['pscale']) * sz / kpd_info['filter']
     print 'pscale',kpd_info['pscale']
+    print 'filter', kpd_info['filter']
 
 
     # rotation of samples according to header info
