@@ -20,6 +20,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pyfits as pf
+import fitsio 
 import copy
 import pickle
 import os
@@ -54,7 +55,7 @@ class kpo():
         self.kpi.uv *= scale
         self.kpi.mask *= scale
         
-        try :                               
+        try :                        
             self.uv = self.kpi.uv # for convenience!
             self.name = self.kpi.name
         except:
@@ -70,10 +71,10 @@ class kpo():
             self.kpe = data['kpe']
             self.hdr = data['hdr']  
             self.wavel = data['wavel']  
-            self.nsets = data['nsets']                                                  
-            #self.nsets = np.size(self.hdr)     # [AL, 2014.03.19] Added nsets parameter                                                    
+            self.nsets = data['nsets']                          
+            #self.nsets = np.size(self.hdr)  # [AL, 2014.03.19] Added nsets parameter                                                    
             #if nsets==0 : self.wavel = self.hdr['filter']
-            #else : self.wavel = self.hdr[0]['filter']                                                                                          
+            #else : self.wavel = self.hdr[0]['filter']                                              
         except:
             print("File %s contains kpi information only" % (kp_fname,))
                                                 
@@ -85,14 +86,14 @@ class kpo():
                                                 
         try:                                        
             self.vis2 = data['vis2']
-            self.vis2e = data['vis2e']                                              
+            self.vis2e = data['vis2e']                        
         except:
-            print("Vis2 data was not loaded")                                                   
+            print("Vis2 data was not loaded")                                       
 
     # =========================================================================
     # =========================================================================
     # [AL, 2014.03.18] Added sg_ld and D parameters - window size in lambda/D
-    #              if D<=0 then use the shortest baseline instead
+    #           if D<=0 then use the shortest baseline instead
     # [AL, 2014.03.20] Recentering and windowing parameters added
     # [AL, 2014.04.17] use_main_header option added to replace individual headers from the datacube by the main one
     # [AL, 2014.05.06] Extract bispectrum (bsp)
@@ -105,19 +106,26 @@ class kpo():
 
         If the path leads to a fits data cube, or to multiple single frame
         files, the extracted kernel-phases are consolidated into a
-        unique kpd object.      
+        unique kpd object.    
 
         Using the 'manual' flag invites you to click through files manually.
         
         '''
-        fnames = glob.glob(path)
-        nf = fnames.__len__()
-        if nf != 0:
-            fits_hdr = pf.getheader(fnames[0])
-        elif nf == 0:
-            fits_hdr = pf.getheader(fnames)
-        else:
-            print 'Frame number error'
+        try:
+            f = fitsio.FITS(path,'r')
+            fits_hdr = f[0].read_header()
+            f.close()
+            nf = 1
+            fnames = [path]
+        except:
+            fnames = glob.glob(path)
+            nf = fnames.__len__()
+            if nf != 0:
+                fits_hdr = pf.getheader(fnames[0])
+            elif nf == 0:
+                fits_hdr = pf.getheader(fnames)
+            else:
+                print 'Frame number error'
         
         print "%d frames will be open" % (nf,)
 
@@ -128,7 +136,7 @@ class kpo():
             kpds = np.zeros((nf, self.kpi.nkphi)) # empty 2D array of kp
             vis2s = np.zeros((nf,self.kpi.nbuv))
             if bsp:
-                bsps=[]                                                 
+                bsps=[]             
             for i, fname in enumerate(fnames):
                                                      # [AL, 2014.03.10] Added plotim parameter
                                                        # [AL, 2014.03.18] Added D and sg_ld parameters
@@ -140,7 +148,7 @@ class kpo():
                 if bsp :
                     (hdr, sgnl, vis2, im, ac, bsp_res)=res
                 else :
-                    (hdr, sgnl, vis2, im, ac)=res                                   
+                    (hdr, sgnl, vis2, im, ac)=res                           
                 self.im, self.ac = im, ac
                 kpds[i] = sgnl
                 vis2s[i] = vis2
@@ -158,18 +166,22 @@ class kpo():
             kpds = np.zeros((fits_hdr['NAXIS3'], 
                              self.kpi.nkphi)) # empty kp array
             vis2s = np.zeros((fits_hdr['NAXIS3'],self.kpi.nbuv))    # [AL, 2014.04.16] Added                                                                                
-            dcube = pf.getdata(fnames[0])
+            try:
+                dcube = pf.getdata(fnames[0])
+            except:
+                f = fitsio.FITS(fnames[0])
+                dcube = f[0][:,:,:]
             nslices = fits_hdr['NAXIS3']
             self.ims = []
             self.acs = []
-            #nslices=20 # hardcode                                                          
+            #nslices=20 # hardcode                              
             if bsp:
                 bsps=[] 
             for i in xrange(nslices):
                 sys.stdout.write(
-                    "\rextracting kp from img %3d/%3d" % (i+1,nslices))                                                                             
+                    "\rextracting kp from img %3d/%3d" % (i+1,nslices))                    
                 sys.stdout.flush()
-                # [AL, 2014.12.09] correction to avoid uv-points readjustment                                                               
+                # [AL, 2014.12.09] correction to avoid uv-points readjustment                                                
                 if adjust_sampling and i==0 :
                     adj=True
                 else : adj=False                    
@@ -181,7 +193,7 @@ class kpo():
                 if bsp :
                     (hdr, sgnl, vis2, im, ac, bsp_res)=res
                 else :
-                    (hdr, sgnl, vis2, im, ac)=res                                                                                                                                                                                                       
+                    (hdr, sgnl, vis2, im, ac)=res                                                                                                                                                      
                 kpds[i] = sgnl
                 vis2s[i]= vis2
                 self.ims.append(im)
@@ -190,7 +202,7 @@ class kpo():
                 if bsp :
                     bsps.append(bsp_res) 
             self.ims = np.array(self.ims)
-            self.acs = np.array(self.acs)      
+            self.acs = np.array(self.acs)     
         # [Al, 2014.05.02] kpe and vis2e definition changed 
         # [Al, 2014.05.29] kpe is standard error now    
         # [AL, 2014.08.26] fixed kpe calculation (shift to mean instead of zero)                                                                        
@@ -198,12 +210,12 @@ class kpo():
             self.kpe = np.std(kpds-np.mean(kpds,axis=0), axis=0)/np.sqrt(kpds.shape[0])
             self.vis2e = np.std(vis2s-np.mean(vis2s,axis=0), axis=0)/np.sqrt(kpds.shape[0])
             if bsp : 
-                self.bspe=np.std(bsps-np.mean(bsps,axis=0), axis=0)/np.sqrt(kpds.shape[0])                                              
+                self.bspe=np.std(bsps-np.mean(bsps,axis=0), axis=0)/np.sqrt(kpds.shape[0])                        
         else :
             self.kpe = np.zeros(self.kpi.nkphi)
             self.vis2e = np.zeros(np.shape(vis2s))  
             if bsp : 
-                self.bspe=np.zeros(np.shape(np.asarray(bsps)))                                                  
+                self.bspe=np.zeros(np.shape(np.asarray(bsps)))                          
                                                 
         if ave == "median":
             print " median average"
@@ -211,16 +223,19 @@ class kpo():
             if nf>1 or fits_hdr['NAXIS'] == 3:
                 self.hdr = hdrs[0]
                 self.kpd = np.median(kpds, 0)
-                self.vis2 = np.median(vis2s,0)                
+                self.vis2 = np.median(vis2s,0)        
                 if bsp : 
-                    self.bsp=np.median(bsps,0)                                                              
+                    self.bsp=np.median(bsps,0)                                
             else :
-                self.hdr = hdrs 
+                if hdrs[0]['tel'] == 'WFC3':
+                    self.hdr = hdrs[0]
+                else:
+                    self.hdr = hdrs 
                 self.kpd = np.asarray(kpds, 0)
                 self.vis2 = np.asarray(vis2s,0)
                 if bsp : 
-                    self.bsp=np.asarray(bsps)                                                           
-            self.wavel = self.hdr['filter']                                                     
+                    self.bsp=np.asarray(bsps)                                             
+            self.wavel = self.hdr['filter']              
 
         elif ave == "mean":
             print " mean average"
@@ -244,12 +259,17 @@ class kpo():
             print " no average"
             self.kpd = np.asarray(kpds)
             self.vis2 = np.asarray(vis2s)
-            self.hdr = hdrs 
+            try:
+                if hdrs[0]['tel'] == 'WFC3':
+                    self.hdr = hdrs[0]
+                    self.nsets = 1
+            except:
+                self.hdr = hdrs             
             if fits_hdr['NAXIS']>3 :                                                
                 self.nsets = nslices # =np.size(hdrs)   # [AL, 2014.04.22] changed to nslices
-            else :                                              
-                self.nsets = np.size(hdrs)  # [AL, 2014.04.22] changed to nslices                                                               
-            #self.nsets = np.size(hdrs)                                             
+            else :                        
+                self.nsets = np.size(hdrs)  # [AL, 2014.04.22] changed to nslices                                                
+            #self.nsets = np.size(hdrs)            
             if self.nsets == 1:
                 self.wavel = self.hdr['filter']
                 self.nsets = 1
@@ -259,16 +279,16 @@ class kpo():
                     self.wavel.append(hd['filter'])
             else :
                 self.wavel=self.hdr[0]['filter'] # [AL, 2014.04.22] changed
-                self.nsets=nslices      
+                self.nsets=nslices    
             if nf==1 and bsp:
-                self.bsp=np.asarray(bsps)                                                                   
+                self.bsp=np.asarray(bsps)                                                   
 
 
 
     # =========================================================================
     # =========================================================================
     def extract_idl(self, path, mfpath, plotim=False, ave="none"):
-        '''Extracts kernel phase data from an idlvar file.        
+        '''Extracts kernel phase data from an idlvar file.    
         '''
 
         data = readsav(path)
@@ -287,22 +307,22 @@ class kpo():
         # self.vis2e = np.std(vis2s,0)
 
         # if ave == "median":
-        #     print "median average"
-        #     self.kpd = np.median(kpds, 0)
-        #     self.vis2 = np.median(vis2s,0)
-        #     self.hdr = hdrs[0]
+        #    print "median average"
+        #    self.kpd = np.median(kpds, 0)
+        #    self.vis2 = np.median(vis2s,0)
+        #    self.hdr = hdrs[0]
 
         # if ave == "mean":
-        #     print "mean average"
-        #     self.kpd = np.mean(self.kpds, 0)
-        #     self.vis2 = np.mean(self.vis2s,0)
-        #     self.hdr = hdrs[0]
+        #    print "mean average"
+        #    self.kpd = np.mean(self.kpds, 0)
+        #    self.vis2 = np.mean(self.vis2s,0)
+        #    self.hdr = hdrs[0]
 
         # if ave == "none":
-        #     print "no average"
-        #     self.kpd = self.kpds
-        #     self.vis2 = self.vis2s
-        #     self.hdr = self.hdrs
+        #    print "no average"
+        #    self.kpd = self.kpds
+        #    self.vis2 = self.vis2s
+        #    self.hdr = self.hdrs
 
     # =========================================================================
     # =========================================================================
@@ -384,9 +404,9 @@ class kpo():
             data = {'name'   : self.kpi.name,
                     'mask'   : self.kpi.mask,
                     'uv'     : self.kpi.uv,
-                    'TFM'    : self.kpi.TFM,
+                    'TFM'   : self.kpi.TFM,
                     'KerPhi' : self.kpi.KerPhi,
-                    'RED'    : self.kpi.RED}                                                                            
+                    'RED'   : self.kpi.RED}                                                                            
         except:
             print("kpi data structure is incomplete")
             print("File %s was not saved to disk" % (fname,))
@@ -401,7 +421,7 @@ class kpo():
             print("kpd data structure is incomplete")
             print("File %s was nevertheless saved to disk" % (fname,))
         
-        # [AL, 2014.05.08] Bispectral data saving                                       
+        # [AL, 2014.05.08] Bispectral data saving                              
         try:
             data['bsp'] = self.bsp
             data['bspe'] = self.bspe
@@ -414,7 +434,7 @@ class kpo():
         except:
             print("Wavelength or Nsets data is missing")                                                
                                                 
-        # [AL, 2014.05.08] Vis2 data saving                                     
+        # [AL, 2014.05.08] Vis2 data saving          
         try:
             data['vis2'] = self.vis2
             data['vis2e'] = self.vis2e
@@ -425,7 +445,7 @@ class kpo():
         try:
             data['uvrel'] = self.kpi.uvrel
         except:
-            print("Uvrel data is missing")                                              
+            print("Uvrel data is missing")                        
                                                 
         try:
             myf = gzip.GzipFile(fname, "wb")

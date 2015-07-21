@@ -342,13 +342,19 @@ def nest(kpo,paramlimits=[20.,250.,0.,360.,1.0001,10],ndim=3,resume=False,eff=0.
 
     # make sure you're using the right number of parameters
     nbands = kpo.kpd.shape[0]
-    if np.size(kpo.hdr) == 1:
-        bands = str(round(1e6*kpo.hdr['filter'],3))
-        parameters = ['Separation','Position Angle','Contrast at ' + bands+' um']
+    if 'WFC3' in kpo.hdr['tel']:
+        bands = str(round(1e9*kpo.hdr['filter'],3))
+        parameters = ['Separation','Position Angle','Contrast at ' + bands + ' nm']
+        print bands
+        print parameters
     else:
-        bands = [str(round(1e6*hd['filter'],3)) for hd in kpo.hdr]
-        parameters = ['Separation','Position Angle'] + ['Contrast at ' + band + ' um' for band in bands]
-    
+        if np.size(kpo.hdr) == 1:
+            bands = str(round(1e6*kpo.hdr['filter'],3))
+            parameters = ['Separation','Position Angle','Contrast at ' + bands + ' um']
+        else:
+            bands = [str(round(1e6*hd['filter'],3)) for hd in kpo.hdr]
+            parameters = ['Separation','Position Angle'] + ['Contrast at ' + band + ' um' for band in bands]
+        
     n_params = len(parameters)
     ndim = n_params
 

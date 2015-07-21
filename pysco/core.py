@@ -400,7 +400,7 @@ def get_nicmos_keywords(hdr):
     data = {
         'tel'   : hdr['TELESCOP'],   # telescope
         'pscale' : pscale,          # HST NIC1 plate scale (mas)
-        'fname'  : hdr['FILENAME'],   # original file name
+        'fname'  : hdr['FILENAME'],   # original 4ile name
         'odate'  : hdr['DATE-OBS'],   # UTC date of observation
         'otime'  : hdr['TIME-OBS'],   # UTC time of observation
         'tint'   : hdr['EXPTIME' ],   # integration time (sec)
@@ -412,6 +412,21 @@ def get_nicmos_keywords(hdr):
         }
     return data
 
+# =========================================================================
+# =========================================================================
+def get_wfc3_keywords(hdr):
+    '''Extract the relevant keyword information from a fits header.
+
+    This version is adapted to handle NICMOS1 data. '''
+
+    data = {
+        'tel'   : 'WFC3',   # telescope
+        'pscale' : 39.75/2.,          # HST NIC1 plate scale (mas)
+        'coadds' : 1,                  # as far as I can tell...
+        'filter' : 763.63e-9,#832e-9, # central wavelength (meters) - from F850L filter
+        'orient' : 0 # P.A. of image y axis (deg e. of n.)
+        }
+    return data
 # =========================================================================
 # =========================================================================
 def get_idl_keywords(filename):
@@ -580,15 +595,19 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     - (kpd_info, kpd_phase [,bsp_res])
 
     ---------------------------------------------------------------- '''
-
-    if 'Keck II' in hdr['TELESCOP']: kpd_info = get_keck_keywords(hdr)
-    if 'HST'     in hdr['TELESCOP']: kpd_info = get_nicmos_keywords(hdr)
-    if 'simu'   in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
-    if 'Hale'   in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
+    try:
+        if 'Keck II' in hdr['TELESCOP']: kpd_info = get_keck_keywords(hdr)
+        if 'HST'     in hdr['TELESCOP']: kpd_info = get_nicmos_keywords(hdr)
+        if 'simu'   in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
+        if 'Hale'   in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
+        if 'WFC3'   in hdr['TELESCOP']: kpd_info = get_wfc3_keywords(hdr)
                     
-    if ('Hale' in hdr['TELESCOP']):# P3K PA are clockwise
-                                                                     # [AL, 04.07.2014] removed reverse from simulation  
-        rev = -1.0                
+        if ('Hale' in hdr['TELESCOP']):# P3K PA are clockwise
+                                                                         # [AL, 04.07.2014] removed reverse from simulation  
+            rev = -1.0                
+    except:
+        # hdr['TELESCOP'] = 'WFC3'
+        kpd_info = get_wfc3_keywords(hdr)
                                     
     # [AL, 2014.04.16] Added calculation of super gaussian radius in sg_ld*lambda/D
     if sg_ld*D>0 :              
@@ -626,7 +645,7 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
 
     uv_samp = kpi.uv * m2pix + dz # uv sample coordinates in pixels
     #uv_samp = uv_rot * m2pix + dz # uv sample coordinates in pixels
-    assert np.max(uv_samp) <= sz, 'UV samples lie outside the Fourier transform'
+    assert np.max(uv_samp) <= sz, 'UV samples lie outside the Fourier transform %d %d'% (np.max(uv_samp),sz)
                 
     if adjust_sampling: 
         uv_samp=adjust_samp(uv_samp,kpi,m2pix,sz) # rounding if not integer       
