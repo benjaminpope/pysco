@@ -58,7 +58,6 @@ if rm_spiders:
     xx, yy = xs.copy(), ys.copy()        # temporary copies
     xs, ys = np.array(()), np.array(())  # start from scratch again
 
-    
     for i in range(xx.size):
         if (np.abs(xx[i]) >= thick/2.) and (np.abs(yy[i]) >= thick/2.):
             xs = np.append(xs, xx[i])

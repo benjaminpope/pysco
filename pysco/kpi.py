@@ -350,6 +350,7 @@ class kpi(object):
                         'KerPhi' : self.KerPhi,
                         'RED'   : self.RED,
                         'uvrel' : self.uvrel,
+                        'uv_samp_rev': self.uv_samp_rev,
                         'uv_to_bsp': self.uv_to_bsp,
                         'bsp_s': self.bsp_s} 
                 print 'KerPhase_Relation data structure was saved.'         
@@ -359,6 +360,7 @@ class kpi(object):
                         'uv'     : self.uv,
                         'TFM'   : self.TFM,
                         'KerPhi' : self.KerPhi,
+                        'uv_samp_rev': self.uv_samp_rev,
                         'RED'   : self.RED,
                         'uvrel' : self.uvrel}
                 print 'KerPhase_Relation data structure was saved. No bispectrum!'                                                                                         

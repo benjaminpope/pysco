@@ -61,17 +61,19 @@ def rad2mas(x):
 # =========================================================================
 # =========================================================================
 
-def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.145e-6,sz=4096):
+def make_binary(sep,theta,contrast,spaxel=25.2,wavel=2.145e-6,sz=4096,tel='palomar'):
 
-	psf, xx = diffract(wavel=wavel,spaxel=spaxel,sz=sz)
+	psf, xx = diffract(wavel=wavel,spaxel=spaxel,sz=sz,tel=tel)
 
 	x,y = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 
 	print 'x',x,',y',y
+		
+	companion = shift_image_ft(psf,[-y,-x])/contrast
 
-	binary_image = psf + shift_image_ft(psf,[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
+	binary_image = psf + companion - companion.min()#shift_image(psf,x=x,y=y,doRoll=True)/contrast
 
-	return binary_image, xx
+	return binary_image/binary_image.max(), xx
 
 # =========================================================================
 # =========================================================================
@@ -98,6 +100,9 @@ def diffract(wavel=2.145e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',ph
 	elif tel == 'jwst':
 		pupil,xs,m2pix = jwstpupil(sz=sz)
 		rprim = 6.5/2.
+	elif tel == 'wfc3':
+		pupil,xs,m2pix = wfc3pupil(sz=sz)
+		rprim = 1.2
 	else: 
 		print 'Telescope must be palomar, wfirst or jwst'
 
@@ -245,7 +250,10 @@ def diffract(wavel=2.145e-6,spaxel=25.2,seeingfile=None,sz=4096,tel='palomar',ph
 	# except:
 	rebin = spaxel_scale(image,pscale,spaxel)
 	rebinx = focx/pscale*spaxel
-	rebin = rebin[rebin.shape[0]/2-128:rebin.shape[0]/2+128,rebin.shape[1]/2-128:rebin.shape[1]/2+128]
+	try:
+		rebin = rebin[rebin.shape[0]/2-256:rebin.shape[0]/2+256,rebin.shape[1]/2-256:rebin.shape[1]/2+256]
+	except:
+		rebin = rebin[rebin.shape[0]/2-128:rebin.shape[0]/2+128,rebin.shape[1]/2-128:rebin.shape[1]/2+128]
 
 	return rebin, rebinx
 
