@@ -67,10 +67,10 @@ class kerphimobj():
 		# self.kerpherr = kpo.kpe*np.sqrt(self.nframes)*np.pi/180. # standard deviation
 
 		try:
-			self.pitch = kpo.hdr[0]['pscale'] # mas/pixel
+			self.pitch = kpo.hdr[0]['pscale']/2. # mas/pixel
 			self.wavl = kpo.hdr[0]['filter'] # in m
 		except:
-			self.pitch = kpo.hdr['pscale']
+			self.pitch = kpo.hdr['pscale']/2.
 			self.wavl = kpo.hdr['filter']
 		
 	def ffs(self, kx,ky):
