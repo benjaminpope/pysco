@@ -30,13 +30,14 @@ def binary_model(params, kpi, hdr, vis2=False,bispec=False):
     else:         params2[1] += 0.0
 
     wavel = hdr['filter']  
-    testPhi = phase_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
-
+    
     if vis2:
         res = vis2_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
     elif bispec:
+        testPhi = phase_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
         res = np.dot(kpi.uv_to_bsp, testPhi)
     else:
+        testPhi = phase_binary(kpi.uv[:,0], kpi.uv[:,1], wavel, params2)
         res = np.dot(kpi.KerPhi, testPhi)
     return res
 
