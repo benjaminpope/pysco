@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import pysco
 from pysco.core import *
 import fitsio
-import triangle
 from k2_epd_george import print_time
 
 from time import time as clock
