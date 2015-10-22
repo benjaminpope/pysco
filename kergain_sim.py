@@ -215,7 +215,7 @@ for trial, contrast in enumerate(contrast_list):
 	        cube[j] = (paramlimits[5] - paramlimits[4])*cube[j]+paramlimits[4]
 	        
 	def kg_loglikelihood(cube,kgd,kge,kpi):
-	    '''Calculate chi2 for single band kernel phase data.
+	    '''Calculate chi2 for single band kernel amplitude data.
 	    Used both in the MultiNest and MCMC Hammer implementations.'''
 	    vises = np.sqrt(pysco.binary_model(cube[0:3],kpi,hdr,vis2=True))
 	    kergains = np.dot(KerGain,vises)
@@ -223,7 +223,7 @@ for trial, contrast in enumerate(contrast_list):
 	    return -chi2/2.
 
 	def vis_loglikelihood(cube,vdata,ve,kpi):
-	    '''Calculate chi2 for single band kernel phase data.
+	    '''Calculate chi2 for single band vis2 data.
 	    Used both in the MultiNest and MCMC Hammer implementations.'''
 	    vises = pysco.binary_model(cube[0:3],kpi,hdr,vis2=True)
 	    chi2 = np.sum(((vdata-vises)/ve)**2)
@@ -260,7 +260,8 @@ for trial, contrast in enumerate(contrast_list):
 		max_iter= 0
 		ndim = n_params
 
-		pymultinest.run(myloglike_kg, myprior, n_params, wrapped_params=[1],verbose=True,resume=False)
+		pymultinest.run(myloglike_kg, myprior, n_params, wrapped_params=[1],
+			verbose=True,resume=False)
 
 		thing = pymultinest.Analyzer(n_params = n_params)
 		s = thing.get_stats()
@@ -272,6 +273,8 @@ for trial, contrast in enumerate(contrast_list):
 		kcons[this_j], dkcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
 
 		print 'Kernel amplitudes done'
+		print_time(clock()-thistime)
+		print ''
 
 		'''-----------------------------------------------
 		Now do visibilities
@@ -289,7 +292,10 @@ for trial, contrast in enumerate(contrast_list):
 		    loglike = vis_loglikelihood(cube,my_observable,my_error,a)
 		    return loglike
 
-		pymultinest.run(myloglike_vis, myprior, n_params, wrapped_params=[1],verbose=True,resume=False)
+		thistime = clock()
+
+		pymultinest.run(myloglike_vis, myprior, n_params, wrapped_params=[1],
+			verbose=True,resume=False)
 
 		thing = pymultinest.Analyzer(n_params = n_params)
 		s = thing.get_stats()
