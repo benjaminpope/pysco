@@ -14,6 +14,7 @@ from pysco.common_tasks import shift_image
 from swiftmask import swiftpupil
 
 import matplotlib as mpl
+from astropy.table import Table
 
 
 mpl.rcParams['figure.figsize']=(8.0,6.0)	#(6.0,4.0)
@@ -244,12 +245,17 @@ for trial, contrast in enumerate(contrast_list):
 		else:
 			my_observable = kervises[frame+1,:]
 
-		my_error =      np.std(kervises,axis=0)
+		addederror = 0.0001 # in case there are bad frames
+		my_error =      np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
+		print 'Error:', my_error 
 		
 		def myloglike_kg(cube,ndim,n_params):
-		    loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-		    # loglike = vis_loglikelihood(cube,my_observable,my_error,a)
-		    return loglike
+			try:
+			    loglike = kg_loglikelihood(cube,my_observable,my_error,a)
+			    # loglike = vis_loglikelihood(cube,my_observable,my_error,a)
+			    return loglike
+			except:
+				return -np.inf 
 
 		parameters = ['Separation','Position Angle','Contrast']
 		n_params = len(parameters)
@@ -285,12 +291,18 @@ for trial, contrast in enumerate(contrast_list):
 		else:
 			my_observable = (vis2s[frame+1,:]/vis2)**2
 
-		my_error =      np.std((vis2s/vis2)**2,axis=0)
+		print '\nDoing raw visibilities'
+		addederror = 0.0001
+		my_error =      np.sqrt(np.std((vis2s/vis2)**2,axis=0)**2+addederror**2)
+		print 'Error:', my_error
 
 		def myloglike_vis(cube,ndim,n_params):
 		    # loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-		    loglike = vis_loglikelihood(cube,my_observable,my_error,a)
-		    return loglike
+		    try:
+		    	loglike = vis_loglikelihood(cube,my_observable,my_error,a)
+		    	return loglike
+		    except:
+		    	return -np.inf
 
 		thistime = clock()
 
