@@ -87,8 +87,8 @@ rsec= 1.829/2.
 pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
-nimages = 5 #100
-nframes = 1
+nimages = 50
+nframes = 49
 
 reso = rad2mas(wavel/(2*rprim))
 
@@ -326,6 +326,7 @@ for trial, contrast in enumerate(contrast_list):
 Now save!
 ------------------------------------'''
 
+cmin, cmax = np.min(contrast_list), np.max(contrast_list)
 vdata = Table({'Seps':vseps,
 		 'Thetas':vthetas,
 		 'Cons':vcons,
@@ -333,9 +334,9 @@ vdata = Table({'Seps':vseps,
 		 'Dthetas':dvthetas,
 		 'Dcons':dvcons})
 
-vdata.write('raw_vis_sims_%2f_%2f.csv' %  (contrasts.min(),contrasts.max()))
+vdata.write('raw_vis_sims_%2f_%2f.csv' %  (cmin,cmax))
 
-print 'Visibility fits saved to raw_vis_sims_%2f_%2f.csv' % (contrasts.min(),contrasts.max())
+print 'Visibility fits saved to raw_vis_sims_%2f_%2f.csv' % (cmin,cmax)
 
 kdata = Table({'Seps':kseps,
 		 'Thetas':kthetas,
@@ -343,10 +344,10 @@ kdata = Table({'Seps':kseps,
 		 'Dseps':dkseps,
 		 'Dthetas':dkthetas,
 		 'Dcons':dkcons})
-kdata.write('kernel_amplitude_sims_%2f_%2f.csv' % (contrasts.min(),contrasts.max()))
+kdata.write('kernel_amplitude_sims_%2f_%2f.csv' % (cmin,cmax))
 
 print 'Kernel amplitude fits saved to kernel_amplitude_sims_%2f_%2f.csv' \
-	%  (contrasts.min(),contrasts.max())
+	%  (cmin,cmax)
 
 print 'Finished contrast loop'
 print_time(clock()-t0)
