@@ -334,9 +334,9 @@ vdata = Table({'Seps':vseps,
 		 'Dthetas':dvthetas,
 		 'Dcons':dvcons})
 
-vdata.write('raw_vis_sims_%2f_%2f.csv' %  (cmin,cmax))
+vdata.write('raw_vis_sims_%.0f_%.0f.csv' %  (cmin,cmax))
 
-print 'Visibility fits saved to raw_vis_sims_%2f_%2f.csv' % (cmin,cmax)
+print 'Visibility fits saved to raw_vis_sims_%.0f_%.0f.csv' % (cmin,cmax)
 
 kdata = Table({'Seps':kseps,
 		 'Thetas':kthetas,
@@ -344,9 +344,9 @@ kdata = Table({'Seps':kseps,
 		 'Dseps':dkseps,
 		 'Dthetas':dkthetas,
 		 'Dcons':dkcons})
-kdata.write('kernel_amplitude_sims_%2f_%2f.csv' % (cmin,cmax))
+kdata.write('kernel_amplitude_sims_%.0f_%.0f.csv' % (cmin,cmax))
 
-print 'Kernel amplitude fits saved to kernel_amplitude_sims_%2f_%2f.csv' \
+print 'Kernel amplitude fits saved to kernel_amplitude_sims_%.0f_%.0f.csv' \
 	%  (cmin,cmax)
 
 print 'Finished contrast loop'
