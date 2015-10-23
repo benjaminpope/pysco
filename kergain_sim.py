@@ -87,6 +87,7 @@ rsec= 1.829/2.
 pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
+
 nimages = 50
 nframes = 49
 
