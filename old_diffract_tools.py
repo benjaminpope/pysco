@@ -14,7 +14,7 @@ fftfreq = np.fft.fftfreq
 dtor = np.pi/180.0
 
 '''------------------------------------------------
-diffract_tools.py 
+old_diffract_tools.py 
 
 code to simulate a narrowband image
 ------------------------------------------------'''
