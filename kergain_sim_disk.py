@@ -383,13 +383,11 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	s = thing.get_stats()
 
-	this_j = j
-
-	ksemis[this_j], dksemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-	keccs[this_j], dkeccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-	kthetas[this_j], dkthetas[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-	kthicks[this_j], dkthicks[this_j] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-	kcons[this_j], dkcons[this_j] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+	ksemis[trial], dksemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	keccs[trial], dkeccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	kthetas[trial], dkthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	kthicks[trial], dkthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+	kcons[trial], dkcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
 
 	print 'Kernel amplitudes done'
@@ -422,13 +420,13 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	s = thing.get_stats()
 
-	this_j = trial*nframes + frame
+	trial = trial*nframes + frame
 
-	vsemis[this_j], dvsemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-	veccs[this_j], dveccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-	vthetas[this_j], dvthetas[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-	vthicks[this_j], dvthicks[this_j] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-	vcons[this_j], dvcons[this_j] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+	vsemis[trial], dvsemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	veccs[trial], dveccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	vthetas[trial], dvthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	vthicks[trial], dvthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+	vcons[trial], dvcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
 	print 'Visibilities done'
 
