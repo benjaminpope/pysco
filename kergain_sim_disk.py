@@ -383,7 +383,7 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	s = thing.get_stats()
 
-	this_j = trial*nframes + frame
+	this_j = j.copy()
 
 	ksemis[this_j], dksemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 	keccs[this_j], dkeccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
@@ -450,7 +450,7 @@ vdata = Table({'Semis':vsemis,
 		 'Dthicks':dvthicks,
 		 'Dcons':dvcons})
 
-vdata.write('raw_vis_sims_%.0f_%.0f.csv' %  (cmin,cmax))
+vdata.write('raw_vis_disk_sims_di%.0f_%.0f.csv' %  (cmin,cmax))
 
 print 'Visibility fits saved to raw_vis_sims_%.0f_%.0f.csv' % (cmin,cmax)
 
@@ -465,7 +465,7 @@ kdata = Table({'Semis':ksemis,
 		 'Dthicks':dkthicks,
 		 'Dcons':dkcons})
 
-kdata.write('kernel_amplitude_sims_%.0f_%.0f.csv' % (cmin,cmax))
+kdata.write('kernel_amplitude_disk_sims_%.0f_%.0f.csv' % (cmin,cmax))
 
 print 'Kernel amplitude fits saved to kernel_amplitude_sims_%.0f_%.0f.csv' \
 	%  (cmin,cmax)
