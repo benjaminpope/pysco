@@ -381,7 +381,7 @@ for trial, contrast in enumerate(contrast_list):
 		max_iter= 20000
 		ndim = n_params
 
-		pymultinest.run(myloglike, myprior, n_params,wrapped_params=[2],
+		pymultinest.run(myloglike_kg, myprior, n_params,wrapped_params=[2],
 			verbose=True,resume=False,max_iter=max_iter)
 
 		thing = pymultinest.Analyzer(n_params = n_params)
@@ -423,7 +423,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		thistime = clock()
 
-		pymultinest.run(myloglike, myprior, n_params,wrapped_params=[2],
+		pymultinest.run(myloglike_vis, myprior, n_params,wrapped_params=[2],
 			verbose=True,resume=False,max_iter=max_iter)
 
 		thing = pymultinest.Analyzer(n_params = n_params)
