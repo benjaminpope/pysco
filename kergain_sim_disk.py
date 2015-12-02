@@ -190,7 +190,7 @@ Loop over a range of contrasts
 ----------------------------------------'''
 
 contrast_list = [1.,5.]#,10.,50.,100.]
-ncalcs = len(contrast_list) * nframes
+ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
 dksemis, dkeccs, dkthetas, dkthicks, dkcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -385,11 +385,11 @@ for trial, contrast in enumerate(contrast_list):
 
 	this_j = trial*nframes + frame
 
-	ksemis, dksemis = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-	keccs, dkeccs = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-	kthetas, dkthetas = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-	kthicks, dkthicks = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-	kcons, dkcons = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+	ksemis[this_j], dksemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	keccs[this_j], dkeccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	kthetas[this_j], dkthetas[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	kthicks[this_j], dkthicks[this_j] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+	kcons[this_j], dkcons[this_j] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
 
 	print 'Kernel amplitudes done'
@@ -424,11 +424,11 @@ for trial, contrast in enumerate(contrast_list):
 
 	this_j = trial*nframes + frame
 
-	vsemis, dvsemis = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-	veccs, dveccs = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-	vthetas, dvthetas = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-	vthicks, dvthicks = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-	vcons, dvcons = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+	vsemis[this_j], dvsemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	veccs[this_j], dveccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	vthetas[this_j], dvthetas[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	vthicks[this_j], dvthicks[this_j] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+	vcons[this_j], dvcons[this_j] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
 	print 'Visibilities done'
 
