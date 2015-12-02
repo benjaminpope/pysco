@@ -214,7 +214,7 @@ for j in range(nimages):
     show=False
     k+=1
       
-print_time(clock-t0)
+print_time(clock()-t0)
 
 
 for trial, contrast in enumerate(contrast_list):
