@@ -202,15 +202,13 @@ t0 = clock()
 
 true_vals = (200.,0.95,50)
 
-print 'x',x,',y',y
-
 for j in range(nimages):
     if k == 10:
         print 'Up to', j
         show=True
         k=0
     psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-                                centre_wavel=wavel,show_pupil=True,dust=True,perturbation=None,
+                                centre_wavel=wavel,show_pupil=False,dust=True,perturbation=None,
                            amp=0.5,final_sz=final_sz)
     imsz = image.shape[0]
     show=False
