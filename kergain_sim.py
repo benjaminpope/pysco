@@ -102,6 +102,8 @@ image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing
 imsz = image.shape[0]
 
 images = np.zeros((nimages,imsz,imsz))
+psfs = np.zeros((nimages,imsz,imsz))
+
 k=0
 show=False
 
@@ -119,24 +121,29 @@ vseps, vthetas, vcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
 dvseps, dvthetas, dvcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
 
 t0 = clock()
+
+sep, theta = 48, 45
+x,y = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
+
+print 'x',x,',y',y
+
+for j in range(nimages):
+	if k == 10:
+		print 'Up to', j
+		show=False
+		k=0
+	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
+								centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,amp=0.2)
+
+print_time(clock-t0)
+
+
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
 	thistime = clock()
 
-	sep, theta = 48, 45
-	x,y = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
-
-	print 'x',x,',y',y
-
 	for j in range(nimages):
-		if k == 10:
-			print 'Up to', j
-			show=False
-			k=0
-		psf, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-									centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,amp=0.2)
-	#	 psf = image
-		images[j,:,:] = psf + shift_image_ft(psf,[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
+		images[j,:,:] = psfs[j,:,:] + shift_image_ft(psf,[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
 
 		imsz = image.shape[0]
 		show=False

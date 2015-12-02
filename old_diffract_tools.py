@@ -36,7 +36,7 @@ def rad2mas(x):
 # =========================================================================
 # =========================================================================
 
-def kolmogorov_spectrum(sz,r0 = 0.01):
+def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None):
 
     xs, ys = np.linspace(-5./r0,5./r0,sz), np.linspace(-5./r0,5./r0,sz)
 
@@ -44,7 +44,14 @@ def kolmogorov_spectrum(sz,r0 = 0.01):
 
     rr = np.sqrt(xx**2+yy**2)
 
-    newspec = shift(0.0229*r0**(5./3.)*(rr**(-11./3.)))
+    newspec = 0.0229*r0**(5./3.)*(rr**(-11./3.))
+
+    if cutoff is not None:
+    	newspec[rr>cutoff] = 0
+    	print 'cut off', cutoff
+
+    newspec = shift(newspec)
+
     newspec[~np.isfinite(newspec)] = 0
 
     return newspec
@@ -52,12 +59,12 @@ def kolmogorov_spectrum(sz,r0 = 0.01):
 # =========================================================================
 # =========================================================================
 
-def screen(seeingfile,xs=None):
+def screen(seeingfile,xs=None,cutoff=None):
 	'''Generate a phase screen'''
 	try:
 		seeing = pf.getdata(seeingfile)
 	except:
-		seeing = kolmogorov_spectrum(2080)
+		seeing = kolmogorov_spectrum(2080,cutoff=None)
 
 	seeing = np.sqrt(shift(seeing)) + 0j # center and square root to get amplitudes; 0j to make it complex!
 
@@ -89,9 +96,9 @@ def screen(seeingfile,xs=None):
 # =========================================================================
 # =========================================================================
 
-def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=None,verbose=True,
-	show_pupil=False,telescope=None,centre_wavel=900e-9,dust=None,
-	perturbation='phase',amp=0.3):
+def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,verbose=True,
+	show_pupil=False,telescope=None,centre_wavel=900e-9,dust=None,seeingamp=0.0,
+	perturbation='phase',amp=0.3,cutoff=None,sz=4096/2,final_sz=256):
 	'''Run a diffraction simulation!'''
 
 	# wavel = params[0]
@@ -107,8 +114,6 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=None,ve
 	'''----------------------------------------
 	Calculate an input pupil.
 	----------------------------------------'''
-
-	sz = 4096/2
 
 	pupil = np.ones((sz,sz),dtype='complex')
 
@@ -188,11 +193,20 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=None,ve
 	# mask[(rr1>rprim)* (rr2 > rprim)] = 0
 
 	if dust:
-		interpfun = screen(None,xs=xs+xs.min())
+		interpfun = screen(None,xs=xs+xs.min(),cutoff=cutoff)
 		scintillation = interpfun(xs+xs.min(),ys+ys.min())
 		scintillation = (scintillation-scintillation.min())/(scintillation.max()-scintillation.min())
-		scintillation *= mask
+		scintillation *= np.abs(mask)
 		keep = np.isfinite(scintillation) * (scintillation>0)
+
+		if seeingamp > 0.01:
+			phasescreen = np.sqrt(np.abs(scintillation)) ## proportional to sqrt scintillation
+			phasescreen = (phasescreen-phasescreen.min())/(phasescreen.max()-phasescreen.min())
+
+			phasescreen *= seeingamp
+			phasescreen -= np.median(phasescreen)
+			pupil *= np.exp(1.j*phasescreen)
+
 		scintillation -= np.median(scintillation[keep])
 		pupil *= (1+amp*scintillation)
 
@@ -235,6 +249,18 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=None,ve
 		plt.title('Input Pupil')
 		# cbar = plt.colorbar()
 		plt.show()
+
+		if seeingamp >= 0.01:
+			plt.figure(1)
+			plt.clf()
+			plt.imshow(np.angle(pupil),extent=[xs.min(),xs.max(),xs.min(),xs.max()],
+				interpolation='none',origin='lower')
+			plt.xlabel('m')
+			plt.ylabel('m')
+			plt.title('Input Phase Screen')
+			cbar = plt.colorbar()
+			plt.draw()
+			plt.show()
 
 
 	if verbose:
@@ -298,9 +324,9 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=None,ve
 
 	rebin = spaxel_scale(image,pscale,spaxel*rescale,verbose=verbose)
 
-	rebin = rebin[rebin.shape[0]/2-128:rebin.shape[0]/2+128,rebin.shape[0]/2-128:rebin.shape[0]/2+128]
+	rebin = rebin[rebin.shape[0]/2-(final_sz/2):rebin.shape[0]/2+(final_sz/2),rebin.shape[0]/2-(final_sz/2):rebin.shape[0]/2+(final_sz/2)]
 
-	rebinx = spaxel*np.arange(256)
+	rebinx = float(spaxel)*np.arange(256)
 	rebinx -= rebinx.max()/2.
 
 
