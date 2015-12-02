@@ -383,7 +383,7 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	s = thing.get_stats()
 
-	this_j = j.copy()
+	this_j = j
 
 	ksemis[this_j], dksemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 	keccs[this_j], dkeccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
