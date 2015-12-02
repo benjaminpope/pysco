@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.,5.,10.,50.,100.]
+contrast_list = [1.,5.]#,10.,50.,100.]
 ncalcs = len(contrast_list) * nframes
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -266,7 +266,7 @@ for trial, contrast in enumerate(contrast_list):
 	vis2js = np.zeros((nimages,vis2.shape[0]))
 
 	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
-	phases = np.zeros((nimages,vis2.shape[0]))
+	# phases = np.zeros((nimages,vis2.shape[0]))
 	randomGain = np.random.randn(np.shape(KerGain)[0],np.shape(KerGain)[1])
 
 	# calibrator
@@ -295,7 +295,7 @@ for trial, contrast in enumerate(contrast_list):
 		
 	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
 		
-		phases[j,:] = np.angle(data_cplx2)/dtor
+		# phases[j,:] = np.angle(data_cplx2)/dtor
 		kervises[j,:] = np.dot(KerGain,vis2b/vis2)
 	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
 	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
@@ -351,95 +351,88 @@ for trial, contrast in enumerate(contrast_list):
 	Loop over a set of frames
 	-----------------------------------------------'''
 
-	for frame in range(nframes):
+
+	'''-----------------------------------------------
+	First do kernel amplitudes
+	-----------------------------------------------'''
+
+	my_observable = np.mean(kervises,axis=0)
+
+	addederror = 0.0001 # in case there are bad frames
+	my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
+	print 'Error:', my_error 
 	
-		'''-----------------------------------------------
-		First do kernel amplitudes
-		-----------------------------------------------'''
+	def myloglike_kg(cube,ndim,n_params):
+		try:
+			loglike = kg_loglikelihood(cube,my_observable,my_error,a)
+			return loglike
+		except:
+			return -np.inf 
 
-		if frame == 0:
-			my_observable = np.mean(kervises,axis=0)
-		else:
-			my_observable = kervises[frame+1,:]
+	parameters = ['Semi-major axis','Eccentricity','Position Angle', 'Thickness','Contrast']
+	n_params = len(parameters)
+	resume=False
+	eff=0.3
+	multi=True,
+	max_iter= 20000
+	ndim = n_params
 
-		addederror = 0.0001 # in case there are bad frames
-		my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
-		print 'Error:', my_error 
-		
-		def myloglike_kg(cube,ndim,n_params):
-			try:
-				loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-				return loglike
-			except:
-				return -np.inf 
+	pymultinest.run(myloglike_kg, myprior, n_params,wrapped_params=[2],
+		verbose=True,resume=False,max_iter=max_iter)
 
-		parameters = ['Semi-major axis','Eccentricity','Position Angle', 'Thickness','Contrast']
-		n_params = len(parameters)
-		resume=False
-		eff=0.3
-		multi=True,
-		max_iter= 20000
-		ndim = n_params
+	thing = pymultinest.Analyzer(n_params = n_params)
+	s = thing.get_stats()
 
-		pymultinest.run(myloglike_kg, myprior, n_params,wrapped_params=[2],
-			verbose=True,resume=False,max_iter=max_iter)
+	this_j = trial*nframes + frame
 
-		thing = pymultinest.Analyzer(n_params = n_params)
-		s = thing.get_stats()
-
-		this_j = trial*nframes + frame
-
-		ksemis[this_j], dksemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-		keccs[this_j], dkeccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-		kthetas[this_j], dkthetas[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-		kthicks[this_j], dkthicks[this_j] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-		kcons[this_j], dkcons[this_j] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+	ksemis, dksemis = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	keccs, dkeccs = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	kthetas, dkthetas = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	kthicks, dkthicks = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+	kcons, dkcons = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
 
-		print 'Kernel amplitudes done'
-		print_time(clock()-thistime)
-		print ''
+	print 'Kernel amplitudes done'
+	print_time(clock()-thistime)
+	print ''
 
-		'''-----------------------------------------------
-		Now do visibilities
-		-----------------------------------------------'''
+	'''-----------------------------------------------
+	Now do visibilities
+	-----------------------------------------------'''
 
-		if frame == 0:
-			my_observable = np.mean((vis2s/vis2)**2,axis=0)
-		else:
-			my_observable = (vis2s[frame+1,:]/vis2)**2
+	my_observable = np.mean((vis2s/vis2)**2,axis=0)
 
-		print '\nDoing raw visibilities'
-		addederror = 0.0001
-		my_error =	  np.sqrt(np.std((vis2s/vis2)**2,axis=0)**2+addederror**2)
-		print 'Error:', my_error
+	print '\nDoing raw visibilities'
+	addederror = 0.0001
+	my_error =	  np.sqrt(np.std((vis2s/vis2)**2,axis=0)**2+addederror**2)
+	print 'Error:', my_error
 
-		def myloglike_vis(cube,ndim,n_params):
-			try:
-				loglike = vis_loglikelihood(cube,my_observable,my_error,a)
-				return loglike
-			except:
-				return -np.inf
+	def myloglike_vis(cube,ndim,n_params):
+		try:
+			loglike = vis_loglikelihood(cube,my_observable,my_error,a)
+			return loglike
+		except:
+			return -np.inf
 
-		thistime = clock()
+	thistime = clock()
 
-		pymultinest.run(myloglike_vis, myprior, n_params,wrapped_params=[2],
-			verbose=True,resume=False,max_iter=max_iter)
+	pymultinest.run(myloglike_vis, myprior, n_params,wrapped_params=[2],
+		verbose=True,resume=False,max_iter=max_iter)
 
-		thing = pymultinest.Analyzer(n_params = n_params)
-		s = thing.get_stats()
+	thing = pymultinest.Analyzer(n_params = n_params)
+	s = thing.get_stats()
 
-		this_j = trial*nframes + frame
+	this_j = trial*nframes + frame
 
-		vsemis[this_j], dvsemis[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-		veccs[this_j], dveccs[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-		vthetas[this_j], dvthetas[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-		vthicks[this_j], dvthicks[this_j] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-		vcons[this_j], dvcons[this_j] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+	vsemis, dvsemis = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	veccs, dveccs = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	vthetas, dvthetas = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	vthicks, dvthicks = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+	vcons, dvcons = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
-		print 'Visibilities done'
+	print 'Visibilities done'
 
-		print_time(clock()-thistime)
+	print_time(clock()-thistime)
 
 '''------------------------------------
 Now save!
