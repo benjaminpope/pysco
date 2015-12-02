@@ -72,7 +72,7 @@ except:
 	np.savetxt('KerGain_plain.csv',KerGain)
 	print 'saved'
 
-def make_ellipse(semi_axis,ecc,thick,sz=final_sz,pscale=12.):
+def make_ellipse(semi_axis,ecc,thick,sz=1024,pscale=12.):
 	
 	semi_axis, thick = semi_axis/pscale, thick/pscale
 	
@@ -164,6 +164,7 @@ rsec= 1.829/2.
 pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
+final_sz = 1024
 
 nimages = 3
 nframes = 2
@@ -173,7 +174,7 @@ reso = rad2mas(wavel/(2*rprim))
 print 'Minimum Lambda/D = %.3g mas' % reso
 
 image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing=None,verbose=False,\
-							 centre_wavel=wavel,show_pupil=False,dust=False)
+                             centre_wavel=wavel,show_pupil=True,dust=False,sz=4096,final_sz=final_sz)
 
 # image = recenter(image,sg_rad=25)
 imsz = image.shape[0]
@@ -204,13 +205,18 @@ true_vals = (200.,0.95,50)
 print 'x',x,',y',y
 
 for j in range(nimages):
-	if k == 10:
-		print 'Up to', j
-		show=False
-		k=0
-	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-								centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,amp=0.2)
-
+for j in range(nimages):
+    if k == 10:
+        print 'Up to', j
+        show=True
+        k=0
+    psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
+                                centre_wavel=wavel,show_pupil=True,dust=True,perturbation=None,
+                           amp=0.5,final_sz=final_sz)
+    imsz = image.shape[0]
+    show=False
+    k+=1
+      
 print_time(clock-t0)
 
 
