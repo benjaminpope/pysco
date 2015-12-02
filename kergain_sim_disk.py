@@ -205,7 +205,6 @@ true_vals = (200.,0.95,50)
 print 'x',x,',y',y
 
 for j in range(nimages):
-for j in range(nimages):
     if k == 10:
         print 'Up to', j
         show=True
