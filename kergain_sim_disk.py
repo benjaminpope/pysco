@@ -223,10 +223,6 @@ for trial, contrast in enumerate(contrast_list):
 
 	for j in range(nimages):
 		images[j,:,:] = make_disk(psfs[j,:,:],true_vals,contrast)
-
-		imsz = image.shape[0]
-		show=False
-		k+=1
 		  
 	'''----------------------------------------
 	Initialise pysco with a pupil model
