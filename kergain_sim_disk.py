@@ -166,7 +166,7 @@ spaxel = 12
 piston = 0
 final_sz = 1024
 
-nimages = 100
+nimages = 200
 nframes = nimages-1
 
 reso = rad2mas(wavel/(2*rprim))
@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.,1.1,1.5,2.,3.,4.,5.,10.,20.]
+contrast_list = [1.,1.1,1.5,2.,3.,4.,5.,6.,7.,8.,9.,10.,12.,15.,17.,18.,20.]
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
