@@ -452,7 +452,7 @@ kdata = Table({'Semis':ksemis,
 
 kdata.write('kernel_amplitude_disk_sims_%.0f_%.0f.csv' % (cmin,cmax))
 
-print 'Kernel amplitude fits saved to kernel_amplitude_sims_%.0f_%.0f.csv' \
+print 'Kernel amplitude fits saved to kernel_amplitude_disk_sims_%.0f_%.0f.csv' \
 	%  (cmin,cmax)
 
 print 'Finished contrast loop'
