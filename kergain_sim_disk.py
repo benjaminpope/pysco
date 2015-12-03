@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.,5.,10.,50.,100.]
+contrast_list = [1.,1.1,1.5,2.,3.,4.,5.,10.,20.]
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -200,7 +200,7 @@ dvsemis, dveccs, dvthetas, dvthicks, dvcons = np.zeros(ncalcs), np.zeros(ncalcs)
 
 t0 = clock()
 
-true_vals = (200.,0.95,50)
+true_vals = (400.,0.95,50)
 
 for j in range(nimages):
     if k == 10:
@@ -209,7 +209,7 @@ for j in range(nimages):
         k=0
     psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
                                 centre_wavel=wavel,show_pupil=False,dust=True,perturbation=None,
-                           amp=0.5,final_sz=final_sz)
+                           amp=0.2,final_sz=final_sz)
     imsz = image.shape[0]
     show=False
     k+=1
@@ -293,20 +293,13 @@ for trial, contrast in enumerate(contrast_list):
 		vis2b /= vis2b.max() #normalise to the origin
 		vis2s[j,:]=vis2b
 		
-	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
-		
-		# phases[j,:] = np.angle(data_cplx2)/dtor
 		kervises[j,:] = np.dot(KerGain,vis2b/vis2)
-	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
-	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
-	#	 kercomplexb = np.dot(KerBispect,log_data_complex_b)
-	#	 kervises_cplx[j,:] = np.abs(kercomplexb)
 
 	'''----------------------------------------
 	Extract Visibilities
 	----------------------------------------'''
 
-	paramlimits = [100.,10000.,0.,0.99,-90.,90.,0.1,0.9,contrast/2.,contrast*2.]
+	paramlimits = [100.,10000.,0.,0.99,-90.,90.,0.1,0.9,contrast/4.,contrast*4.]
 
 	hdr = {'tel':'HST',
 		  'filter':wavel,
@@ -446,9 +439,9 @@ vdata = Table({'Semis':vsemis,
 		 'Dthicks':dvthicks,
 		 'Dcons':dvcons})
 
-vdata.write('raw_vis_disk_sims_di%.0f_%.0f.csv' %  (cmin,cmax))
+vdata.write('raw_vis_disk_sims_%.0f_%.0f.csv' %  (cmin,cmax))
 
-print 'Visibility fits saved to raw_vis_sims_%.0f_%.0f.csv' % (cmin,cmax)
+print 'Visibility fits saved to raw_vis_disk_sims_%.0f_%.0f.csv' % (cmin,cmax)
 
 kdata = Table({'Semis':ksemis,
 		 'Eccs':keccs,
