@@ -372,14 +372,21 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	try:
 		s = thing.get_stats()
-	except:
-		s = thing.get_mode_stats()
 
-	ksemis[trial], dksemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-	keccs[trial], dkeccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-	kthetas[trial], dkthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-	kthicks[trial], dkthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-	kcons[trial], dkcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+		ksemis[trial], dksemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+		keccs[trial], dkeccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+		kthetas[trial], dkthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+		kthicks[trial], dkthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+		kcons[trial], dkcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+	except:
+		print 'Failed!'
+
+		ksemis[trial], dksemis[trial] = 0,0
+		keccs[trial], dkeccs[trial] = 0,0
+		kthetas[trial], dkthetas[trial] = 0,0
+		kthicks[trial], dkthicks[trial] = 0,0
+		kcons[trial], dkcons[trial] = 0,0
+
 
 
 	print 'Kernel amplitudes done'
@@ -412,14 +419,19 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	try:
 		s = thing.get_stats()
+		vsemis[trial], dvsemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+		veccs[trial], dveccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+		vthetas[trial], dvthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+		vthicks[trial], dvthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
+		vcons[trial], dvcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 	except:
-		s = thing.get_mode_stats()
-		
-	vsemis[trial], dvsemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-	veccs[trial], dveccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-	vthetas[trial], dvthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-	vthicks[trial], dvthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
-	vcons[trial], dvcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+		print 'Failed'
+		vsemis[trial], dvsemis[trial] = 0, 0
+		veccs[trial], dveccs[trial] = 0, 0
+		vthetas[trial], dvthetas[trial] = 0,0
+		vthicks[trial], dvthicks[trial] = 0,0
+		vcons[trial], dvcons[trial] = 0,0
+
 
 	print 'Visibilities done'
 
