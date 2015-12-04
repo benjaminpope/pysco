@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.,1.1,1.5,2.,3.,4.,4.5.,5.,5.5,6.,6.5,7.,7.5,8.,8.5,9.,9.5,10.,12.,15.,17.,18.,20.]
+contrast_list = [1.,1.1,1.5,2.,3.,4.,4.5,5.,5.5,6.,6.5,7.,7.5,8.,8.5,9.,9.5,10.,12.,15.,17.,18.,20.]
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
