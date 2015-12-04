@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.,1.1,1.5,2.,3.,4.,5.,6.,7.,8.,9.,10.,12.,15.,17.,18.,20.]
+contrast_list = [1.,1.1,1.5,2.,3.,4.,4.5.,5.,5.5,6.,6.5,7.,7.5,8.,8.5,9.,9.5,10.,12.,15.,17.,18.,20.]
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -295,7 +295,7 @@ for trial, contrast in enumerate(contrast_list):
 	Extract Visibilities
 	----------------------------------------'''
 
-	paramlimits = [100.,10000.,0.,0.99,-90.,90.,0.1,0.9,contrast/4.,contrast*4.]
+	paramlimits = [100.,10000.,0.,0.99,-90.,90.,0.02,0.49,contrast/4.,contrast*4.]
 
 	hdr = {'tel':'HST',
 		  'filter':wavel,
