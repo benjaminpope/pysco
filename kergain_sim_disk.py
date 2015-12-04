@@ -370,7 +370,10 @@ for trial, contrast in enumerate(contrast_list):
 		verbose=True,resume=False,max_iter=max_iter)
 
 	thing = pymultinest.Analyzer(n_params = n_params)
-	s = thing.get_stats()
+	try:
+		s = thing.get_stats()
+	except:
+		s = thing.get_mode_stats()
 
 	ksemis[trial], dksemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 	keccs[trial], dkeccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
@@ -407,8 +410,11 @@ for trial, contrast in enumerate(contrast_list):
 		verbose=True,resume=False,max_iter=max_iter)
 
 	thing = pymultinest.Analyzer(n_params = n_params)
-	s = thing.get_stats()
-
+	try:
+		s = thing.get_stats()
+	except:
+		s = thing.get_mode_stats()
+		
 	vsemis[trial], dvsemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 	veccs[trial], dveccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 	vthetas[trial], dvthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
