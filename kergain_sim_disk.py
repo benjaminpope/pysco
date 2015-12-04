@@ -378,6 +378,22 @@ for trial, contrast in enumerate(contrast_list):
 		kthetas[trial], dkthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
 		kthicks[trial], dkthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
 		kcons[trial], dkcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+
+		ll, best_params = s.get_best_fit()
+		true_params = [true_vals[0],true_vals[1],0.,true_vals[2],contrast]
+
+		model = np.dot(KerGain,vis_model(best_params,kpi))
+		true_model = np.dot(KerGain,vis_model(true_params,kpi))
+
+		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
+			ls='',markersize=10,elinewidth=2.5)
+		plt.errorbar(my_observable,model,xerr=my_error,color='k',
+			ls='',markersize=10,elinewidth=2.5)
+		plt.xlabel('Measured Kernel Amplitudes')
+		plt.ylabel('Model Kernel Amplitudes')
+		plt.title('Model Fit: Contrast %.1f' % contrast)
+		plt.savefig('kpfit_%f_con.png')
+
 	except:
 		print 'Failed!'
 
@@ -424,6 +440,21 @@ for trial, contrast in enumerate(contrast_list):
 		vthetas[trial], dvthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
 		vthicks[trial], dvthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
 		vcons[trial], dvcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
+
+		ll, best_params = s.get_best_fit()
+		true_params = [true_vals[0],true_vals[1],0.,true_vals[2],contrast]
+		
+		model = np.dot(KerGain,vis_model(best_params,kpi))
+		true_model = np.dot(KerGain,vis_model(true_params,kpi))
+
+		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
+			ls='',markersize=10,elinewidth=2.5)
+		plt.errorbar(my_observable,model,xerr=my_error,color='k',
+			ls='',markersize=10,elinewidth=2.5)
+		plt.xlabel('Measured Square visibilities')
+		plt.ylabel('Model Square Visibilities')
+		plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
+		plt.savefig('visfit_%f_con.png')
 	except:
 		print 'Failed'
 		vsemis[trial], dvsemis[trial] = 0, 0
