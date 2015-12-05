@@ -379,7 +379,8 @@ for trial, contrast in enumerate(contrast_list):
 		kthicks[trial], dkthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
 		kcons[trial], dkcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
-		ll, best_params = s.get_best_fit()
+		stuff = thing.get_best_fit()
+		best_params = stuff['parameters']
 		true_params = [true_vals[0],true_vals[1],0.,true_vals[2],contrast]
 
 		model = np.dot(KerGain,vis_model(best_params,kpi))
@@ -392,7 +393,7 @@ for trial, contrast in enumerate(contrast_list):
 		plt.xlabel('Measured Kernel Amplitudes')
 		plt.ylabel('Model Kernel Amplitudes')
 		plt.title('Model Fit: Contrast %.1f' % contrast)
-		plt.savefig('kpfit_%f_con.png')
+		plt.savefig('kpfit_%f_con.png' % contrast)
 
 	except:
 		print 'Failed!'
@@ -441,11 +442,12 @@ for trial, contrast in enumerate(contrast_list):
 		vthicks[trial], dvthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
 		vcons[trial], dvcons[trial] = s['marginals'][4]['median'], s['marginals'][4]['sigma']
 
-		ll, best_params = s.get_best_fit()
+		stuff = thing.get_best_fit()
+		best_params = stuff['parameters']
 		true_params = [true_vals[0],true_vals[1],0.,true_vals[2],contrast]
 		
-		model = np.dot(KerGain,vis_model(best_params,kpi))
-		true_model = np.dot(KerGain,vis_model(true_params,kpi))
+		model = np.dot(KerGain,vis_model(best_params,a))
+		true_model = np.dot(KerGain,vis_model(true_params,a))
 
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
 			ls='',markersize=10,elinewidth=2.5)
@@ -454,11 +456,11 @@ for trial, contrast in enumerate(contrast_list):
 		plt.xlabel('Measured Square visibilities')
 		plt.ylabel('Model Square Visibilities')
 		plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
-		plt.savefig('visfit_%f_con.png')
+		plt.savefig('visfit_%f_con.png' % contrast)
 	except:
 		print 'Failed'
-		vsemis[trial], dvsemis[trial] = 0, 0
-		veccs[trial], dveccs[trial] = 0, 0
+		vsemis[trial], dvsemis[trial] = 0,0
+		veccs[trial], dveccs[trial] = 0,0
 		vthetas[trial], dvthetas[trial] = 0,0
 		vthicks[trial], dvthicks[trial] = 0,0
 		vcons[trial], dvcons[trial] = 0,0
