@@ -387,9 +387,9 @@ for trial, contrast in enumerate(contrast_list):
 		true_model = np.dot(KerGain,vis_model(true_params,kpi))
 
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
-			ls='',markersize=10,elinewidth=2.5)
+			ls='',markersize=10,linewidth=2.5)
 		plt.errorbar(my_observable,model,xerr=my_error,color='k',
-			ls='',markersize=10,elinewidth=2.5)
+			ls='',markersize=10,linewidth=2.5)
 		plt.xlabel('Measured Kernel Amplitudes')
 		plt.ylabel('Model Kernel Amplitudes')
 		plt.title('Model Fit: Contrast %.1f' % contrast)
@@ -446,13 +446,13 @@ for trial, contrast in enumerate(contrast_list):
 		best_params = stuff['parameters']
 		true_params = [true_vals[0],true_vals[1],0.,true_vals[2],contrast]
 		
-		model = np.dot(KerGain,vis_model(best_params,a))
-		true_model = np.dot(KerGain,vis_model(true_params,a))
+		model = vis_model(best_params,a)
+		true_model = vis_model(true_params,a)
 
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
-			ls='',markersize=10,elinewidth=2.5)
+			ls='',markersize=10,linewidth=2.5)
 		plt.errorbar(my_observable,model,xerr=my_error,color='k',
-			ls='',markersize=10,elinewidth=2.5)
+			ls='',markersize=10,linewidth=2.5)
 		plt.xlabel('Measured Square visibilities')
 		plt.ylabel('Model Square Visibilities')
 		plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
