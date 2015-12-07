@@ -19,7 +19,7 @@ from astropy.table import Table
 
 mpl.rcParams['figure.figsize']=(8.0,6.0)	#(6.0,4.0)
 mpl.rcParams['font.size']= 18			   #10 
-mpl.rcParams['savefig.dpi']=100			 #72 
+mpl.rcParams['savefig.dpi']=200			 #72 
 mpl.rcParams['axes.labelsize'] = 16
 mpl.rcParams['xtick.labelsize'] = 12
 mpl.rcParams['ytick.labelsize'] = 12
@@ -253,16 +253,11 @@ for trial, contrast in enumerate(contrast_list):
 	vis2 /= vis2.max() #normalise to the origin
 
 	mvis = a.RED/a.RED.max().astype('float')
-
-	# kpd_phase = np.angle(data_cplx)/dtor
-	# kpd_signal = np.dot(a.KerPhi, kpd_phase)
-
 	kervises=np.zeros((nimages,KerGain.shape[0]))
 	vis2s = np.zeros((nimages,vis2.shape[0]))
 	vis2js = np.zeros((nimages,vis2.shape[0]))
 
 	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
-	# phases = np.zeros((nimages,vis2.shape[0]))
 
 	# calibrator
 
@@ -273,8 +268,8 @@ for trial, contrast in enumerate(contrast_list):
 		data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
 		vis2cj = np.abs(data_cplx)
-		vis2cj /= vis2.max() #normalise to the origin
-		vis2js[j,:]=vis2
+		vis2cj /= vis2cj.max() #normalise to the origin
+		vis2js[j,:]=vis2cj
 
 	vis2c = np.mean(vis2js,axis=0)
 
