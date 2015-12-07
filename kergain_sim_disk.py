@@ -242,6 +242,7 @@ vis2 /= vis2.max() #normalise to the origin
 mvis = a.RED/a.RED.max().astype('float')
 
 # calibrator
+vis2js = np.zeros((nimages,vis2.shape[0]))
 
 for j in range(nimages):
 	image = psfs[j,:,:]
@@ -268,7 +269,6 @@ for trial, contrast in enumerate(contrast_list):
 
 	kervises=np.zeros((nimages,KerGain.shape[0]))
 	vis2s = np.zeros((nimages,vis2.shape[0]))
-	vis2js = np.zeros((nimages,vis2.shape[0]))
 
 	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
 
