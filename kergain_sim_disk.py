@@ -385,7 +385,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		model = np.dot(KerGain,vis_model(best_params,a))
 		true_model = np.dot(KerGain,vis_model(true_params,a))
-
+		plt.clf()
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
 			ls='',markersize=10,linewidth=2.5)
 		plt.errorbar(my_observable,model,xerr=my_error,color='k',
@@ -448,7 +448,7 @@ for trial, contrast in enumerate(contrast_list):
 		
 		model = vis_model(best_params,a)
 		true_model = vis_model(true_params,a)
-
+		plt.clf()
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
 			ls='',markersize=10,linewidth=2.5)
 		plt.errorbar(my_observable,model,xerr=my_error,color='k',
