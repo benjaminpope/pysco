@@ -216,6 +216,44 @@ for j in range(nimages):
       
 print_time(clock()-t0)
 
+'''----------------------------------------
+Initialise pysco with a pupil model
+----------------------------------------'''
+
+# meter to pixel conversion factor
+scale = 1.0
+m2pix = mas2rad(spaxel) * imsz/ wavel * scale
+uv_samp = a.uv * m2pix + imsz/2 # uv sample coordinates in pixels
+
+x = a.mask[:,0]
+y = a.mask[:,1]
+
+rev = 1.0
+ac = shift(fft(shift(image)))
+ac /= (np.abs(ac)).max() / a.nbh
+
+uv_samp_rev=np.cast['int'](np.round(uv_samp))
+uv_samp_rev[:,0]*=rev
+data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
+
+vis2 = np.abs(data_cplx)
+vis2 /= vis2.max() #normalise to the origin
+
+mvis = a.RED/a.RED.max().astype('float')
+
+# calibrator
+
+for j in range(nimages):
+	image = psfs[j,:,:]
+	ac = shift(fft(shift(image)))
+	ac /= (np.abs(ac)).max() / a.nbh
+	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
+
+	vis2cj = np.abs(data_cplx)
+	vis2cj /= vis2cj.max() #normalise to the origin
+	vis2js[j,:]=vis2cj
+
+vis2c = np.mean(vis2js/vis2,axis=0)
 
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
@@ -225,53 +263,14 @@ for trial, contrast in enumerate(contrast_list):
 		images[j,:,:] = make_disk(psfs[j,:,:],true_vals,contrast)
 		  
 	'''----------------------------------------
-	Initialise pysco with a pupil model
-	----------------------------------------'''
-
-	# meter to pixel conversion factor
-	scale = 1.0
-	m2pix = mas2rad(spaxel) * imsz/ wavel * scale
-	uv_samp = a.uv * m2pix + imsz/2 # uv sample coordinates in pixels
-
-	x = a.mask[:,0]
-	y = a.mask[:,1]
-
-	'''----------------------------------------
 	Extract Visibilities
 	----------------------------------------'''
 
-
-	rev = 1.0
-	ac = shift(fft(shift(image)))
-	ac /= (np.abs(ac)).max() / a.nbh
-
-	uv_samp_rev=np.cast['int'](np.round(uv_samp))
-	uv_samp_rev[:,0]*=rev
-	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
-
-	vis2 = np.abs(data_cplx)
-	vis2 /= vis2.max() #normalise to the origin
-
-	mvis = a.RED/a.RED.max().astype('float')
 	kervises=np.zeros((nimages,KerGain.shape[0]))
 	vis2s = np.zeros((nimages,vis2.shape[0]))
 	vis2js = np.zeros((nimages,vis2.shape[0]))
 
 	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
-
-	# calibrator
-
-	for j in range(nimages):
-		image = psfs[j,:,:]
-		ac = shift(fft(shift(image)))
-		ac /= (np.abs(ac)).max() / a.nbh
-		data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
-
-		vis2cj = np.abs(data_cplx)
-		vis2cj /= vis2cj.max() #normalise to the origin
-		vis2js[j,:]=vis2cj
-
-	vis2c = np.mean(vis2js,axis=0)
 
 	for j in range(nimages):
 		image2 = images[j,:,:]
@@ -280,10 +279,10 @@ for trial, contrast in enumerate(contrast_list):
 		data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
 		vis2b = np.abs(data_cplx2)
-		vis2b /= vis2b.max() #normalise to the origin
-		vis2s[j,:]=vis2b
+		vis2b /= vis2 #normalise to the origin
+		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b/vis2)-np.dot(KerGain,vis2c/vis2)
+		kervises[j,:] = np.dot(KerGain,vis2b)-np.dot(KerGain,vis2c)
 
 	'''----------------------------------------
 	Extract Visibilities
@@ -294,7 +293,6 @@ for trial, contrast in enumerate(contrast_list):
 	hdr = {'tel':'HST',
 		  'filter':wavel,
 		  'orient':0}
-
 
 	def vis_model(cube,kpi):
 		u, v = (kpi.uv/wavel).T
@@ -329,12 +327,6 @@ for trial, contrast in enumerate(contrast_list):
 		cube[3] = (paramlimits[7] - paramlimits[6])*cube[3]+paramlimits[6]
 		cube[4] = (paramlimits[9] - paramlimits[8])*cube[4]+paramlimits[8]
 			
-
-	'''-----------------------------------------------
-	Loop over a set of frames
-	-----------------------------------------------'''
-
-
 	'''-----------------------------------------------
 	First do kernel amplitudes
 	-----------------------------------------------'''
