@@ -250,10 +250,10 @@ for j in range(nimages):
 	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
 	vis2cj = np.abs(data_cplx)
-	vis2cj /= vis2cj.max() #normalise to the origin
+	vis2cj /= vis2 #normalise to the origin
 	vis2js[j,:]=vis2cj
 
-vis2c = np.mean(vis2js/vis2,axis=0)
+vis2c = np.mean(vis2js,axis=0)
 
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
