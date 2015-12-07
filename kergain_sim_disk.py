@@ -263,7 +263,6 @@ for trial, contrast in enumerate(contrast_list):
 
 	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
 	# phases = np.zeros((nimages,vis2.shape[0]))
-	randomGain = np.random.randn(np.shape(KerGain)[0],np.shape(KerGain)[1])
 
 	# calibrator
 
@@ -273,11 +272,11 @@ for trial, contrast in enumerate(contrast_list):
 		ac /= (np.abs(ac)).max() / a.nbh
 		data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
-		vis2 = np.abs(data_cplx)
-		vis2 /= vis2.max() #normalise to the origin
+		vis2cj = np.abs(data_cplx)
+		vis2cj /= vis2.max() #normalise to the origin
 		vis2js[j,:]=vis2
 
-	vis2 = np.mean(vis2js,axis=0)
+	vis2c = np.mean(vis2js,axis=0)
 
 	for j in range(nimages):
 		image2 = images[j,:,:]
@@ -289,7 +288,7 @@ for trial, contrast in enumerate(contrast_list):
 		vis2b /= vis2b.max() #normalise to the origin
 		vis2s[j,:]=vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b/vis2)
+		kervises[j,:] = np.dot(KerGain,vis2b/vis2)-np.dot(KerGain,vis2c/vis2)
 
 	'''----------------------------------------
 	Extract Visibilities
@@ -381,10 +380,11 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
-		true_params = [true_vals[0],true_vals[1],0.,true_vals[2],contrast]
+		true_params = [true_vals[0],true_vals[1],0.,true_vals[0]/true_vals[2],contrast]
 
 		model = np.dot(KerGain,vis_model(best_params,a))
 		true_model = np.dot(KerGain,vis_model(true_params,a))
+
 		plt.clf()
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
 			ls='',markersize=10,linewidth=2.5)
@@ -392,7 +392,7 @@ for trial, contrast in enumerate(contrast_list):
 			ls='',markersize=10,linewidth=2.5)
 		plt.xlabel('Measured Kernel Amplitudes')
 		plt.ylabel('Model Kernel Amplitudes')
-		plt.title('Model Fit: Contrast %.1f' % contrast)
+		plt.title('Model Fit: Kernel Amplitudes, Contrast %.1f' % contrast)
 		plt.savefig('kpfit_%.1f_con.png' % contrast)
 
 	except:
@@ -414,11 +414,11 @@ for trial, contrast in enumerate(contrast_list):
 	Now do visibilities
 	-----------------------------------------------'''
 
-	my_observable = np.mean((vis2s/vis2)**2,axis=0)
+	my_observable = np.mean((vis2s/vis2c)**2,axis=0)
 
 	print '\nDoing raw visibilities'
 	addederror = 0.001
-	my_error =	  np.sqrt(np.std((vis2s/vis2)**2,axis=0)**2+addederror**2)
+	my_error =	  np.sqrt(np.std((vis2s/vis2c)**2,axis=0)**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
@@ -444,10 +444,11 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
-		true_params = [true_vals[0],true_vals[1],0.,true_vals[2],contrast]
+		true_params = [true_vals[0],true_vals[1],0.,true_vals[0]/true_vals[2],contrast]
 		
-		model = vis_model(best_params,a)
-		true_model = vis_model(true_params,a)
+		model = vis_model(best_params,a)**2.
+		true_model = vis_model(true_params,a)**2.
+
 		plt.clf()
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
 			ls='',markersize=10,linewidth=2.5)
