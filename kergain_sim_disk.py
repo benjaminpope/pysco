@@ -277,6 +277,7 @@ for trial, contrast in enumerate(contrast_list):
 		data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
 		vis2b = np.abs(data_cplx2)
+		vis2b /= vis2b.max()
 		vis2b /= vis2 #normalise to the origin
 		vis2s[j,:]= vis2b
 		
@@ -357,7 +358,7 @@ for trial, contrast in enumerate(contrast_list):
 	try:
 		s = thing.get_stats()
 
-		ksemis[trial], dksemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+		ksemis[trial], dksemis[trial] = s['marginals'][0]['median']/4., s['marginals'][0]['sigma']/4.
 		keccs[trial], dkeccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 		kthetas[trial], dkthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
 		kthicks[trial], dkthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
@@ -365,7 +366,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
-		true_params = [true_vals[0],true_vals[1],0.,true_vals[0]/true_vals[2],contrast]
+		true_params = [true_vals[0]*4.,true_vals[1],0.,true_vals[2]/float(true_vals[0]),contrast]
 
 		model = np.dot(KerGain,vis_model(best_params,a))
 		true_model = np.dot(KerGain,vis_model(true_params,a))
@@ -421,7 +422,7 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	try:
 		s = thing.get_stats()
-		vsemis[trial], dvsemis[trial] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+		vsemis[trial], dvsemis[trial] = s['marginals'][0]['median']/4., s['marginals'][0]['sigma']/4.
 		veccs[trial], dveccs[trial] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 		vthetas[trial], dvthetas[trial] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
 		vthicks[trial], dvthicks[trial] = s['marginals'][3]['median'], s['marginals'][3]['sigma']
@@ -429,7 +430,6 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
-		true_params = [true_vals[0],true_vals[1],0.,true_vals[0]/true_vals[2],contrast]
 		
 		model = vis_model(best_params,a)**2.
 		true_model = vis_model(true_params,a)**2.
