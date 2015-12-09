@@ -251,6 +251,7 @@ for j in range(nimages):
 	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
 	vis2cj = np.abs(data_cplx)
+	vis2c /= vis2c.max()
 	vis2cj /= vis2 #normalise to the origin
 	vis2js[j,:]=vis2cj
 
@@ -281,7 +282,7 @@ for trial, contrast in enumerate(contrast_list):
 		vis2b /= vis2 #normalise to the origin
 		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b)#-np.dot(KerGain,vis2c)
+		kervises[j,:] = np.dot(KerGain,vis2b)-np.dot(KerGain,vis2c)
 
 	'''----------------------------------------
 	Extract Visibilities
@@ -332,7 +333,7 @@ for trial, contrast in enumerate(contrast_list):
 
 	my_observable = np.mean(kervises,axis=0)
 
-	addederror = 0.001 # in case there are bad frames
+	addederror = 0.05 # in case there are bad frames
 	my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
 	print 'Error:', my_error 
 	
