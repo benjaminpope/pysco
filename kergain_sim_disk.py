@@ -251,7 +251,7 @@ for j in range(nimages):
 	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
 	vis2cj = np.abs(data_cplx)
-	vis2c /= vis2c.max()
+	vis2cj /= vis2cj.max()
 	vis2cj /= vis2 #normalise to the origin
 	vis2js[j,:]=vis2cj
 
