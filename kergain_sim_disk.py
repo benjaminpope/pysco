@@ -437,12 +437,12 @@ for trial, contrast in enumerate(contrast_list):
 		true_model = vis_model(true_params,a)**2.
 
 		plt.clf()
-		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
+		plt.errorbar(my_observable,true_model-mvis**2.,xerr=my_error,color='b',alpha=0.5,
 			ls='',markersize=10,linewidth=2.5)
-		plt.errorbar(my_observable,model,xerr=my_error,color='k',
+		plt.errorbar(my_observable,model-mvis**2.,xerr=my_error,color='k',
 			ls='',markersize=10,linewidth=2.5)
-		plt.xlabel('Measured Square visibilities')
-		plt.ylabel('Model Square Visibilities')
+		plt.xlabel('Measured Differential Square Visibilities')
+		plt.ylabel('Model Differential Square Visibilities')
 		plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
 		plt.savefig('visfit_%.1f_con.png' % contrast)
 	except:
