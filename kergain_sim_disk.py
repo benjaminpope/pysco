@@ -143,7 +143,7 @@ def my_gauss_blur(array1,gausswidth):
 def mk_star_with_ring(psf_temp,ring,con):
 	dummy = np.abs(my_convolve_2d(ring,psf_temp))
 	dummy /= dummy.sum()
-	ff = psf_temp/psf_temp.sum()+con*dummy
+	ff = psf_temp/psf_temp.sum()+dummy/con
 	return ff/ff.sum()	
 
 def make_disk(psf_temp,params,contrast):
@@ -158,7 +158,7 @@ def make_disk(psf_temp,params,contrast):
 First, set all  your parameters.
 ------------------------------'''
 print '\nSimulating a basic PSF'
-wavel = 1.e-6
+wavel = 2.5e-6
 rprim = 5.093/2.#36903.e-3/2.
 rsec= 1.829/2.
 pos = [0,0] #m, deg
@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.,1.1,1.5,2.,3.,4.,4.5,5.,5.5,6.,6.5,7.,7.5,8.,8.5,9.,9.5,10.,12.,15.,17.,18.,20.]
+contrast_list = [1.,3.,10.,12.,15.,20.,30.,40.,50.,80.,90.,100.,150.,200.]
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -200,7 +200,7 @@ dvsemis, dveccs, dvthetas, dvthicks, dvcons = np.zeros(ncalcs), np.zeros(ncalcs)
 
 t0 = clock()
 
-true_vals = (400.,0.95,50)
+true_vals = (300.,0.95,100)
 
 for j in range(nimages):
     if k == 10:
