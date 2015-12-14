@@ -268,7 +268,7 @@ for trial, contrast in enumerate(contrast_list):
 	Extract Visibilities
 	----------------------------------------'''
 
-	kervises=np.zeros((nimages,KerGain.shape[0]))
+	kervises = np.zeros((nimages,KerGain.shape[0]))
 	vis2s = np.zeros((nimages,vis2.shape[0]))
 
 	for j in range(nimages):
@@ -282,7 +282,7 @@ for trial, contrast in enumerate(contrast_list):
 		vis2b /= vis2 #normalise to the origin
 		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b)-np.dot(KerGain,vis2c)
+		kervises[j,:] = np.dot(KerGain,vis2b)#-np.dot(KerGain,vis2c)
 
 	'''----------------------------------------
 	Extract Visibilities
