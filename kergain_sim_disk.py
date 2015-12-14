@@ -174,7 +174,7 @@ reso = rad2mas(wavel/(2*rprim))
 print 'Minimum Lambda/D = %.3g mas' % reso
 
 image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing=None,verbose=False,\
-                             centre_wavel=wavel,show_pupil=True,dust=False,sz=4096,final_sz=final_sz)
+							 centre_wavel=wavel,show_pupil=True,dust=False,sz=4096,final_sz=final_sz)
 
 # image = recenter(image,sg_rad=25)
 imsz = image.shape[0]
@@ -203,17 +203,17 @@ t0 = clock()
 true_vals = (300.,0.95,100)
 
 for j in range(nimages):
-    if k == 10:
-        print 'Up to', j
-        show=True
-        k=0
-    psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-                                centre_wavel=wavel,show_pupil=False,dust=True,perturbation=None,
-                           amp=0.2,final_sz=final_sz)
-    imsz = image.shape[0]
-    show=False
-    k+=1
-      
+	if k == 10:
+		print 'Up to', j
+		show=True
+		k=0
+	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
+								centre_wavel=wavel,show_pupil=False,dust=True,perturbation=None,
+						   amp=0.2,final_sz=final_sz)
+	imsz = image.shape[0]
+	show=False
+	k+=1
+	  
 print_time(clock()-t0)
 
 '''----------------------------------------
@@ -295,9 +295,10 @@ for trial, contrast in enumerate(contrast_list):
 		  'orient':0}
 
 	def vis_model(cube,kpi):
+		con = 1./cube[4]
 		u, v = (kpi.uv/wavel).T
-		unresolved = 1./(1.+cube[4])
-		flux_ratio = cube[4]/(1.+cube[4])
+		unresolved = 1./(1.+con)
+		flux_ratio = con/(1.+con)
 		vises = vis_ellipse_thin(cube[0],cube[1],cube[2],cube[0]*cube[3],u,v)
 		norm = vis_ellipse_thin(cube[0],cube[1],cube[2],cube[0]*cube[3],np.array([1e-5]),np.array([1e-5]))
 		vises = (vises/norm *flux_ratio + unresolved)
@@ -333,8 +334,8 @@ for trial, contrast in enumerate(contrast_list):
 
 	my_observable = np.mean(kervises,axis=0)
 
-	addederror = 0.0005 # in case there are bad frames
-	my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
+	addederror = 0.000001 # in case there are bad frames
+	my_error =	  np.sqrt((np.std(kervises,axis=0)/np.sqrt(kervises.shape[0]))**2+addederror**2)
 	print 'Error:', my_error 
 	
 	def myloglike_kg(cube,ndim,n_params):
@@ -404,8 +405,8 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean((vis2s)**2,axis=0)
 
 	print '\nDoing raw visibilities'
-	addederror = 0.001
-	my_error =	  np.sqrt(np.std((vis2s)**2,axis=0)**2+addederror**2)
+	addederror = 0.0001
+	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0)/np.sqrt(vis2s.shape[0]))**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
