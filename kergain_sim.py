@@ -166,7 +166,7 @@ for trial, contrast in enumerate(contrast_list):
 	----------------------------------------'''
 
 
-	rev = 1.0
+	rev = 1
 	ac = shift(fft(shift(image)))
 	ac /= (np.abs(ac)).max() / a.nbh
 
@@ -285,7 +285,18 @@ for trial, contrast in enumerate(contrast_list):
 		kseps[this_j], dkseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 		kthetas[this_j], dkthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 		kcons[this_j], dkcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+		if frame == 0:
+			stuff = thing.get_best_fit()
+			best_params = stuff['parameters']
+			model_vises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
 
+			plt.clf()
+			plt.errorbar(my_observable,model,xerr=my_error,color='k',
+				ls='',markersize=10,linewidth=2.5)
+			plt.xlabel('Measured Kernel Amplitudes')
+			plt.ylabel('Model Kernel Amplitudes')
+			plt.title('Model Fit: Kernel Amplitudes, Contrast %.1f' % contrast)
+			plt.savefig('kpfit_bin_%.1f_con.png' % contrast)
 		print 'Kernel amplitudes done'
 		print_time(clock()-thistime)
 		print ''
@@ -325,6 +336,18 @@ for trial, contrast in enumerate(contrast_list):
 		vseps[this_j], dvseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 		vthetas[this_j], dvthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 		vcons[this_j], dvcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+		if frame == 0:
+			stuff = thing.get_best_fit()
+			best_params = stuff['parameters']
+			model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
+
+			plt.clf()
+			plt.errorbar(my_observable,model,xerr=my_error,color='k',
+				ls='',markersize=10,linewidth=2.5)
+			plt.xlabel('Measured Visibilities')
+			plt.ylabel('Model Visibilities')
+			plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
+			plt.savefig('vis2_bin_new_%.1f_con.png' % contrast)
 
 		print 'Visibilities done'
 
@@ -342,9 +365,9 @@ vdata = Table({'Seps':vseps,
 		 'Dthetas':dvthetas,
 		 'Dcons':dvcons})
 
-vdata.write('raw_vis_sims_%.0f_%.0f.csv' %  (cmin,cmax))
+vdata.write('raw_vis_sims_new_%.0f_%.0f.csv' %  (cmin,cmax))
 
-print 'Visibility fits saved to raw_vis_sims_%.0f_%.0f.csv' % (cmin,cmax)
+print 'Visibility fits saved to raw_vis_sims_new_%.0f_%.0f.csv' % (cmin,cmax)
 
 kdata = Table({'Seps':kseps,
 		 'Thetas':kthetas,
@@ -352,9 +375,9 @@ kdata = Table({'Seps':kseps,
 		 'Dseps':dkseps,
 		 'Dthetas':dkthetas,
 		 'Dcons':dkcons})
-kdata.write('kernel_amplitude_sims_%.0f_%.0f.csv' % (cmin,cmax))
+kdata.write('kernel_amplitude_sims_new_%.0f_%.0f.csv' % (cmin,cmax))
 
-print 'Kernel amplitude fits saved to kernel_amplitude_sims_%.0f_%.0f.csv' \
+print 'Kernel amplitude fits saved to kernel_amplitude_sims_new_%.0f_%.0f.csv' \
 	%  (cmin,cmax)
 
 print 'Finished contrast loop'

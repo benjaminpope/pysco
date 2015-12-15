@@ -442,8 +442,8 @@ for trial, contrast in enumerate(contrast_list):
 			ls='',markersize=10,linewidth=2.5)
 		plt.errorbar(my_observable,model,xerr=my_error,color='k',
 			ls='',markersize=10,linewidth=2.5)
-		plt.xlabel('Measured Differential Square Visibilities')
-		plt.ylabel('Model Differential Square Visibilities')
+		plt.xlabel('Measured Square Visibilities')
+		plt.ylabel('Model Square Visibilities')
 		plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
 		plt.savefig('visfit_%.1f_con.png' % contrast)
 	except:
