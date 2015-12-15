@@ -135,7 +135,7 @@ for j in range(nimages):
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
 								centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,amp=0.2)
 
-print_time(clock-t0)
+print_time(clock()-t0)
 
 
 for trial, contrast in enumerate(contrast_list):
