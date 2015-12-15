@@ -174,7 +174,7 @@ reso = rad2mas(wavel/(2*rprim))
 print 'Minimum Lambda/D = %.3g mas' % reso
 
 image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing=None,verbose=False,\
-							 centre_wavel=wavel,show_pupil=True,dust=False,sz=4096,final_sz=final_sz)
+							 centre_wavel=wavel,show_pupil=False,dust=False,sz=4096,final_sz=final_sz)
 
 # image = recenter(image,sg_rad=25)
 imsz = image.shape[0]
@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.,3.,10.,12.,15.,20.,30.,40.,50.,80.,90.,100.,150.,200.]
+contrast_list = [1.,3.,5.,7.5,10.,12.,15.,20.,30.,40.,50.,80.,90.,100.,150.,200.]
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -208,8 +208,8 @@ for j in range(nimages):
 		show=True
 		k=0
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-								centre_wavel=wavel,show_pupil=False,dust=True,perturbation=None,
-						   amp=0.2,final_sz=final_sz)
+								centre_wavel=wavel,sz=4096,show_pupil=False,dust=True,perturbation=None,
+						   amp=0.3,final_sz=final_sz)
 	imsz = image.shape[0]
 	show=False
 	k+=1
@@ -228,7 +228,7 @@ uv_samp = a.uv * m2pix + imsz/2 # uv sample coordinates in pixels
 x = a.mask[:,0]
 y = a.mask[:,1]
 
-rev = 1.0
+rev = 1
 ac = shift(fft(shift(image)))
 ac /= (np.abs(ac)).max() / a.nbh
 
@@ -278,17 +278,18 @@ for trial, contrast in enumerate(contrast_list):
 		data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
 		vis2b = np.abs(data_cplx2)
-		vis2b /= vis2b.max()
-		vis2b /= vis2 #normalise to the origin
+		vis2b /= vis2 
+		vis2b /= vis2b.max() #normalise to the origin
+
 		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b)#-np.dot(KerGain,vis2c)
+		kervises[j,:] = np.dot(KerGain,vis2b)
 
 	'''----------------------------------------
 	Extract Visibilities
 	----------------------------------------'''
 
-	paramlimits = [100.,10000.,0.,0.99,-90.,90.,0.02,0.49,contrast/4.,contrast*4.]
+	paramlimits = [50.,10000.,0.,0.99,-90.,90.,0.02,0.49,contrast/4.,contrast*4.]
 
 	hdr = {'tel':'HST',
 		  'filter':wavel,
@@ -432,14 +433,14 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
-		
+
 		model = vis_model(best_params,a)**2.
 		true_model = vis_model(true_params,a)**2.
 
 		plt.clf()
-		plt.errorbar(my_observable,true_model-mvis**2.,xerr=my_error,color='b',alpha=0.5,
+		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
 			ls='',markersize=10,linewidth=2.5)
-		plt.errorbar(my_observable,model-mvis**2.,xerr=my_error,color='k',
+		plt.errorbar(my_observable,model,xerr=my_error,color='k',
 			ls='',markersize=10,linewidth=2.5)
 		plt.xlabel('Measured Differential Square Visibilities')
 		plt.ylabel('Model Differential Square Visibilities')
@@ -463,6 +464,7 @@ Now save!
 ------------------------------------'''
 
 cmin, cmax = np.min(contrast_list), np.max(contrast_list)
+
 vdata = Table({'Semis':vsemis,
 		 'Eccs':veccs,
 		 'Thetas':vthetas,
