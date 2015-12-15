@@ -407,7 +407,7 @@ for trial, contrast in enumerate(contrast_list):
 
 	print '\nDoing raw visibilities'
 	addederror = 0.0001
-	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0)/)**2+addederror**2)
+	my_error =	  np.sqrt((np.std(vis2s)**2,axis=0)**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
