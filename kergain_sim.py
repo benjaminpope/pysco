@@ -143,7 +143,7 @@ for trial, contrast in enumerate(contrast_list):
 	thistime = clock()
 
 	for j in range(nimages):
-		images[j,:,:] = psfs[j,:,:] + shift_image_ft(psf,[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
+		images[j,:,:] = psfs[j,:,:] + shift_image_ft(psfs[j,:,:],[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
 
 		imsz = image.shape[0]
 		show=False
