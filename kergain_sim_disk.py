@@ -189,7 +189,8 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.0,2.0,3.0,4.0,5.,7.5,10.,12.5,15.,17.5,20.,30.,40.,50.,60.,70.,80.,90.,100.,125.,150.,175.,200.,250.,300.]
+contrast_list = [1.0,2.0,3.0,4.0,5.,7.5,10.,12.5,15.,17.5,20.,30.,35.,40.,45.,50.,\
+	55.,60.,65.,70.,75.,80.,85.,90.,95.,100.,105.,110.,115.,120.,125.,130.,135.,140.,145.,150.,175.,200.,250.,300.]
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -336,7 +337,7 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean(kervises,axis=0)
 
 	addederror = 0.000001 # in case there are bad frames
-	my_error =	  np.sqrt((np.std(kervises,axis=0))**2+addederror**2)
+	my_error =	  np.sqrt((np.std(kervises,axis=0)/np.sqrt(kervises.shape[0]))**2+addederror**2)
 	print 'Error:', my_error 
 	
 	def myloglike_kg(cube,ndim,n_params):
@@ -407,7 +408,7 @@ for trial, contrast in enumerate(contrast_list):
 
 	print '\nDoing raw visibilities'
 	addederror = 0.0001
-	my_error =	  np.sqrt(np.std((vis2s)**2,axis=0)**2+addederror**2)
+	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0)/vis2s.shape[0])**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
