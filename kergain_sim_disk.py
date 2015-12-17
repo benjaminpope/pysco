@@ -370,6 +370,13 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
+
+		ksemis[trial] = best_params[0]/4.
+		keccs[trial] = best_params[1]
+		kthetas[trial] = best_params[2]
+		kthicks[trial] = best_params[3]
+		kcons[trial] = best_params[4]
+
 		true_params = [true_vals[0]*4.,true_vals[1],0.,true_vals[2]/float(true_vals[0]),contrast]
 
 		model = np.dot(KerGain,vis_model(best_params,a))
@@ -434,6 +441,12 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
+
+		vsemis[trial] = best_params[0]/4.
+		veccs[trial] = best_params[1]
+		vthetas[trial] = best_params[2]
+		vthicks[trial] = best_params[3]
+		vcons[trial] = best_params[4]
 
 		model = vis_model(best_params,a)**2.
 		true_model = vis_model(true_params,a)**2.
