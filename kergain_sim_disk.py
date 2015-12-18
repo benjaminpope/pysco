@@ -286,7 +286,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b) - np.dot(KerGain,vis2c)
+		kervises[j,:] = np.dot(KerGain,vis2b) - np.dot(KerGain,vis2c-1.) 
 
 	'''----------------------------------------
 	Extract Visibilities
