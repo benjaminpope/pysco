@@ -189,8 +189,9 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [1.0,2.0,3.0,4.0,5.,7.5,10.,12.5,15.,17.5,20.,30.,35.,40.,45.,50.,\
-	55.,60.,65.,70.,75.,80.,85.,90.,95.,100.,105.,110.,115.,120.,125.,130.,135.,140.,145.,150.,175.,200.,250.,300.]
+contrast_list = np.linspace(1.,100.,100)
+contrast_list = np.linspace(1.,100.,10)
+
 ncalcs = len(contrast_list)
 
 ksemis, keccs, kthetas, kthicks, kcons = np.zeros(ncalcs), np.zeros(ncalcs),np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -284,7 +285,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b)
+		kervises[j,:] = np.dot(KerGain,vis2b) - np.dot(KerGain,vis2c)
 
 	'''----------------------------------------
 	Extract Visibilities
@@ -411,11 +412,11 @@ for trial, contrast in enumerate(contrast_list):
 	Now do visibilities
 	-----------------------------------------------'''
 
-	my_observable = np.mean((vis2s)**2,axis=0)
+	my_observable = np.mean((vis2s/vis2c)**2,axis=0)
 
 	print '\nDoing raw visibilities'
 	addederror = 0.0001
-	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0)/vis2s.shape[0])**2+addederror**2)
+	my_error =	  np.sqrt((np.std((vis2s/vis2c)**2,axis=0)/vis2s.shape[0])**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
