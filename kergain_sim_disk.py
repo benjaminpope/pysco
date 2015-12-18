@@ -286,7 +286,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b) - np.dot(KerGain,vis2c-1.) 
+		kervises[j,:] = np.dot(KerGain,vis2b-1) - np.dot(KerGain,vis2c-1.) 
 
 	'''----------------------------------------
 	Extract Visibilities
@@ -312,7 +312,7 @@ for trial, contrast in enumerate(contrast_list):
 		'''Calculate chi2 for single band kernel phase data.
 		Used both in the MultiNest and MCMC Hammer implementations.'''
 		vises = vis_model(cube,kpi)
-		kergains = np.dot(KerGain,vises)
+		kergains = np.dot(KerGain,vises-1.)
 		chi2 = np.sum(((kgd-kergains)/kge)**2)
 		return -chi2/2.
 
@@ -381,8 +381,8 @@ for trial, contrast in enumerate(contrast_list):
 
 		true_params = [true_vals[0]*4.,true_vals[1],0.,true_vals[2]/float(true_vals[0]),contrast]
 
-		model = np.dot(KerGain,vis_model(best_params,a))
-		true_model = np.dot(KerGain,vis_model(true_params,a))
+		model = np.dot(KerGain,vis_model(best_params,a)-1.)
+		true_model = np.dot(KerGain,vis_model(true_params,a)-1.)
 
 		plt.clf()
 		plt.errorbar(my_observable,true_model,xerr=my_error,color='b',alpha=0.5,
@@ -416,7 +416,6 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean((vis2s/vis2c)**2,axis=0)
 
 	print '\nDoing raw visibilities'
-	addederror = 0.0001
 	my_error =	  np.sqrt((np.std((vis2s/vis2c)**2,axis=0)/vis2s.shape[0])**2+addederror**2)
 	print 'Error:', my_error
 
