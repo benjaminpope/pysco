@@ -286,7 +286,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2s[j,:]= vis2b
 		
-		kervises[j,:] = np.dot(KerGain,vis2b-1) - np.dot(KerGain,vis2c-1.) 
+		kervises[j,:] = np.dot(KerGain,vis2b-1.)# - np.dot(KerGain,vis2c-1.) 
 
 	'''----------------------------------------
 	Extract Visibilities
@@ -413,10 +413,10 @@ for trial, contrast in enumerate(contrast_list):
 	Now do visibilities
 	-----------------------------------------------'''
 
-	my_observable = np.mean((vis2s/vis2c)**2,axis=0)
+	my_observable = np.mean((vis2s)**2,axis=0)
 
 	print '\nDoing raw visibilities'
-	my_error =	  np.sqrt((np.std((vis2s/vis2c)**2,axis=0)/vis2s.shape[0])**2+addederror**2)
+	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0)/vis2s.shape[0])**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
