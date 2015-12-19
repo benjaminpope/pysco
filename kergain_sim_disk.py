@@ -190,8 +190,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = np.linspace(1.,100.,100)
-contrast_list = np.linspace(1.,100.,10)
+contrast_list = np.linspace(1.,100.,100.)[::2]
 
 ncalcs = len(contrast_list)
 
@@ -339,7 +338,7 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean(kervises,axis=0)
 
 	addederror = 0.000001 # in case there are bad frames
-	my_error =	  np.sqrt((np.std(kervises,axis=0)/np.sqrt(kervises.shape[0]))**2+addederror**2)
+	my_error =	  np.sqrt((np.std(kervises,axis=0))**2+addederror**2)
 	print 'Error:', my_error 
 	
 	def myloglike_kg(cube,ndim,n_params):
@@ -416,7 +415,7 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean((vis2s)**2,axis=0)
 
 	print '\nDoing raw visibilities'
-	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0)/vis2s.shape[0])**2+addederror**2)
+	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0))**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
