@@ -347,7 +347,7 @@ for trial, contrast in enumerate(contrast_list):
 			plt.xlabel('Measured Visibilities')
 			plt.ylabel('Model Visibilities')
 			plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
-			plt.savefig('vis2_bin_new_%.1f_con.png' % contrast)
+			plt.savefig('vis2_bin_phase_%.1f_con.png' % contrast)
 
 		print 'Visibilities done'
 
@@ -365,9 +365,9 @@ vdata = Table({'Seps':vseps,
 		 'Dthetas':dvthetas,
 		 'Dcons':dvcons})
 
-vdata.write('raw_vis_sims_new_%.0f_%.0f.csv' %  (cmin,cmax))
+vdata.write('raw_vis_sims_phase_%.0f_%.0f.csv' %  (cmin,cmax))
 
-print 'Visibility fits saved to raw_vis_sims_new_%.0f_%.0f.csv' % (cmin,cmax)
+print 'Visibility fits saved to raw_vis_sims_phase_%.0f_%.0f.csv' % (cmin,cmax)
 
 kdata = Table({'Seps':kseps,
 		 'Thetas':kthetas,
@@ -375,9 +375,9 @@ kdata = Table({'Seps':kseps,
 		 'Dseps':dkseps,
 		 'Dthetas':dkthetas,
 		 'Dcons':dkcons})
-kdata.write('kernel_amplitude_sims_new_%.0f_%.0f.csv' % (cmin,cmax))
+kdata.write('kernel_amplitude_sims_phase_%.0f_%.0f.csv' % (cmin,cmax))
 
-print 'Kernel amplitude fits saved to kernel_amplitude_sims_new_%.0f_%.0f.csv' \
+print 'Kernel amplitude fits saved to kernel_amplitude_sims_phase_%.0f_%.0f.csv' \
 	%  (cmin,cmax)
 
 print 'Finished contrast loop'
