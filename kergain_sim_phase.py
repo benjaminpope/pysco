@@ -288,15 +288,15 @@ for trial, contrast in enumerate(contrast_list):
 		if frame == 0:
 			stuff = thing.get_best_fit()
 			best_params = stuff['parameters']
-			model_vises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
+			model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
 
 			plt.clf()
-			plt.errorbar(my_observable,model,xerr=my_error,color='k',
+			plt.errorbar(my_observable,model_kervises,xerr=my_error,color='k',
 				ls='',markersize=10,linewidth=2.5)
 			plt.xlabel('Measured Kernel Amplitudes')
 			plt.ylabel('Model Kernel Amplitudes')
 			plt.title('Model Fit: Kernel Amplitudes, Contrast %.1f' % contrast)
-			plt.savefig('kpfit_bin_%.1f_con.png' % contrast)
+			plt.savefig('kpfit_bin_phase_%.1f_con.png' % contrast)
 		print 'Kernel amplitudes done'
 		print_time(clock()-thistime)
 		print ''
@@ -342,7 +342,7 @@ for trial, contrast in enumerate(contrast_list):
 			model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
 
 			plt.clf()
-			plt.errorbar(my_observable,model,xerr=my_error,color='k',
+			plt.errorbar(my_observable,model_vises,xerr=my_error,color='k',
 				ls='',markersize=10,linewidth=2.5)
 			plt.xlabel('Measured Visibilities')
 			plt.ylabel('Model Visibilities')
