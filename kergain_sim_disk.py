@@ -167,7 +167,7 @@ piston = 0
 final_sz = 1024
 
 nimages = 200
-nimages = 20
+# nimages = 20
 nframes = nimages-1
 
 reso = rad2mas(wavel/(2*rprim))
@@ -353,7 +353,7 @@ for trial, contrast in enumerate(contrast_list):
 	resume=False
 	eff=0.3
 	multi=True,
-	max_iter= 20000
+	max_iter= 10000
 	ndim = n_params
 
 	pymultinest.run(myloglike_kg, myprior, n_params,wrapped_params=[2],
