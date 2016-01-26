@@ -221,8 +221,8 @@ for trial, contrast in enumerate(contrast_list):
 	def myprior(cube, ndim, n_params,paramlimits=paramlimits):
 		cube[0] = (paramlimits[1] - paramlimits[0])*cube[0]+paramlimits[0]
 		cube[1] = (paramlimits[3] - paramlimits[2])*cube[1]+paramlimits[2]
-		for j in range(2,ndim):
-			cube[j] = (paramlimits[5] - paramlimits[4])*cube[j]+paramlimits[4]
+		for k in range(2,ndim):
+			cube[k] = (paramlimits[5] - paramlimits[4])*cube[k]+paramlimits[4]
 			
 	def kg_loglikelihood(cube,kgd,kge,kpi):
 		'''Calculate chi2 for single band kernel amplitude data.
