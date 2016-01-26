@@ -133,7 +133,8 @@ for j in range(nimages):
 		show=False
 		k=0
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-								centre_wavel=wavel,show_pupil=show,dust=True,perturbation='phase',amp=0.05)
+								centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,
+								amp=0.2,seeingamp=0.2)
 
 print_time(clock()-t0)
 
@@ -336,6 +337,7 @@ for trial, contrast in enumerate(contrast_list):
 		vseps[this_j], dvseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 		vthetas[this_j], dvthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 		vcons[this_j], dvcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+		
 		if frame == 0:
 			stuff = thing.get_best_fit()
 			best_params = stuff['parameters']
