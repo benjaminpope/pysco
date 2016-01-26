@@ -189,23 +189,23 @@ for trial, contrast in enumerate(contrast_list):
 	randomGain = np.random.randn(np.shape(KerGain)[0],np.shape(KerGain)[1])
 
 	for j in range(nimages):
-	    image2 = images[j,:,:]
-	    ac2 = shift(fft(shift(image2)))
-	    ac2 /= (np.abs(ac2)).max() / a.nbh
-	    data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
+		image2 = images[j,:,:]
+		ac2 = shift(fft(shift(image2)))
+		ac2 /= (np.abs(ac2)).max() / a.nbh
+		data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
-	    vis2b = np.abs(data_cplx2)
-	    vis2b /= vis2b.max() #normalise to the origin
-	    vis2s[j,:]=vis2b
-	    
-	#     log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
-	    
-	    phases[j,:] = np.angle(data_cplx2)/dtor
-	    kervises[j,:] = np.dot(KerGain,vis2b/vis2)
-	#     kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
-	#     kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
-	#     kercomplexb = np.dot(KerBispect,log_data_complex_b)
-	#     kervises_cplx[j,:] = np.abs(kercomplexb)
+		vis2b = np.abs(data_cplx2)
+		vis2b /= vis2b.max() #normalise to the origin
+		vis2s[j,:]=vis2b
+		
+	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
+		
+		phases[j,:] = np.angle(data_cplx2)/dtor
+		kervises[j,:] = np.dot(KerGain,vis2b/vis2)
+	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
+	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
+	#	 kercomplexb = np.dot(KerBispect,log_data_complex_b)
+	#	 kervises_cplx[j,:] = np.abs(kercomplexb)
 
 	'''----------------------------------------
 	Extract Visibilities
@@ -214,29 +214,29 @@ for trial, contrast in enumerate(contrast_list):
 	paramlimits = [20.,80.,30.,60.,contrast/2.,contrast*2.]
 
 	hdr = {'tel':'HST',
-	      'filter':wavel,
-	      'orient':0}
+		  'filter':wavel,
+		  'orient':0}
 
 	def myprior(cube, ndim, n_params,paramlimits=paramlimits):
-	    cube[0] = (paramlimits[1] - paramlimits[0])*cube[0]+paramlimits[0]
-	    cube[1] = (paramlimits[3] - paramlimits[2])*cube[1]+paramlimits[2]
-	    for j in range(2,ndim):
-	        cube[j] = (paramlimits[5] - paramlimits[4])*cube[j]+paramlimits[4]
-	        
+		cube[0] = (paramlimits[1] - paramlimits[0])*cube[0]+paramlimits[0]
+		cube[1] = (paramlimits[3] - paramlimits[2])*cube[1]+paramlimits[2]
+		for j in range(2,ndim):
+			cube[j] = (paramlimits[5] - paramlimits[4])*cube[j]+paramlimits[4]
+			
 	def kg_loglikelihood(cube,kgd,kge,kpi):
-	    '''Calculate chi2 for single band kernel amplitude data.
-	    Used both in the MultiNest and MCMC Hammer implementations.'''
-	    vises = np.sqrt(pysco.binary_model(cube[0:3],kpi,hdr,vis2=True))
-	    kergains = np.dot(KerGain,vises)
-	    chi2 = np.sum(((kgd-kergains)/kge)**2)
-	    return -chi2/2.
+		'''Calculate chi2 for single band kernel amplitude data.
+		Used both in the MultiNest and MCMC Hammer implementations.'''
+		vises = np.sqrt(pysco.binary_model(cube[0:3],kpi,hdr,vis2=True))
+		kergains = np.dot(KerGain,vises)
+		chi2 = np.sum(((kgd-kergains)/kge)**2)
+		return -chi2/2.
 
 	def vis_loglikelihood(cube,vdata,ve,kpi):
-	    '''Calculate chi2 for single band vis2 data.
-	    Used both in the MultiNest and MCMC Hammer implementations.'''
-	    vises = pysco.binary_model(cube[0:3],kpi,hdr,vis2=True)
-	    chi2 = np.sum(((vdata-vises)/ve)**2)
-	    return -chi2/2.
+		'''Calculate chi2 for single band vis2 data.
+		Used both in the MultiNest and MCMC Hammer implementations.'''
+		vises = pysco.binary_model(cube[0:3],kpi,hdr,vis2=True)
+		chi2 = np.sum(((vdata-vises)/ve)**2)
+		return -chi2/2.
 
 	'''-----------------------------------------------
 	Loop over a set of frames
@@ -254,14 +254,14 @@ for trial, contrast in enumerate(contrast_list):
 			my_observable = kervises[frame+1,:]
 
 		addederror = 0.0001 # in case there are bad frames
-		my_error =      np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
+		my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
 		print 'Error:', my_error 
 		
 		def myloglike_kg(cube,ndim,n_params):
 			try:
-			    loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-			    # loglike = vis_loglikelihood(cube,my_observable,my_error,a)
-			    return loglike
+				loglike = kg_loglikelihood(cube,my_observable,my_error,a)
+				# loglike = vis_loglikelihood(cube,my_observable,my_error,a)
+				return loglike
 			except:
 				return -np.inf 
 
@@ -312,16 +312,16 @@ for trial, contrast in enumerate(contrast_list):
 
 		print '\nDoing raw visibilities'
 		addederror = 0.0001
-		my_error =      np.sqrt(np.std((vis2s/vis2)**2,axis=0)**2+addederror**2)
+		my_error =	  np.sqrt(np.std((vis2s/vis2)**2,axis=0)**2+addederror**2)
 		print 'Error:', my_error
 
 		def myloglike_vis(cube,ndim,n_params):
-		    # loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-		    try:
-		    	loglike = vis_loglikelihood(cube,my_observable,my_error,a)
-		    	return loglike
-		    except:
-		    	return -np.inf
+			# loglike = kg_loglikelihood(cube,my_observable,my_error,a)
+			try:
+				loglike = vis_loglikelihood(cube,my_observable,my_error,a)
+				return loglike
+			except:
+				return -np.inf
 
 		thistime = clock()
 
@@ -353,32 +353,32 @@ for trial, contrast in enumerate(contrast_list):
 
 		print_time(clock()-thistime)
 
-'''------------------------------------
-Now save!
-------------------------------------'''
+	'''------------------------------------
+	Now save!
+	------------------------------------'''
 
-cmin, cmax = np.min(contrast_list), np.max(contrast_list)
-vdata = Table({'Seps':vseps,
-		 'Thetas':vthetas,
-		 'Cons':vcons,
-		 'Dseps':dvseps,
-		 'Dthetas':dvthetas,
-		 'Dcons':dvcons})
+	cmin, cmax = np.min(contrast_list), np.max(contrast_list)
+	vdata = Table({'Seps':vseps,
+			 'Thetas':vthetas,
+			 'Cons':vcons,
+			 'Dseps':dvseps,
+			 'Dthetas':dvthetas,
+			 'Dcons':dvcons})
 
-vdata.write('raw_vis_sims_phase_%.0f_%.0f.csv' %  (cmin,cmax))
+	vdata.write('raw_vis_sims_phase_%.0f_%.0f.csv' %  (cmin,cmax))
 
-print 'Visibility fits saved to raw_vis_sims_phase_%.0f_%.0f.csv' % (cmin,cmax)
+	print 'Visibility fits saved to raw_vis_sims_phase_%.0f_%.0f.csv' % (cmin,cmax)
 
-kdata = Table({'Seps':kseps,
-		 'Thetas':kthetas,
-		 'Cons':kcons,
-		 'Dseps':dkseps,
-		 'Dthetas':dkthetas,
-		 'Dcons':dkcons})
-kdata.write('kernel_amplitude_sims_phase_%.0f_%.0f.csv' % (cmin,cmax))
+	kdata = Table({'Seps':kseps,
+			 'Thetas':kthetas,
+			 'Cons':kcons,
+			 'Dseps':dkseps,
+			 'Dthetas':dkthetas,
+			 'Dcons':dkcons})
+	kdata.write('kernel_amplitude_sims_phase_%.0f_%.0f.csv' % (cmin,cmax))
 
-print 'Kernel amplitude fits saved to kernel_amplitude_sims_phase_%.0f_%.0f.csv' \
-	%  (cmin,cmax)
+	print 'Kernel amplitude fits saved to kernel_amplitude_sims_phase_%.0f_%.0f.csv' \
+		%  (cmin,cmax)
 
 print 'Finished contrast loop'
 print_time(clock()-t0)
