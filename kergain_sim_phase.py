@@ -111,7 +111,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = [10,50,100,150,200,250,300]
+contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
 ncalcs = len(contrast_list) * nframes
 
 kseps, kthetas, kcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -134,7 +134,7 @@ for j in range(nimages):
 		k=0
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
 								centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,
-								amp=0.2,seeingamp=0.2)
+								amp=0.2,seeingamp=0.5)
 
 print_time(clock()-t0)
 
