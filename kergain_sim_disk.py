@@ -167,7 +167,6 @@ piston = 0
 final_sz = 1024
 
 nimages = 200
-# nimages = 20
 nframes = nimages-1
 
 reso = rad2mas(wavel/(2*rprim))
