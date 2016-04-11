@@ -189,7 +189,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = np.linspace(1.,100.,100.)[::2]
+contrast_list = np.linspace(1.,65.,65)
 
 ncalcs = len(contrast_list)
 
