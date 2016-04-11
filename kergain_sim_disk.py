@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import pysco
 from pysco.core import *
 import fitsio
-from k2_epd_george import print_time
 
 from time import time as clock
 from old_diffract_tools import *
@@ -31,6 +30,21 @@ fftfreq = np.fft.fftfreq
 fftn = np.fft.fftn
 rfftn = np.fft.rfftn
 dtor = np.pi/180.0
+
+# =========================================================================
+# =========================================================================
+
+def print_time(t):
+		if t>3600:
+			print 'Time taken: %d h %d m %3f s'\
+			% (np.int(np.floor(t/3600)), np.int(np.floor(np.mod(t,3600)/60)),np.mod(t,60))
+		elif t>60:
+			print 'Time taken: %d m %3f s' % (np.int(np.floor(np.mod(t,3600)/60)),np.mod(t,60) )
+		else:
+			print 'Time taken: %3f s' % t
+
+# =========================================================================
+# =========================================================================
 
 '''------------------------------------------------------------
 kergain_sim.py 
