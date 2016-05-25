@@ -185,6 +185,7 @@ for trial, contrast in enumerate(contrast_list):
 
 	kervises=np.zeros((nimages,KerGain.shape[0]))
 	vis2s = np.zeros((nimages,vis2.shape[0]))
+	vis2_cals = np.zeros((nimages,vis2.shape[0]))
 	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
 	phases = np.zeros((nimages,vis2.shape[0]))
 	randomGain = np.random.randn(np.shape(KerGain)[0],np.shape(KerGain)[1])
@@ -208,10 +209,19 @@ for trial, contrast in enumerate(contrast_list):
 	#	 kercomplexb = np.dot(KerBispect,log_data_complex_b)
 	#	 kervises_cplx[j,:] = np.abs(kercomplexb)
 
-	'''----------------------------------------
-	Extract Visibilities
-	----------------------------------------'''
+	for j in range(nimages):
+		image3 = psfs[j,:,:]
+		ac3 = shift(fft(shift(image3)))
+		ac3 /= (np.abs(ac3)).max() / a.nbh
+		data_cplx3=ac3[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
+		vis2c = np.abs(data_cplx3)
+		vis2c /= vis2c.max() #normalise to the origin
+		vis2_cals[j,:]=vis2c
+
+	vis2cal = np.mean(vis2_cals,axis=0)
+
+		
 	paramlimits = [20.,80.,30.,60.,contrast/2.,contrast*2.]
 
 	hdr = {'tel':'HST',
@@ -307,9 +317,9 @@ for trial, contrast in enumerate(contrast_list):
 		-----------------------------------------------'''
 
 		if frame == 0:
-			my_observable = np.mean((vis2s/vis2)**2,axis=0)
+			my_observable = np.mean((vis2s/vis2cal)**2,axis=0)
 		else:
-			my_observable = (vis2s[frame+1,:]/vis2)**2
+			my_observable = (vis2s[frame+1,:]/vis2cal)**2
 
 		print '\nDoing raw visibilities'
 		addederror = 0.0001

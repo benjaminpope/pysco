@@ -246,7 +246,8 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,v
 		plt.ylim([-4,4])
 		plt.xlabel('m')
 		plt.ylabel('m')
-		plt.title('Input Pupil')
+		plt.savefig('ampscreen.eps')
+		# plt.title('Input Pupil')
 		# cbar = plt.colorbar()
 		plt.show()
 
@@ -257,7 +258,7 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,v
 				interpolation='none',origin='lower')
 			plt.xlabel('m')
 			plt.ylabel('m')
-			plt.title('Input Phase Screen')
+			# plt.title('Input Phase Screen')
 			cbar = plt.colorbar()
 			plt.draw()
 			plt.show()
