@@ -191,6 +191,18 @@ for trial, contrast in enumerate(contrast_list):
 	randomGain = np.random.randn(np.shape(KerGain)[0],np.shape(KerGain)[1])
 
 	for j in range(nimages):
+		image3 = psfs[j,:,:]
+		ac3 = shift(fft(shift(image3)))
+		ac3 /= (np.abs(ac3)).max() / a.nbh
+		data_cplx3=ac3[uv_samp_rev[:,1], uv_samp_rev[:,0]]
+
+		vis2c = np.abs(data_cplx3)
+		vis2c /= vis2c.max() #normalise to the origin
+		vis2_cals[j,:]=vis2c
+
+	vis2cal = np.mean(vis2_cals,axis=0)
+
+	for j in range(nimages):
 		image2 = images[j,:,:]
 		ac2 = shift(fft(shift(image2)))
 		ac2 /= (np.abs(ac2)).max() / a.nbh
@@ -203,24 +215,11 @@ for trial, contrast in enumerate(contrast_list):
 	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
 		
 		phases[j,:] = np.angle(data_cplx2)/dtor
-		kervises[j,:] = np.dot(KerGain,vis2b/vis2)
+		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal)
 	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
 	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
 	#	 kercomplexb = np.dot(KerBispect,log_data_complex_b)
 	#	 kervises_cplx[j,:] = np.abs(kercomplexb)
-
-	for j in range(nimages):
-		image3 = psfs[j,:,:]
-		ac3 = shift(fft(shift(image3)))
-		ac3 /= (np.abs(ac3)).max() / a.nbh
-		data_cplx3=ac3[uv_samp_rev[:,1], uv_samp_rev[:,0]]
-
-		vis2c = np.abs(data_cplx3)
-		vis2c /= vis2c.max() #normalise to the origin
-		vis2_cals[j,:]=vis2c
-
-	vis2cal = np.mean(vis2_cals,axis=0)
-
 		
 	paramlimits = [20.,80.,30.,60.,contrast/2.,contrast*2.]
 
