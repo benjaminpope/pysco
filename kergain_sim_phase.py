@@ -353,9 +353,9 @@ for trial, contrast in enumerate(contrast_list):
 				stuff = thing.get_best_fit()
 				best_params = stuff['parameters']
 				model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
-
+				m = my_error<0.5
 				plt.clf()
-				plt.errorbar(my_observable,model_vises,xerr=my_error,color='k',
+				plt.errorbar(my_observable[m],model_vises[m],xerr=my_error[m],color='k',
 					ls='',markersize=10,linewidth=2.5)
 				plt.xlabel('Measured Visibilities')
 				plt.ylabel('Model Visibilities')
