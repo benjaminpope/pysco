@@ -187,7 +187,7 @@ for trial, contrast in enumerate(contrast_list):
 	vis2s = np.zeros((nimages,vis2.shape[0]))
 	vis2_cals = np.zeros((nimages,vis2.shape[0]))
 	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
-	phases = np.zeros((nimages,vis2.shape[0]))
+	# phases = np.zeros((nimages,vis2.shape[0]))
 	randomGain = np.random.randn(np.shape(KerGain)[0],np.shape(KerGain)[1])
 
 	for j in range(nimages):
@@ -210,11 +210,11 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2b = np.abs(data_cplx2)
 		vis2b /= vis2b.max() #normalise to the origin
-		vis2s[j,:]=vis2b
+		vis2s[j,:]= vis2b
 		
 	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
 		
-		phases[j,:] = np.angle(data_cplx2)/dtor
+		# phases[j,:] = np.angle(data_cplx2)/dtor
 		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal)
 	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
 	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
