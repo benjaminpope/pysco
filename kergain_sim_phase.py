@@ -237,7 +237,7 @@ for trial, contrast in enumerate(contrast_list):
 		'''Calculate chi2 for single band kernel amplitude data.
 		Used both in the MultiNest and MCMC Hammer implementations.'''
 		vises = np.sqrt(pysco.binary_model(cube[0:3],kpi,hdr,vis2=True))
-		kergains = np.dot(KerGain,vises)
+		kergains = np.dot(KerGain,vises-1)
 		chi2 = np.sum(((kgd-kergains)/kge)**2)
 		return -chi2/2.
 
