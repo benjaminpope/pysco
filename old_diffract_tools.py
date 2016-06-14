@@ -36,7 +36,7 @@ def rad2mas(x):
 # =========================================================================
 # =========================================================================
 
-def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None):
+def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None,inner=None):
 
     xs, ys = np.linspace(-5./r0,5./r0,sz), np.linspace(-5./r0,5./r0,sz)
 
@@ -49,6 +49,9 @@ def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None):
     if cutoff is not None:
     	newspec[rr>cutoff] = 0
     	print 'cut off', cutoff
+
+    if inner is not None:
+		newspec[rr<inner] = np.nanmax(newspec[rr>inner])
 
     newspec = shift(newspec)
 

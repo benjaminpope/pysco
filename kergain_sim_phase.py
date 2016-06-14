@@ -215,7 +215,7 @@ for trial, contrast in enumerate(contrast_list):
 	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
 		
 		# phases[j,:] = np.angle(data_cplx2)/dtor
-		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal)
+		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal-1)
 	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
 	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
 	#	 kercomplexb = np.dot(KerBispect,log_data_complex_b)
