@@ -199,7 +199,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2c = np.abs(data_cplx3)
 		vis2c /= vis2c.max() #normalise to the origin
-		vi2sc[vis2c>1] = 1
+		vis2c[vis2c>1] = 1
 		vis2_cals[j,:]=vis2c
 
 	vis2cal = np.mean(vis2_cals,axis=0)
