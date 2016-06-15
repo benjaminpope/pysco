@@ -199,6 +199,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2c = np.abs(data_cplx3)
 		vis2c /= vis2c.max() #normalise to the origin
+		vi2sc[vis2c>1] = 1
 		vis2_cals[j,:]=vis2c
 
 	vis2cal = np.mean(vis2_cals,axis=0)
@@ -211,13 +212,13 @@ for trial, contrast in enumerate(contrast_list):
 
 		vis2b = np.abs(data_cplx2)
 		vis2b /= vis2b.max() #normalise to the origin
-		# vis2b[vis2b>1.] = 1.
+		vis2b[vis2b>1.] = 1.
 		vis2s[j,:]= vis2b
 		
 	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
 		
 		# phases[j,:] = np.angle(data_cplx2)/dtor
-		kervises[j,:] = np.dot(KerGain,vis2b-vis2cal)
+		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal-1.)
 		# kervises[j,:] = np.dot(KerGain,np.sqrt(vis2b/vis2cal)**2-1)
 	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
 	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
@@ -256,7 +257,7 @@ for trial, contrast in enumerate(contrast_list):
 	-----------------------------------------------'''
 
 	my_observable = np.mean(kervises,axis=0)
-	my_observable = np.dot(KerGain,np.sqrt(np.mean((vis2s-vis2cal)**2,axis=0)))
+	my_observable = np.dot(KerGain,np.sqrt(np.mean((vis2s/vis2cal)**2,axis=0))-1.)
 
 	addederror = 0.000001 # in case there are bad frames
 	my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
