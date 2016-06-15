@@ -294,7 +294,9 @@ for trial, contrast in enumerate(contrast_list):
 	model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True)-1.)
 
 	plt.clf()
-	plt.errorbar(my_observable,model_kervises,xerr=my_error,
+	# plt.errorbar(my_observable,model_kervises,xerr=my_error,
+	# 	ls='',markersize=10,linewidth=2.5)
+	plt.plt(my_observable,model_kervises,'.'
 		ls='',markersize=10,linewidth=2.5)
 	plt.xlabel('Measured Kernel Amplitudes')
 	plt.ylabel('Model Kernel Amplitudes')
@@ -342,7 +344,9 @@ for trial, contrast in enumerate(contrast_list):
 	model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
 
 	plt.clf()
-	plt.errorbar(my_observable,model_vises,xerr=my_error,
+	# plt.errorbar(my_observable,model_vises,xerr=my_error,
+	# 	ls='',markersize=10,linewidth=2.5)
+	plt.errorbar(my_observable,model_vises,'.'
 		ls='',markersize=10,linewidth=2.5)
 	plt.xlabel('Measured Visibilities')
 	plt.ylabel('Model Visibilities')
