@@ -287,18 +287,19 @@ for trial, contrast in enumerate(contrast_list):
 	kseps[this_j], dkseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 	kthetas[this_j], dkthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 	kcons[this_j], dkcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-	if frame == 0:
-		stuff = thing.get_best_fit()
-		best_params = stuff['parameters']
-		model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
+	
+	stuff = thing.get_best_fit()
+	best_params = stuff['parameters']
+	model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
 
-		plt.clf()
-		plt.errorbar(my_observable,model_kervises,xerr=my_error,color='k',
-			ls='',markersize=10,linewidth=2.5)
-		plt.xlabel('Measured Kernel Amplitudes')
-		plt.ylabel('Model Kernel Amplitudes')
-		plt.title('Model Fit: Kernel Amplitudes, Contrast %.1f' % contrast)
-		plt.savefig('kpfit_bin_phase_%.1f_con.png' % contrast)
+	plt.clf()
+	plt.errorbar(my_observable,model_kervises,xerr=my_error,color='k',
+		ls='',markersize=10,linewidth=2.5)
+	plt.xlabel('Measured Kernel Amplitudes')
+	plt.ylabel('Model Kernel Amplitudes')
+	plt.title('Model Fit: Kernel Amplitudes, Contrast %.1f' % contrast)
+	plt.savefig('kpfit_bin_phase_%.1f_con.png' % contrast)
+
 	print 'Kernel amplitudes done'
 	print_time(clock()-thistime)
 	print ''
@@ -336,18 +337,17 @@ for trial, contrast in enumerate(contrast_list):
 	vthetas[this_j], dvthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
 	vcons[this_j], dvcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
 	
-	if frame == 0:
-		stuff = thing.get_best_fit()
-		best_params = stuff['parameters']
-		model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
-		m = my_error<0.5
-		plt.clf()
-		plt.errorbar(my_observable[m],model_vises[m],xerr=my_error[m],color='k',
-			ls='',markersize=10,linewidth=2.5)
-		plt.xlabel('Measured Visibilities')
-		plt.ylabel('Model Visibilities')
-		plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
-		plt.savefig('vis2_bin_phase_%.1f_con.png' % contrast)
+	stuff = thing.get_best_fit()
+	best_params = stuff['parameters']
+	model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
+	m = my_error<0.5
+	plt.clf()
+	plt.errorbar(my_observable[m],model_vises[m],xerr=my_error[m],color='k',
+		ls='',markersize=10,linewidth=2.5)
+	plt.xlabel('Measured Visibilities')
+	plt.ylabel('Model Visibilities')
+	plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
+	plt.savefig('vis2_bin_phase_%.1f_con.png' % contrast)
 
 	print 'Visibilities done'
 
