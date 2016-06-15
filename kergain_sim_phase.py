@@ -88,8 +88,8 @@ pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
 
-nimages = 50
-nframes = 49
+nimages = 30
+nframes = 29
 
 reso = rad2mas(wavel/(2*rprim))
 
@@ -183,14 +183,14 @@ for trial, contrast in enumerate(contrast_list):
 	# kpd_phase = np.angle(data_cplx)/dtor
 	# kpd_signal = np.dot(a.KerPhi, kpd_phase)
 
-	kervises=np.zeros((nimages,KerGain.shape[0]))
-	vis2s = np.zeros((nimages,vis2.shape[0]))
-	vis2_cals = np.zeros((nimages,vis2.shape[0]))
-	kpd_signals = np.zeros((nimages,a.KerPhi.shape[0]))
+	kervises=np.zeros((nimages/2,KerGain.shape[0]))
+	vis2s = np.zeros((nimages/2,vis2.shape[0]))
+	vis2_cals = np.zeros((nimages/2,vis2.shape[0]))
+	kpd_signals = np.zeros((nimages/2,a.KerPhi.shape[0]))
 	# phases = np.zeros((nimages,vis2.shape[0]))
 	randomGain = np.random.randn(np.shape(KerGain)[0],np.shape(KerGain)[1])
 
-	for j in range(nimages):
+	for j in range(nimages/2):
 		image3 = psfs[j,:,:]
 		ac3 = shift(fft(shift(image3)))
 		ac3 /= (np.abs(ac3)).max() / a.nbh
@@ -202,8 +202,8 @@ for trial, contrast in enumerate(contrast_list):
 
 	vis2cal = np.mean(vis2_cals,axis=0)
 
-	for j in range(nimages):
-		image2 = images[j,:,:]
+	for j in range(nimages/2):
+		image2 = images[j+nimages/2,:,:]
 		ac2 = shift(fft(shift(image2)))
 		ac2 /= (np.abs(ac2)).max() / a.nbh
 		data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
@@ -215,8 +215,8 @@ for trial, contrast in enumerate(contrast_list):
 	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
 		
 		# phases[j,:] = np.angle(data_cplx2)/dtor
-		# kervises[j,:] = np.dot(KerGain,vis2b/vis2cal-1)
-		kervises[j,:] = np.dot(KerGain,np.sqrt(vis2b/vis2cal)**2-1)
+		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal-1)
+		# kervises[j,:] = np.dot(KerGain,np.sqrt(vis2b/vis2cal)**2-1)
 	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
 	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
 	#	 kercomplexb = np.dot(KerBispect,log_data_complex_b)

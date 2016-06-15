@@ -250,8 +250,8 @@ for trial, contrast in enumerate(contrast_list):
 
 		if frame == 0:
 			my_observable = np.mean(kervises,axis=0)
-		else:
-			my_observable = kervises[frame+1,:]
+		# else:
+		# 	my_observable = kervises[frame+1,:]
 
 		addederror = 0.0001 # in case there are bad frames
 		my_error =      np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
@@ -307,8 +307,8 @@ for trial, contrast in enumerate(contrast_list):
 
 		if frame == 0:
 			my_observable = np.mean((vis2s/vis2)**2,axis=0)
-		else:
-			my_observable = (vis2s[frame+1,:]/vis2)**2
+		# else:
+		# 	my_observable = (vis2s[frame+1,:]/vis2)**2
 
 		print '\nDoing raw visibilities'
 		addederror = 0.0001
