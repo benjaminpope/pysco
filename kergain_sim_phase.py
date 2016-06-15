@@ -112,7 +112,8 @@ Loop over a range of contrasts
 ----------------------------------------'''
 
 contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
-ncalcs = len(contrast_list) * nframes
+contrast_list =  [10,50,100,200,300,400,500]
+ncalcs = len(contrast_list)# * nframes
 
 kseps, kthetas, kcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
 dkseps, dkthetas, dkcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -166,7 +167,6 @@ for trial, contrast in enumerate(contrast_list):
 	Extract Visibilities
 	----------------------------------------'''
 
-
 	rev = 1
 	ac = shift(fft(shift(image)))
 	ac /= (np.abs(ac)).max() / a.nbh
@@ -215,7 +215,7 @@ for trial, contrast in enumerate(contrast_list):
 	#	 log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
 		
 		# phases[j,:] = np.angle(data_cplx2)/dtor
-		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal-1)
+		kervises[j,:] = np.dot(KerGain,vis2b/vis2cal-1.)
 		# kervises[j,:] = np.dot(KerGain,np.sqrt(vis2b/vis2cal)**2-1)
 	#	 kervises[j,:] = np.dot(randomGain, np.sqrt(vis2b)-mvis)
 	#	 kpd_signals[j,:] = np.dot(a.KerPhi,np.angle(data_cplx2))/dtor
@@ -250,123 +250,108 @@ for trial, contrast in enumerate(contrast_list):
 		return -chi2/2.
 
 	'''-----------------------------------------------
-	Loop over a set of frames
+	First do kernel amplitudes
 	-----------------------------------------------'''
 
-	for frame in range(nframes):
+	my_observable = np.mean(kervises,axis=0)
+
+	addederror = 0.000001 # in case there are bad frames
+	my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
+	print 'Error:', my_error 
 	
-		'''-----------------------------------------------
-		First do kernel amplitudes
-		-----------------------------------------------'''
+	def myloglike_kg(cube,ndim,n_params):
+		try:
+			loglike = kg_loglikelihood(cube,my_observable,my_error,a)
+			# loglike = vis_loglikelihood(cube,my_observable,my_error,a)
+			return loglike
+		except:
+			return -np.inf 
 
-		if frame == 0:
-			my_observable = np.mean(kervises,axis=0)
-			# my_observable = np.dot(KerGain,np.sqrt(np.mean((vis2s/vis2cal)**2,axis=0))-1)
-		# else:
-			# continue
-			# my_observable = kervises[frame+1,:]
+	parameters = ['Separation','Position Angle','Contrast']
+	n_params = len(parameters)
 
-			addederror = 0.000001 # in case there are bad frames
-			my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
-			print 'Error:', my_error 
-			
-			def myloglike_kg(cube,ndim,n_params):
-				try:
-					loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-					# loglike = vis_loglikelihood(cube,my_observable,my_error,a)
-					return loglike
-				except:
-					return -np.inf 
+	resume=False
+	eff=0.3
+	multi=True,
+	max_iter= 0
+	ndim = n_params
 
-			parameters = ['Separation','Position Angle','Contrast']
-			n_params = len(parameters)
+	pymultinest.run(myloglike_kg, myprior, n_params, wrapped_params=[1],
+		verbose=True,resume=False)
 
-			resume=False
-			eff=0.3
-			multi=True,
-			max_iter= 0
-			ndim = n_params
+	thing = pymultinest.Analyzer(n_params = n_params)
+	s = thing.get_stats()
 
-			pymultinest.run(myloglike_kg, myprior, n_params, wrapped_params=[1],
-				verbose=True,resume=False)
+	this_j = trial#*nframes + frame
 
-			thing = pymultinest.Analyzer(n_params = n_params)
-			s = thing.get_stats()
+	kseps[this_j], dkseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	kthetas[this_j], dkthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	kcons[this_j], dkcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	if frame == 0:
+		stuff = thing.get_best_fit()
+		best_params = stuff['parameters']
+		model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
 
-			this_j = trial*nframes + frame
+		plt.clf()
+		plt.errorbar(my_observable,model_kervises,xerr=my_error,color='k',
+			ls='',markersize=10,linewidth=2.5)
+		plt.xlabel('Measured Kernel Amplitudes')
+		plt.ylabel('Model Kernel Amplitudes')
+		plt.title('Model Fit: Kernel Amplitudes, Contrast %.1f' % contrast)
+		plt.savefig('kpfit_bin_phase_%.1f_con.png' % contrast)
+	print 'Kernel amplitudes done'
+	print_time(clock()-thistime)
+	print ''
 
-			kseps[this_j], dkseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-			kthetas[this_j], dkthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-			kcons[this_j], dkcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-			if frame == 0:
-				stuff = thing.get_best_fit()
-				best_params = stuff['parameters']
-				model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
+	'''-----------------------------------------------
+	Now do visibilities
+	-----------------------------------------------'''
 
-				plt.clf()
-				plt.errorbar(my_observable,model_kervises,xerr=my_error,color='k',
-					ls='',markersize=10,linewidth=2.5)
-				plt.xlabel('Measured Kernel Amplitudes')
-				plt.ylabel('Model Kernel Amplitudes')
-				plt.title('Model Fit: Kernel Amplitudes, Contrast %.1f' % contrast)
-				plt.savefig('kpfit_bin_phase_%.1f_con.png' % contrast)
-			print 'Kernel amplitudes done'
-			print_time(clock()-thistime)
-			print ''
+	my_observable = np.mean((vis2s/vis2cal)**2,axis=0)
 
-		'''-----------------------------------------------
-		Now do visibilities
-		-----------------------------------------------'''
+	print '\nDoing raw visibilities'
+	addederror = 0.0001
+	my_error =	np.sqrt(np.std((vis2s/vis2cal)**2,axis=0)**2+addederror**2)
+	print 'Error:', my_error
 
-		if frame == 0:
-			my_observable = np.mean((vis2s/vis2cal)**2,axis=0)
-		# else:
-			# continue
-			# my_observable = (vis2s[frame+1,:]/vis2cal)**2
+	def myloglike_vis(cube,ndim,n_params):
+		# loglike = kg_loglikelihood(cube,my_observable,my_error,a)
+		try:
+			loglike = vis_loglikelihood(cube,my_observable,my_error,a)
+			return loglike
+		except:
+			return -np.inf
 
-			print '\nDoing raw visibilities'
-			addederror = 0.0001
-			my_error =	np.sqrt(np.std((vis2s/vis2cal)**2,axis=0)**2+addederror**2)
-			print 'Error:', my_error
+	thistime = clock()
 
-			def myloglike_vis(cube,ndim,n_params):
-				# loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-				try:
-					loglike = vis_loglikelihood(cube,my_observable,my_error,a)
-					return loglike
-				except:
-					return -np.inf
+	pymultinest.run(myloglike_vis, myprior, n_params, wrapped_params=[1],
+		verbose=True,resume=False)
 
-			thistime = clock()
+	thing = pymultinest.Analyzer(n_params = n_params)
+	s = thing.get_stats()
 
-			pymultinest.run(myloglike_vis, myprior, n_params, wrapped_params=[1],
-				verbose=True,resume=False)
+	this_j = trial#*nframes + frame
 
-			thing = pymultinest.Analyzer(n_params = n_params)
-			s = thing.get_stats()
+	vseps[this_j], dvseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
+	vthetas[this_j], dvthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
+	vcons[this_j], dvcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
+	
+	if frame == 0:
+		stuff = thing.get_best_fit()
+		best_params = stuff['parameters']
+		model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
+		m = my_error<0.5
+		plt.clf()
+		plt.errorbar(my_observable[m],model_vises[m],xerr=my_error[m],color='k',
+			ls='',markersize=10,linewidth=2.5)
+		plt.xlabel('Measured Visibilities')
+		plt.ylabel('Model Visibilities')
+		plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
+		plt.savefig('vis2_bin_phase_%.1f_con.png' % contrast)
 
-			this_j = trial*nframes + frame
+	print 'Visibilities done'
 
-			vseps[this_j], dvseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
-			vthetas[this_j], dvthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
-			vcons[this_j], dvcons[this_j] = s['marginals'][2]['median'], s['marginals'][2]['sigma']
-			
-			if frame == 0:
-				stuff = thing.get_best_fit()
-				best_params = stuff['parameters']
-				model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
-				m = my_error<0.5
-				plt.clf()
-				plt.errorbar(my_observable[m],model_vises[m],xerr=my_error[m],color='k',
-					ls='',markersize=10,linewidth=2.5)
-				plt.xlabel('Measured Visibilities')
-				plt.ylabel('Model Visibilities')
-				plt.title('Model Fit: Visibilities, Contrast %.1f' % contrast)
-				plt.savefig('vis2_bin_phase_%.1f_con.png' % contrast)
-
-			print 'Visibilities done'
-
-			print_time(clock()-thistime)
+	print_time(clock()-thistime)
 
 	'''------------------------------------
 	Now save!
