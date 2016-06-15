@@ -137,7 +137,7 @@ for j in range(nimages):
 		k=0
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
 								centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,
-								amp=0.0,seeingamp=1.5)
+								amp=0.0,seeingamp=0.5)
 
 print_time(clock()-t0)
 
