@@ -296,7 +296,7 @@ for trial, contrast in enumerate(contrast_list):
 	plt.clf()
 	# plt.errorbar(my_observable,model_kervises,xerr=my_error,
 	# 	ls='',markersize=10,linewidth=2.5)
-	plt.plt(my_observable,model_kervises,'.'
+	plt.plt(my_observable,model_kervises,'.',
 		ls='',markersize=10,linewidth=2.5)
 	plt.xlabel('Measured Kernel Amplitudes')
 	plt.ylabel('Model Kernel Amplitudes')
@@ -346,7 +346,7 @@ for trial, contrast in enumerate(contrast_list):
 	plt.clf()
 	# plt.errorbar(my_observable,model_vises,xerr=my_error,
 	# 	ls='',markersize=10,linewidth=2.5)
-	plt.errorbar(my_observable,model_vises,'.'
+	plt.errorbar(my_observable,model_vises,'.',
 		ls='',markersize=10,linewidth=2.5)
 	plt.xlabel('Measured Visibilities')
 	plt.ylabel('Model Visibilities')
