@@ -15,14 +15,15 @@ from swiftmask import swiftpupil
 
 import matplotlib as mpl
 from astropy.table import Table
+mpl.style.use('seaborn-colorblind')
 
 
-mpl.rcParams['figure.figsize']=(8.0,6.0)	#(6.0,4.0)
-mpl.rcParams['font.size']= 18			   #10 
-mpl.rcParams['savefig.dpi']=100			 #72 
-mpl.rcParams['axes.labelsize'] = 16
-mpl.rcParams['xtick.labelsize'] = 12
-mpl.rcParams['ytick.labelsize'] = 12
+mpl.rcParams['figure.figsize']=(8.0,6.0)    #(6.0,4.0)
+mpl.rcParams['font.size']= 16              #10 
+mpl.rcParams['savefig.dpi']=200             #72 
+mpl.rcParams['axes.labelsize'] = 14
+mpl.rcParams['xtick.labelsize'] = 10
+mpl.rcParams['ytick.labelsize'] = 10
 
 shift = np.fft.fftshift
 fft   = np.fft.fft2
@@ -111,7 +112,8 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
+# contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
+contrast_list =  [10,25,50,75,100,125,150,175,200,250]
 # contrast_list =  [10,50,100,200,300,400,500]
 ncalcs = len(contrast_list)# * nframes
 
@@ -262,7 +264,6 @@ for trial, contrast in enumerate(contrast_list):
 	def myloglike_kg(cube,ndim,n_params):
 		try:
 			loglike = kg_loglikelihood(cube,my_observable,my_error,a)
-			# loglike = vis_loglikelihood(cube,my_observable,my_error,a)
 			return loglike
 		except:
 			return -np.inf 
@@ -290,10 +291,10 @@ for trial, contrast in enumerate(contrast_list):
 	
 	stuff = thing.get_best_fit()
 	best_params = stuff['parameters']
-	model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True))
+	model_kervises = np.dot(KerGain,pysco.binary_model(best_params,a,hdr,vis2=True)-1.)
 
 	plt.clf()
-	plt.errorbar(my_observable,model_kervises,xerr=my_error,color='k',
+	plt.errorbar(my_observable,model_kervises,xerr=my_error,
 		ls='',markersize=10,linewidth=2.5)
 	plt.xlabel('Measured Kernel Amplitudes')
 	plt.ylabel('Model Kernel Amplitudes')
@@ -311,12 +312,11 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean((vis2s/vis2cal)**2,axis=0)
 
 	print '\nDoing raw visibilities'
-	addederror = 0.0001
+	addederror = 0.000001
 	my_error =	np.sqrt(np.std((vis2s/vis2cal)**2,axis=0)**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
-		# loglike = kg_loglikelihood(cube,my_observable,my_error,a)
 		try:
 			loglike = vis_loglikelihood(cube,my_observable,my_error,a)
 			return loglike
@@ -340,9 +340,9 @@ for trial, contrast in enumerate(contrast_list):
 	stuff = thing.get_best_fit()
 	best_params = stuff['parameters']
 	model_vises = pysco.binary_model(best_params,a,hdr,vis2=True)
-	m = my_error<0.5
+
 	plt.clf()
-	plt.errorbar(my_observable[m],model_vises[m],xerr=my_error[m],color='k',
+	plt.errorbar(my_observable,model_vises,xerr=my_error,
 		ls='',markersize=10,linewidth=2.5)
 	plt.xlabel('Measured Visibilities')
 	plt.ylabel('Model Visibilities')
