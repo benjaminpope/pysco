@@ -89,8 +89,7 @@ pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
 
-nimages = 30
-nframes = 29
+nimages = 80
 
 reso = rad2mas(wavel/(2*rprim))
 
@@ -115,7 +114,7 @@ Loop over a range of contrasts
 # contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
 contrast_list =  [10,25,50,75,100,125,150,175,200,250]
 # contrast_list =  [10,50,100,200,300,400,500]
-ncalcs = len(contrast_list)# * nframes
+ncalcs = len(contrast_list)
 
 kseps, kthetas, kcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
 dkseps, dkthetas, dkcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
@@ -258,7 +257,7 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean(kervises,axis=0)
 
 	addederror = 0.000001 # in case there are bad frames
-	my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
+	my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
 	print 'Error:', my_error 
 	
 	def myloglike_kg(cube,ndim,n_params):
@@ -283,7 +282,7 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	s = thing.get_stats()
 
-	this_j = trial#*nframes + frame
+	this_j = trial
 
 	kseps[this_j], dkseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 	kthetas[this_j], dkthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
@@ -334,7 +333,7 @@ for trial, contrast in enumerate(contrast_list):
 	thing = pymultinest.Analyzer(n_params = n_params)
 	s = thing.get_stats()
 
-	this_j = trial#*nframes + frame
+	this_j = trial
 
 	vseps[this_j], dvseps[this_j] = s['marginals'][0]['median'], s['marginals'][0]['sigma']
 	vthetas[this_j], dvthetas[this_j] = s['marginals'][1]['median'], s['marginals'][1]['sigma']
