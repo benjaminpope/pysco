@@ -260,6 +260,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		if frame == 0:
 			my_observable = np.mean(kervises,axis=0)
+			my_observable = np.dot(KerGain,np.sqrt(np.mean((vis2s/vis2cal)**2,axis=0))-1)
 		# else:
 			# continue
 			# my_observable = kervises[frame+1,:]
