@@ -265,7 +265,7 @@ for trial, contrast in enumerate(contrast_list):
 			# continue
 			# my_observable = kervises[frame+1,:]
 
-			addederror = 0.0001 # in case there are bad frames
+			addederror = 0.000001 # in case there are bad frames
 			my_error =	  np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
 			print 'Error:', my_error 
 			
