@@ -62,12 +62,33 @@ def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None,inner=None):
 # =========================================================================
 # =========================================================================
 
-def screen(seeingfile,xs=None,cutoff=None):
+def kolmogorov_scint(sz,height=3e4,wavel=1e-6,r0=1e-3,outer=100):
+
+    xs, ys = np.linspace(-5./r0,5./r0,sz), np.linspace(-5./r0,5./r0,sz)
+
+    xx, yy = np.meshgrid(xs,ys)
+
+    rr = np.sqrt(xx**2+yy**2)
+    kf = (4*np.pi/wavel/height)
+    newspec = 4*0.0229*r0**(5./3.)*(rr**(-11./3.)) * np.sin(rr**2./kf**2.)**2.
+    newspec[rr<(1/outer)] = 1
+    newspec = shift(newspec)
+    newspec[~np.isfinite(newspec)] = 0
+
+    return newspec
+
+# =========================================================================
+# =========================================================================
+
+def screen(seeingfile,xs=None,cutoff=None,mode='amp'):
 	'''Generate a phase screen'''
 	try:
 		seeing = pf.getdata(seeingfile)
 	except:
-		seeing = kolmogorov_spectrum(2080,cutoff=None)
+		if mode == 'amp':
+			seeing = kolmogorov_scint(2080,cutoff=None)
+		else: 
+			seeing = kolmogorov_spectrum(2080,cutoff=None)
 
 	seeing = np.sqrt(shift(seeing)) + 0j # center and square root to get amplitudes; 0j to make it complex!
 
@@ -81,7 +102,7 @@ def screen(seeingfile,xs=None,cutoff=None):
 
 	noise = shift(fft(shift(noise)))
 
-	rprim = 5.093/2. # E-ELT
+	rprim = 5.093/2. # Palomar
 
 	seeing *= 2.*rprim*noise # multiply amplitudes by pupil plane noise
 	# remember seeing is normalised to the pupil diameter in metres!
@@ -100,7 +121,7 @@ def screen(seeingfile,xs=None,cutoff=None):
 # =========================================================================
 
 def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,verbose=True,
-	show_pupil=False,telescope=None,centre_wavel=900e-9,dust=None,seeingamp=0.0,
+	show_pupil=False,telescope=None,centre_wavel=900e-9,mode='amp',seeingamp=0.0,
 	perturbation='phase',amp=0.3,cutoff=None,sz=4096/2,final_sz=256):
 	'''Run a diffraction simulation!'''
 
@@ -195,23 +216,27 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,v
 	# mask /= mask.max()
 	# mask[(rr1>rprim)* (rr2 > rprim)] = 0
 
-	if dust:
-		interpfun = screen(None,xs=xs+xs.min(),cutoff=cutoff)
+	if mode == 'amp':
+		interpfun = screen(None,xs=xs+xs.min(),cutoff=cutoff,mode='amp')
 		scintillation = interpfun(xs+xs.min(),ys+ys.min())
 		scintillation = (scintillation-scintillation.min())/(scintillation.max()-scintillation.min())
 		scintillation *= np.abs(mask)
 		keep = np.isfinite(scintillation) * (scintillation>0)
-
-		if seeingamp > 0.01:
-			phasescreen = np.sqrt(np.abs(scintillation)) ## proportional to sqrt scintillation
-			phasescreen = (phasescreen-phasescreen.min())/(phasescreen.max()-phasescreen.min())
-
-			phasescreen *= seeingamp
-			phasescreen -= np.median(phasescreen)
-			pupil *= np.exp(1.j*phasescreen)
-
 		scintillation -= np.median(scintillation[keep])
 		pupil *= (1+amp*scintillation)
+
+	elif mode == 'phase':
+		interpfun = screen(None,xs=xs+xs.min(),cutoff=cutoff,mode='phase')
+		phasescreen = interpfun(xs+xs.min(),ys+ys.min())
+		phasescreen = (phasescreen-phasescreen.min())/(phasescreen.max()-phasescreen.min())
+		phasescreen *= np.abs(mask)
+		keep = np.isfinite(phasescreen)
+
+		phasescreen *= seeingamp
+		phasescreen -= np.median(phasescreen)
+		pupil *= np.exp(1.j*phasescreen)
+
+
 
 	pupil *= mask
 
