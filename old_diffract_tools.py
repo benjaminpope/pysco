@@ -86,7 +86,7 @@ def screen(seeingfile,xs=None,cutoff=None,mode='amp'):
 		seeing = pf.getdata(seeingfile)
 	except:
 		if mode == 'amp':
-			seeing = kolmogorov_scint(2080,cutoff=None)
+			seeing = kolmogorov_scint(2080)
 		else: 
 			seeing = kolmogorov_spectrum(2080,cutoff=None)
 
