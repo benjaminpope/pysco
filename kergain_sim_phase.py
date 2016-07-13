@@ -264,7 +264,7 @@ for trial, contrast in enumerate(contrast_list):
 	my_observable = np.mean(np.dot(np.dot(my_s_matrix,KerGain),
 		(vis2s/vis2cal).T-1.),axis=1)
 
-	addederror = 0.001 # in case there are bad frames
+	addederror = np.std(my_observable) # in case there are bad frames
 	# my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
 	my_error = np.sqrt(my_eigs**2+addederror**2)
 
