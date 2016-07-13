@@ -124,7 +124,7 @@ t0 = clock()
 sep, theta = 48, 45
 xb,yb = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 
-print 'x',x,',y',y
+print 'x',xb,',y',yb
 
 for j in range(nimages):
 	if k == 10:
