@@ -103,7 +103,6 @@ imsz = image.shape[0]
 
 psfs = np.zeros((nimages,imsz,imsz))
 
-k=0
 show=True
 
 '''----------------------------------------
@@ -129,10 +128,6 @@ xb,yb = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 print 'x',xb,',y',yb
 
 for j in range(nimages):
-	if k == 10:
-		print 'Up to', j
-		show=False
-		k=0
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
 								centre_wavel=wavel,show_pupil=show,mode='amp',
 								perturbation=None,amp=0.05)
