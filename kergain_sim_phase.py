@@ -257,12 +257,12 @@ for trial, contrast in enumerate(contrast_list):
 	-----------------------------------------------'''
 
 	my_observable = np.mean(kervises,axis=0)
-	raw_data = KerGain,np.sqrt(np.mean((vis2s/vis2cal)**2,axis=0))-1.
+	raw_data = np.dot(KerGain,np.sqrt((vis2s/vis2cal)**2).T-1.).T
 
 	mycov = np.cov(raw_data.T) # calculate statistically independent KA
-	my_eigs, my_s_matrix = np.eigh(mycov) # hermitian
+	my_eigs, my_s_matrix = np.linalg.eigh(mycov) # hermitian
 	my_observable = np.mean(np.dot(np.dot(my_s_matrix,KerGain),
-		(vis2s/vis2cal)-1.),axis=0)
+		(vis2s/vis2cal).T-1.),axis=1)
 
 	addederror = 0.000001 # in case there are bad frames
 	# my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)

@@ -265,6 +265,8 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,v
 	if show_pupil:
 		toy = np.copy(pupil)
 		toy[mask==0] = np.nan
+		plt.figure()
+		plt.clf()
 		plt.imshow(np.abs(toy),extent=[xs.min(),xs.max(),xs.min(),xs.max()],
 			interpolation='none')
 		# plt.colorbar(ticks=np.linspace(0.98,1.03,11))
@@ -274,7 +276,7 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,v
 		plt.ylim([-4,4])
 		plt.xlabel('m')
 		plt.ylabel('m')
-		plt.savefig('ampscreen.eps')
+		plt.savefig('ampscreen.png')
 		# plt.title('Input Pupil')
 		# cbar = plt.colorbar()
 		plt.show()
