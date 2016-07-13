@@ -122,7 +122,7 @@ dvseps, dvthetas, dvcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
 t0 = clock()
 
 sep, theta = 48, 45
-x,y = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
+xb,yb = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 
 print 'x',x,',y',y
 
@@ -144,7 +144,7 @@ for trial, contrast in enumerate(contrast_list):
 	images = np.zeros((nimages,imsz,imsz))
 
 	for j in range(nimages):
-		images[j,:,:] = np.copy(psfs[j,:,:]) + shift_image_ft(np.copy(psfs[j,:,:]),[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
+		images[j,:,:] = np.copy(psfs[j,:,:]) + shift_image_ft(np.copy(psfs[j,:,:]),[-yb,-xb])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
 
 		imsz = images.shape[1]
 		  
