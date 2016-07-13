@@ -135,7 +135,7 @@ for j in range(nimages):
 		k=0
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
 								centre_wavel=wavel,show_pupil=show,mode='amp',
-								perturbation=None,amp=0.2)
+								perturbation=None,amp=0.05)
 
 print_time(clock()-t0)
 
@@ -228,7 +228,7 @@ for trial, contrast in enumerate(contrast_list):
 	    '''Calculate chi2 for single band kernel amplitude data.
 	    Used both in the MultiNest and MCMC Hammer implementations.'''
 	    vises = np.sqrt(pysco.binary_model(cube[0:3],kpi,hdr,vis2=True))
-	    kergains = np.dot(KerGain,vises)
+	    kergains = np.dot(KerGain,vises-1.)
 	    chi2 = np.sum(((kgd-kergains)/kge)**2)
 	    return -chi2/2.
 
