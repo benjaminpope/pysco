@@ -96,7 +96,7 @@ reso = rad2mas(wavel/(2*rprim))
 print 'Minimum Lambda/D = %.3g mas' % reso
 
 image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing=None,verbose=False,\
-							 centre_wavel=wavel,show_pupil=False,dust=False)
+							 centre_wavel=wavel,show_pupil=False,mode=None)
 
 # image = recenter(image,sg_rad=25)
 imsz = image.shape[0]
@@ -135,8 +135,8 @@ for j in range(nimages):
 		show=False
 		k=0
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-								centre_wavel=wavel,show_pupil=show,dust=True,perturbation=None,
-								amp=0.0,seeingamp=0.75)
+								centre_wavel=wavel,show_pupil=show,mode='phase',
+								perturbation=None,amp=0.0,seeingamp=0.75)
 
 print_time(clock()-t0)
 
