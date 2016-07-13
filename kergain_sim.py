@@ -100,7 +100,6 @@ image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing
 # image = recenter(image,sg_rad=25)
 imsz = image.shape[0]
 
-images = np.zeros((nimages,imsz,imsz))
 psfs = np.zeros((nimages,imsz,imsz))
 
 k=0
@@ -142,13 +141,12 @@ print_time(clock()-t0)
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
 	thistime = clock()
+	images = np.zeros((nimages,imsz,imsz))
 
 	for j in range(nimages):
-		images[j,:,:] = psfs[j,:,:] + shift_image_ft(psfs[j,:,:],[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
+		images[j,:,:] = np.copy(psfs[j,:,:]) + shift_image_ft(np.copy(psfs[j,:,:]),[-y,-x])/contrast#shift_image(psf,x=x,y=y,doRoll=True)/contrast
 
-		imsz = image.shape[0]
-		show=False
-		k+=1
+		imsz = images.shape[1]
 		  
 	'''----------------------------------------
 	Initialise pysco with a pupil model
