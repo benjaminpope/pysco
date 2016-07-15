@@ -62,7 +62,7 @@ def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None,inner=None):
 # =========================================================================
 # =========================================================================
 
-def kolmogorov_scint(sz,height=2e4,wavel=1e-6,r0=1e-2,inner=5e-3):
+def kolmogorov_scint(sz,height=5e4,wavel=1e-6,r0=1e-2,inner=5e-3):
 
     xs, ys = np.linspace(-5./r0,5./r0,sz), np.linspace(-5./r0,5./r0,sz)
 

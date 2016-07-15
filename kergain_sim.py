@@ -134,6 +134,33 @@ for j in range(nimages):
 
 print_time(clock()-t0)
 
+'''----------------------------------------
+Initialise pysco with a pupil model
+----------------------------------------'''
+
+# meter to pixel conversion factor
+scale = 1.0
+m2pix = mas2rad(spaxel) * imsz/ wavel * scale
+uv_samp = a.uv * m2pix + imsz/2 # uv sample coordinates in pixels
+
+x = a.mask[:,0]
+y = a.mask[:,1]
+
+rev = 1
+ac = shift(fft(shift(image)))
+ac /= (np.abs(ac)).max() / a.nbh
+
+uv_samp_rev=np.cast['int'](np.round(uv_samp))
+uv_samp_rev[:,0]*=rev
+data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
+
+vis2 = np.abs(data_cplx)
+vis2 /= vis2.max() #normalise to the origin
+
+'''----------------------------------------
+Now loop over simulated binaries
+----------------------------------------'''
+
 
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
@@ -146,32 +173,8 @@ for trial, contrast in enumerate(contrast_list):
 		imsz = images.shape[1]
 		  
 	'''----------------------------------------
-	Initialise pysco with a pupil model
-	----------------------------------------'''
-
-	# meter to pixel conversion factor
-	scale = 1.0
-	m2pix = mas2rad(spaxel) * imsz/ wavel * scale
-	uv_samp = a.uv * m2pix + imsz/2 # uv sample coordinates in pixels
-
-	x = a.mask[:,0]
-	y = a.mask[:,1]
-
-	'''----------------------------------------
 	Extract Visibilities
 	----------------------------------------'''
-
-
-	rev = 1
-	ac = shift(fft(shift(image)))
-	ac /= (np.abs(ac)).max() / a.nbh
-
-	uv_samp_rev=np.cast['int'](np.round(uv_samp))
-	uv_samp_rev[:,0]*=rev
-	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
-
-	vis2 = np.abs(data_cplx)
-	vis2 /= vis2.max() #normalise to the origin
 
 	mvis = a.RED/a.RED.max().astype('float')
 
@@ -242,7 +245,7 @@ for trial, contrast in enumerate(contrast_list):
 	# else:
 	# 	my_observable = kervises[frame+1,:]
 
-	addederror = 0.0001 # in case there are bad frames
+	addederror = 0.00001 # in case there are bad frames
 	my_error =      np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
 	print 'Error:', my_error 
 	
