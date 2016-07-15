@@ -89,7 +89,7 @@ spaxel = 12
 piston = 0
 
 nimages = 50
-nimages = 5
+nimages = 100
 
 reso = rad2mas(wavel/(2*rprim))
 
@@ -110,7 +110,7 @@ Loop over a range of contrasts
 ----------------------------------------'''
 
 contrast_list = [350,400,450,500]#[10,50,100,150,200,250,300]
-contrast_list = [10,50,100,150,200,250,300,350,400,450,50]
+contrast_list = [10,50,100,150,200,250,300,350,400,450,500]
 # contrast_list = [10,50]
 ncalcs = len(contrast_list)
 
