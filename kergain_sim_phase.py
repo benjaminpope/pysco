@@ -237,13 +237,6 @@ for trial, contrast in enumerate(contrast_list):
 		for k in range(2,ndim):
 			cube[k] = (paramlimits[5] - paramlimits[4])*cube[k]+paramlimits[4]
 			
-	def kg_loglikelihood(cube,kgd,kge,kpi,s_matrix):
-		'''Calculate chi2 for single band kernel amplitude data.
-		Used both in the MultiNest and MCMC Hammer implementations.'''
-		vises = np.sqrt(pysco.binary_model(cube[0:3],kpi,hdr,vis2=True))
-		kergains = np.dot(np.dot(s_matrix,KerGain),vises-1)
-		chi2 = np.sum(((kgd-kergains)/kge)**2)
-		return -chi2/2.
 
 	def vis_loglikelihood(cube,vdata,ve,kpi):
 		'''Calculate chi2 for single band vis2 data.
@@ -261,8 +254,17 @@ for trial, contrast in enumerate(contrast_list):
 
 	mycov = np.cov(raw_data.T) # calculate statistically independent KA
 	my_eigs, my_s_matrix = np.linalg.eigh(mycov) # hermitian
-	my_observable = np.mean(np.dot(np.dot(my_s_matrix,KerGain),
-		(vis2s/vis2cal).T-1.),axis=1)
+	thismatrix = np.dot(my_s_matrix,KerGain)
+
+	my_observable = np.mean(np.dot(thismatrix,(vis2s/vis2cal).T-1.),axis=1)
+
+	def kg_loglikelihood(cube,kgd,kge,kpi):
+		'''Calculate chi2 for single band kernel amplitude data.
+		Used both in the MultiNest and MCMC Hammer implementations.'''
+		vises = np.sqrt(pysco.binary_model(cube[0:3],kpi,hdr,vis2=True))
+		kergains = np.dot(thismatrix,vises-1)
+		chi2 = np.sum(((kgd-kergains)/kge)**2)
+		return -chi2/2.
 
 	addederror = np.std(my_observable) # in case there are bad frames
 	# my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
@@ -272,7 +274,7 @@ for trial, contrast in enumerate(contrast_list):
 	
 	def myloglike_kg(cube,ndim,n_params):
 		try:
-			loglike = kg_loglikelihood(cube,my_observable,my_error,a,my_s_matrix)
+			loglike = kg_loglikelihood(cube,my_observable,my_error,a)
 			return loglike
 		except:
 			return -np.inf 
