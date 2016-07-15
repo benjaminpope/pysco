@@ -62,7 +62,7 @@ def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None,inner=None):
 # =========================================================================
 # =========================================================================
 
-def kolmogorov_scint(sz,height=3e4,wavel=1e-6,r0=1e-3,outer=100):
+def kolmogorov_scint(sz,height=3e4,wavel=1e-6,r0=1e-3,inner=5e-3):
 
     xs, ys = np.linspace(-5./r0,5./r0,sz), np.linspace(-5./r0,5./r0,sz)
 
@@ -71,7 +71,7 @@ def kolmogorov_scint(sz,height=3e4,wavel=1e-6,r0=1e-3,outer=100):
     rr = np.sqrt(xx**2+yy**2)
     kf = (4*np.pi/wavel/height)
     newspec = 4*0.0229*r0**(5./3.)*(rr**(-11./3.)) * np.sin(rr**2./kf**2.)**2.
-    newspec[rr<(1/outer)] = 1
+    newspec[rr>(1/inner)] = 0
     newspec = shift(newspec)
     newspec[~np.isfinite(newspec)] = 0
 
@@ -290,6 +290,7 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,v
 			plt.ylabel('m')
 			# plt.title('Input Phase Screen')
 			cbar = plt.colorbar()
+			pplt.savefig('phasescreen.png')
 			plt.draw()
 			plt.show()
 
