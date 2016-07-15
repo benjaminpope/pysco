@@ -89,7 +89,7 @@ pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
 
-nimages = 2000
+nimages = 200
 
 reso = rad2mas(wavel/(2*rprim))
 
