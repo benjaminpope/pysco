@@ -110,7 +110,7 @@ Loop over a range of contrasts
 ----------------------------------------'''
 
 contrast_list = [350,400,450,500]#[10,50,100,150,200,250,300]
-contrast_list = [10,50,100,150,200,250,300,350,400,450,500,700]
+contrast_list = [10,50,100,150,200,250,300,350,400,450,50]
 # contrast_list = [10,50]
 ncalcs = len(contrast_list)
 

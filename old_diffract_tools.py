@@ -62,14 +62,14 @@ def kolmogorov_spectrum(sz,r0 = 0.01,cutoff=None,inner=None):
 # =========================================================================
 # =========================================================================
 
-def kolmogorov_scint(sz,height=3e4,wavel=1e-6,r0=1e-3,inner=5e-3):
+def kolmogorov_scint(sz,height=2e4,wavel=1e-6,r0=1e-2,inner=5e-3):
 
     xs, ys = np.linspace(-5./r0,5./r0,sz), np.linspace(-5./r0,5./r0,sz)
 
     xx, yy = np.meshgrid(xs,ys)
 
     rr = np.sqrt(xx**2+yy**2)
-    kf = (4*np.pi/wavel/height)
+    kf = (4*np.pi/wavel/height)**0.5
     newspec = 4*0.0229*r0**(5./3.)*(rr**(-11./3.)) * np.sin(rr**2./kf**2.)**2.
     newspec[rr>(1/inner)] = 0
     newspec = shift(newspec)
