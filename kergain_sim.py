@@ -130,7 +130,7 @@ print 'x',xb,',y',yb
 for j in range(nimages):
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
 		verbose=False,centre_wavel=wavel,show_pupil=show,mode='amp',
-		perturbation=None,amp=0.05)
+		perturbation=None,amp=0.1)
 
 print_time(clock()-t0)
 
