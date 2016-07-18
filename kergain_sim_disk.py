@@ -188,8 +188,7 @@ reso = rad2mas(wavel/(2*rprim))
 print 'Minimum Lambda/D = %.3g mas' % reso
 
 image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing=None,verbose=False,\
-							 centre_wavel=wavel,show_pupil=False,dust=False,sz=4096,final_sz=final_sz)
-
+							 centre_wavel=wavel,show_pupil=False,mode=None)
 # image = recenter(image,sg_rad=25)
 imsz = image.shape[0]
 
@@ -203,7 +202,7 @@ show=False
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = np.linspace(1.,65.,65)
+contrast_list = np.linspace(1.,200.,50)
 
 ncalcs = len(contrast_list)
 
@@ -218,17 +217,11 @@ t0 = clock()
 true_vals = (300.,0.95,100)
 
 for j in range(nimages):
-	if k == 10:
-		print 'Up to', j
-		show=True
-		k=0
-	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
-								centre_wavel=wavel,sz=4096,show_pupil=False,dust=True,perturbation=None,
-						   amp=0.3,final_sz=final_sz)
+	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
+		verbose=False,centre_wavel=wavel,show_pupil=show,mode='amp',
+		perturbation=None,amp=0.1)	
 	imsz = image.shape[0]
-	show=False
-	k+=1
-	  
+
 print_time(clock()-t0)
 
 '''----------------------------------------
