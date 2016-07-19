@@ -89,7 +89,7 @@ pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
 
-nimages = 2000
+nimages = 200
 
 reso = rad2mas(wavel/(2*rprim))
 
@@ -112,7 +112,7 @@ Loop over a range of contrasts
 ----------------------------------------'''
 
 # contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
-contrast_list =  [10,25,50,75,100,125,150,175,200,250,300,350,400,450,500,600,700,800,900,1000,1100,1200,1300,1400,1500]
+contrast_list =  [10,25,50,75,100,125,150,175,200,250,300,350,400,450,500,600,700,800,900,1000,1100,1200,1300,1400,1]
 # contrast_list =  [10,50,100,200,300,400,500]
 ncalcs = len(contrast_list)
 
@@ -129,17 +129,23 @@ xb,yb = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 
 print 'x',xb,',y',yb
 
-for j in range(nimages):
-	if k == 10:
-		print 'Up to', j
-		show=False
-		k=0
-	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
+seeingamp = 0.75
+
+try:
+	dummy = fitsio.FITS('psf_cube_phase_%.2f.fits' % seeingamp)
+	psfs = dummy[0][:,:,:]
+	print 'Loaded PSFs'
+except:
+	print 'Creating PSFs'
+	for j in range(nimages):
+		psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
 								centre_wavel=wavel,show_pupil=show,mode='phase',
-								perturbation=None,amp=0.0,seeingamp=0.75)
+								perturbation=None,amp=0.0,seeingamp=seeingamp)
+	fitsio.write('psf_cube_phase_%.2f.fits' % seeingamp,psfs)
 
 print_time(clock()-t0)
 
+	
 
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast

@@ -180,7 +180,6 @@ spaxel = 12
 piston = 0
 
 nimages = 200
-nframes = nimages-1
 
 reso = rad2mas(wavel/(2*rprim))
 
@@ -212,11 +211,21 @@ t0 = clock()
 
 true_vals = (300.,0.95,100)
 
-for j in range(nimages):
-	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
-		verbose=False,centre_wavel=wavel,show_pupil=False,mode='amp',
-		perturbation=None,amp=0.1)	
-	imsz = image.shape[0]
+amp = 0.1
+
+try:
+	dummy = fitsio.FITS('psf_cube_scint_%.2f.fits' % amp)
+	psfs = dummy[0][:,:,:]
+	print 'Loaded PSFs'
+except:
+	print 'Creating PSFs'
+	for j in range(nimages):
+		psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
+			verbose=False,centre_wavel=wavel,show_pupil=show,mode='amp',
+			perturbation=None,amp=amp)
+	fitsio.write('psf_cube_scint_%.2f.fits' % amp,psfs)
+
+imsz = image.shape[0]
 
 print_time(clock()-t0)
 
