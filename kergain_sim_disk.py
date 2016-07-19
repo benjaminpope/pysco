@@ -86,7 +86,7 @@ except:
 	np.savetxt('KerGain_plain.csv',KerGain)
 	print 'saved'
 
-def make_ellipse(semi_axis,ecc,thick,sz=1024,pscale=12.):
+def make_ellipse(semi_axis,ecc,thick,sz=256,pscale=12.):
 	
 	semi_axis, thick = semi_axis/pscale, thick/pscale
 	
@@ -178,7 +178,6 @@ rsec= 1.829/2.
 pos = [0,0] #m, deg
 spaxel = 12
 piston = 0
-final_sz = 1024
 
 nimages = 200
 nframes = nimages-1
@@ -194,9 +193,6 @@ imsz = image.shape[0]
 
 images = np.zeros((nimages,imsz,imsz))
 psfs = np.zeros((nimages,imsz,imsz))
-
-k=0
-show=False
 
 '''----------------------------------------
 Loop over a range of contrasts
@@ -253,8 +249,8 @@ mvis = a.RED/a.RED.max().astype('float')
 vis2js = np.zeros((nimages,vis2.shape[0]))
 
 for j in range(nimages):
-	image = psfs[j,:,:]
-	ac = shift(fft(shift(image)))
+	thisimage = psfs[j,:,:]
+	ac = shift(fft(shift(thisimage)))
 	ac /= (np.abs(ac)).max() / a.nbh
 	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
