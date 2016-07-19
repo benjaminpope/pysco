@@ -214,7 +214,7 @@ true_vals = (300.,0.95,100)
 
 for j in range(nimages):
 	psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
-		verbose=False,centre_wavel=wavel,show_pupil=show,mode='amp',
+		verbose=False,centre_wavel=wavel,show_pupil=False,mode='amp',
 		perturbation=None,amp=0.1)	
 	imsz = image.shape[0]
 
