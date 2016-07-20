@@ -15,7 +15,7 @@ rmax   = 5.093/2.           # outer diameter:      5.093 m
 rmin   = 1.829/2.           # central obstruction: 1.829 m
 thick  = 0 #4*0.257            # adopted spider thickness (meters)
 
-srad = 0.1        # segment "radius"
+srad = 0.15        # segment "radius"
 rad = np.sqrt(3)*srad  # radius of the first hex ring in meters
 
 xs = np.array(())
@@ -70,8 +70,8 @@ r0 = srad/np.sqrt(3)
 th = 2*np.pi*np.arange(6)/6. + np.pi/6.
 
 rs = np.sqrt(xs**2+ys**2)
-xs *= rmax/rs.max()
-ys *= rmax/rs.max()
+# xs *= rmax/rs.max()
+# ys *= rmax/rs.max()
 
 
 for i in range(xs.size):
