@@ -95,7 +95,7 @@ reso = rad2mas(wavel/(2*rprim))
 print 'Minimum Lambda/D = %.3g mas' % reso
 
 image, imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,seeing=None,verbose=False,\
-							 centre_wavel=wavel,show_pupil=False,mode=None)
+							 show_pupil=False,mode=None)
 
 # image = recenter(image,sg_rad=25)
 imsz = image.shape[0]
@@ -140,7 +140,7 @@ except:
 		else:
 			verbose = False
 		psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
-			verbose=verbose,centre_wavel=wavel,show_pupil=show,mode='amp',
+			verbose=verbose,show_pupil=show,mode='amp',
 			perturbation=None,amp=amp)
 	fitsio.write('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel),psfs)
 
