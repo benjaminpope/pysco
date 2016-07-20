@@ -176,7 +176,7 @@ wavel = 2.5e-6
 rprim = 5.093/2.#36903.e-3/2.
 rsec= 1.829/2.
 pos = [0,0] #m, deg
-spaxel = 12
+spaxel = 36.
 piston = 0
 
 nimages = 200
