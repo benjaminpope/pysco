@@ -112,7 +112,7 @@ Loop over a range of contrasts
 ----------------------------------------'''
 
 # contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
-contrast_list =  [10,25,50,75,100,125,150,175,200,250,300,350,400,450,500,600,700,800,900,1000,1100,1200,1300,1400,1]
+contrast_list =  [10,25,50,75,100,125,150,175,200,250,300,350,400,450,500,600,700,800,900,1000,1100,1200,1300,1400,1500]
 # contrast_list =  [10,50,100,200,300,400,500]
 ncalcs = len(contrast_list)
 
@@ -145,7 +145,36 @@ except:
 
 print_time(clock()-t0)
 
-	
+rev = 1
+ac = shift(fft(shift(image)))
+ac /= (np.abs(ac)).max() / a.nbh
+
+'''----------------------------------------
+Initialise pysco with a pupil model
+----------------------------------------'''
+
+# meter to pixel conversion factor
+scale = 1.0
+m2pix = mas2rad(spaxel) * imsz/ wavel * scale
+uv_samp = a.uv * m2pix + imsz/2 # uv sample coordinates in pixels
+
+x = a.mask[:,0]
+y = a.mask[:,1]
+
+uv_samp_rev=np.cast['int'](np.round(uv_samp))
+uv_samp_rev[:,0]*=rev
+data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
+
+vis2 = np.abs(data_cplx)
+vis2 /= vis2.max() #normalise to the origin
+
+mvis = a.RED/a.RED.max().astype('float')
+
+
+'''----------------------------------------
+Loop over contrasts
+----------------------------------------'''
+
 
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
@@ -158,34 +187,10 @@ for trial, contrast in enumerate(contrast_list):
 		show=False
 		k+=1
 		  
-	'''----------------------------------------
-	Initialise pysco with a pupil model
-	----------------------------------------'''
-
-	# meter to pixel conversion factor
-	scale = 1.0
-	m2pix = mas2rad(spaxel) * imsz/ wavel * scale
-	uv_samp = a.uv * m2pix + imsz/2 # uv sample coordinates in pixels
-
-	x = a.mask[:,0]
-	y = a.mask[:,1]
 
 	'''----------------------------------------
 	Extract Visibilities
 	----------------------------------------'''
-
-	rev = 1
-	ac = shift(fft(shift(image)))
-	ac /= (np.abs(ac)).max() / a.nbh
-
-	uv_samp_rev=np.cast['int'](np.round(uv_samp))
-	uv_samp_rev[:,0]*=rev
-	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
-
-	vis2 = np.abs(data_cplx)
-	vis2 /= vis2.max() #normalise to the origin
-
-	mvis = a.RED/a.RED.max().astype('float')
 
 	# kpd_phase = np.angle(data_cplx)/dtor
 	# kpd_signal = np.dot(a.KerPhi, kpd_phase)

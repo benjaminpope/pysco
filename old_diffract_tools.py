@@ -121,7 +121,7 @@ def screen(seeingfile,xs=None,cutoff=None,mode='amp'):
 # =========================================================================
 
 def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,verbose=True,
-	show_pupil=False,telescope=None,centre_wavel=900e-9,mode='amp',seeingamp=0.0,
+	show_pupil=False,telescope=None,mode='amp',seeingamp=0.0,
 	perturbation='phase',amp=0.3,cutoff=None,sz=4096/2,final_sz=256):
 	'''Run a diffraction simulation!'''
 

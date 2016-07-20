@@ -129,16 +129,20 @@ print 'x',xb,',y',yb
 amp = 0.1
 
 try:
-	dummy = fitsio.FITS('psf_cube_scint_%.2f.fits' % amp)
+	dummy = fitsio.FITS('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel))
 	psfs = dummy[0][:,:,:]
 	print 'Loaded PSFs'
 except:
 	print 'Creating PSFs'
 	for j in range(nimages):
+		if j == 0:
+			verbose = True
+		else:
+			verbose = False
 		psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
-			verbose=False,centre_wavel=wavel,show_pupil=show,mode='amp',
+			verbose=verbose,centre_wavel=wavel,show_pupil=show,mode='amp',
 			perturbation=None,amp=amp)
-	fitsio.write('psf_cube_scint_%.2f.fits' % amp,psfs)
+	fitsio.write('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel),psfs)
 
 print_time(clock()-t0)
 
