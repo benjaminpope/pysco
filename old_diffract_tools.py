@@ -340,7 +340,7 @@ def diffract(wavel,rprim,rsec,pos=[0,0],piston=100.e-9,spaxel=40.,seeing=False,v
 
 	pscale = (focx.max()-focx.min())/focx.size
 
-	rescale = wavel/centre_wavel
+	rescale = 1.0#wavel/centre_wavel
 
 	if verbose:
 		print 'Image dimension', imsz

@@ -121,7 +121,7 @@ dvseps, dvthetas, dvcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
 
 t0 = clock()
 
-sep, theta = 48, 45
+sep, theta = 150, 45
 xb,yb = np.cos(theta*np.pi/180)*sep/spaxel, np.sin(theta*np.pi/180)*sep/spaxel
 
 print 'x',xb,',y',yb
