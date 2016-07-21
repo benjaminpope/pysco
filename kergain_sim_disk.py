@@ -197,7 +197,7 @@ psfs = np.zeros((nimages,imsz,imsz))
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = np.linspace(1.,300.,20)
+contrast_list = np.linspace(1.,100.,10)
 
 ncalcs = len(contrast_list)
 
@@ -285,18 +285,19 @@ for trial, contrast in enumerate(contrast_list):
 	vis2s = np.zeros((nimages,vis2.shape[0]))
 
 	for j in range(nimages):
-		image2 = images[j,:,:]
-		ac2 = shift(fft(shift(image2)))
-		ac2 /= (np.abs(ac2)).max() / a.nbh
-		data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
+	    image2 = images[j,:,:]
+	    ac2 = shift(fft(shift(image2)))
+	    ac2 /= (np.abs(ac2)).max() / a.nbh
+	    data_cplx2=ac2[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 
-		vis2b = np.abs(data_cplx2)
-		vis2b /= vis2 
-		vis2b /= vis2b.max() #normalise to the origin
-
-		vis2s[j,:]= vis2b
-		
-		kervises[j,:] = np.dot(KerGain,vis2b-1.)# - np.dot(KerGain,vis2c-1.) 
+	    vis2b = np.abs(data_cplx2)
+	    vis2b /= vis2b.max() #normalise to the origin
+	    vis2s[j,:]=vis2b
+	    
+	#     log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
+	    
+	    # phases[j,:] = np.angle(data_cplx2)/dtor
+	    kervises[j,:] = np.dot(KerGain,vis2b/vis2-1.)
 
 	'''----------------------------------------
 	Now Model
@@ -382,6 +383,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
+		print 'Best params (kg):', best_params
 
 		ksemis[trial] = best_params[0]/4.
 		keccs[trial] = best_params[1]
@@ -452,6 +454,7 @@ for trial, contrast in enumerate(contrast_list):
 
 		stuff = thing.get_best_fit()
 		best_params = stuff['parameters']
+		print 'Best params (vis):', best_params
 
 		vsemis[trial] = best_params[0]/4.
 		veccs[trial] = best_params[1]
