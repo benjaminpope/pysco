@@ -214,7 +214,7 @@ true_vals = (300.,0.95,100)
 amp = 0.1
 
 try:
-	dummy = fitsio.FITS('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel))
+	dummy = fitsio.FITS('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel*1e6))
 	psfs = dummy[0][:,:,:]
 	print 'Loaded PSFs'
 except:
@@ -223,7 +223,7 @@ except:
 		psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,
 			verbose=False,show_pupil=show,mode='amp',
 			perturbation=None,amp=amp)
-	fitsio.write('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel),psfs)
+	fitsio.write('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel*1e6),psfs)
 
 imsz = image.shape[0]
 

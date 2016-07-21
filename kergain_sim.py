@@ -129,7 +129,7 @@ print 'x',xb,',y',yb
 amp = 0.1
 
 try:
-	dummy = fitsio.FITS('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel))
+	dummy = fitsio.FITS('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel*1e6))
 	psfs = dummy[0][:,:,:]
 	print 'Loaded PSFs'
 except:
@@ -143,6 +143,7 @@ except:
 			verbose=verbose,show_pupil=show,mode='amp',
 			perturbation=None,amp=amp)
 	fitsio.write('psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel),psfs)
+	print 'Saved to psf_cube_scint_%.2f_wavel_%.2f.fits' % (amp,wavel*1e6)
 
 print_time(clock()-t0)
 
