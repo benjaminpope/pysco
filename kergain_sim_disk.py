@@ -197,7 +197,7 @@ psfs = np.zeros((nimages,imsz,imsz))
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = np.linspace(1.,200.,50)
+contrast_list = np.linspace(1.,300.,20)
 
 ncalcs = len(contrast_list)
 
