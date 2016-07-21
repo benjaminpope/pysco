@@ -252,23 +252,9 @@ data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
 vis2 = np.abs(data_cplx)
 vis2 /= vis2.max() #normalise to the origin
 
-mvis = a.RED/a.RED.max().astype('float')
-
-# calibrator
-vis2js = np.zeros((nimages,vis2.shape[0]))
-
-for j in range(nimages):
-	thisimage = psfs[j,:,:]
-	ac = shift(fft(shift(thisimage)))
-	ac /= (np.abs(ac)).max() / a.nbh
-	data_cplx=ac[uv_samp_rev[:,1], uv_samp_rev[:,0]]
-
-	vis2cj = np.abs(data_cplx)
-	vis2cj /= vis2cj.max()
-	vis2cj /= vis2 #normalise to the origin
-	vis2js[j,:]=vis2cj
-
-vis2c = np.mean(vis2js,axis=0)
+'''----------------------------------------
+Now loop over simulated disks
+----------------------------------------'''
 
 for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
@@ -276,7 +262,8 @@ for trial, contrast in enumerate(contrast_list):
 
 	for j in range(nimages):
 		images[j,:,:] = make_disk(psfs[j,:,:],true_vals,contrast)
-		  
+		imsz = images.shape[1]
+
 	'''----------------------------------------
 	Extract Visibilities
 	----------------------------------------'''
@@ -319,6 +306,8 @@ for trial, contrast in enumerate(contrast_list):
 		vises = (vises/norm *flux_ratio + unresolved)
 		return vises
 
+	### define prior and loglikelihood
+
 	def kg_loglikelihood(cube,kgd,kge,kpi):
 		'''Calculate chi2 for single band kernel phase data.
 		Used both in the MultiNest and MCMC Hammer implementations.'''
@@ -333,8 +322,6 @@ for trial, contrast in enumerate(contrast_list):
 		vises = vis_model(cube,kpi)**2.
 		chi2 = np.sum(((vdata-vises)/ve)**2)
 		return -chi2/2.
-
-	### define prior and loglikelihood
 
 	def myprior(cube, ndim, n_params,paramlimits=paramlimits):
 		cube[0] = (paramlimits[1] - paramlimits[0])*cube[0]+paramlimits[0]
@@ -425,10 +412,10 @@ for trial, contrast in enumerate(contrast_list):
 	Now do visibilities
 	-----------------------------------------------'''
 
-	my_observable = np.mean((vis2s)**2,axis=0)
+	my_observable = np.mean((vis2s/vis2)**2,axis=0)
 
 	print '\nDoing raw visibilities'
-	my_error =	  np.sqrt((np.std((vis2s)**2,axis=0))**2+addederror**2)
+	my_error =	  np.sqrt((np.std((vis2s/vis2)**2,axis=0))**2+addederror**2)
 	print 'Error:', my_error
 
 	def myloglike_vis(cube,ndim,n_params):
