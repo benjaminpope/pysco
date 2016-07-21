@@ -86,7 +86,7 @@ except:
 	np.savetxt('KerGain_plain.csv',KerGain)
 	print 'saved'
 
-def make_ellipse(semi_axis,ecc,thick,sz=256,pscale=12.):
+def make_ellipse(semi_axis,ecc,thick,sz=256,pscale=36.):
 	
 	semi_axis, thick = semi_axis/pscale, thick/pscale
 	
@@ -197,7 +197,7 @@ psfs = np.zeros((nimages,imsz,imsz))
 Loop over a range of contrasts
 ----------------------------------------'''
 
-contrast_list = np.linspace(1.,100.,10)
+contrast_list = np.linspace(5.,200.,20)
 
 ncalcs = len(contrast_list)
 
@@ -355,7 +355,7 @@ for trial, contrast in enumerate(contrast_list):
 	ndim = n_params
 
 	pymultinest.run(myloglike_kg, myprior, n_params,wrapped_params=[2],
-		verbose=True,resume=False,max_iter=max_iter)
+		verbose=False,resume=False,max_iter=max_iter)
 
 	thing = pymultinest.Analyzer(n_params = n_params)
 	try:
@@ -425,7 +425,7 @@ for trial, contrast in enumerate(contrast_list):
 	thistime = clock()
 
 	pymultinest.run(myloglike_vis, myprior, n_params,wrapped_params=[2],
-		verbose=True,resume=False,max_iter=max_iter)
+		verbose=False,resume=False,max_iter=max_iter)
 
 	thing = pymultinest.Analyzer(n_params = n_params)
 	try:
