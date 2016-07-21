@@ -260,6 +260,8 @@ for trial, contrast in enumerate(contrast_list):
 	print '\nSimulating for contrast %f' % contrast
 	thistime = clock()
 
+	true_params = [true_vals[0]*4.,true_vals[1],0.,true_vals[2]/float(true_vals[0]),contrast]
+
 	for j in range(nimages):
 		images[j,:,:] = make_disk(psfs[j,:,:],true_vals,contrast)
 		imsz = images.shape[1]
@@ -281,9 +283,6 @@ for trial, contrast in enumerate(contrast_list):
 	    vis2b /= vis2b.max() #normalise to the origin
 	    vis2s[j,:]=vis2b
 	    
-	#     log_data_complex_b = np.log(np.abs(data_cplx2))+1.j*np.angle(data_cplx2)
-	    
-	    # phases[j,:] = np.angle(data_cplx2)/dtor
 	    kervises[j,:] = np.dot(KerGain,vis2b/vis2-1.)
 
 	'''----------------------------------------
@@ -377,8 +376,6 @@ for trial, contrast in enumerate(contrast_list):
 		kthetas[trial] = best_params[2]
 		kthicks[trial] = best_params[3]
 		kcons[trial] = best_params[4]
-
-		true_params = [true_vals[0]*4.,true_vals[1],0.,true_vals[2]/float(true_vals[0]),contrast]
 
 		model = np.dot(KerGain,vis_model(best_params,a)-1.)
 		true_model = np.dot(KerGain,vis_model(true_params,a)-1.)
