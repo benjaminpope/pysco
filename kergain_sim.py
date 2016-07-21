@@ -220,10 +220,10 @@ for trial, contrast in enumerate(contrast_list):
 	#     kervises_cplx[j,:] = np.abs(kercomplexb)
 
 	'''----------------------------------------
-	Extract Visibilities
+	Now Model
 	----------------------------------------'''
 
-	paramlimits = [20.,80.,30.,60.,contrast/2.,contrast*2.]
+	paramlimits = [50.,300.,30.,60.,contrast/3.,contrast*3.]
 
 	hdr = {'tel':'HST',
 	      'filter':wavel,

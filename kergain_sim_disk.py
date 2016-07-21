@@ -299,7 +299,7 @@ for trial, contrast in enumerate(contrast_list):
 		kervises[j,:] = np.dot(KerGain,vis2b-1.)# - np.dot(KerGain,vis2c-1.) 
 
 	'''----------------------------------------
-	Extract Visibilities
+	Now Model
 	----------------------------------------'''
 
 	paramlimits = [50.,10000.,0.,0.99,-90.,90.,0.02,0.49,contrast/4.,contrast*4.]
