@@ -261,11 +261,11 @@ for trial, contrast in enumerate(contrast_list):
 	-----------------------------------------------'''
 
 	my_observable = np.mean(kervises,axis=0)
-	raw_data = np.dot(KerGain,np.sqrt((vis2s/vis2cal)**2).T-1.).T
+	# raw_data = np.dot(KerGain,np.sqrt((vis2s/vis2cal)**2).T-1.).T
 
-	mycov = np.cov(raw_data.T) # calculate statistically independent KA
-	my_eigs, my_s_matrix = np.linalg.eigh(mycov) # hermitian
-	thismatrix = np.dot(my_s_matrix,KerGain)
+	# mycov = np.cov(raw_data.T) # calculate statistically independent KA
+	# my_eigs, my_s_matrix = np.linalg.eigh(mycov) # hermitian
+	# thismatrix = np.dot(my_s_matrix,KerGain)
 
 	my_observable = np.mean(np.dot(thismatrix,(vis2s/vis2cal).T-1.),axis=1)
 
@@ -277,9 +277,9 @@ for trial, contrast in enumerate(contrast_list):
 		chi2 = np.sum(((kgd-kergains)/kge)**2)
 		return -chi2/2.
 
-	addederror = np.std(my_observable) # in case there are bad frames
-	# my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
-	my_error = np.sqrt(my_eigs**2+addederror**2)
+	# addederror = np.std(my_observable) # in case there are bad frames
+	my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
+	# my_error = np.sqrt(my_eigs**2+addederror**2)
 
 	print 'Error:', my_error 
 	
