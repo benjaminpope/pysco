@@ -112,8 +112,9 @@ Loop over a range of contrasts
 ----------------------------------------'''
 
 # contrast_list =  [10,50,100,150,200,250,300,350,400,450,500]
-contrast_list =  [10,25,50,75,100,125,150,175,200,250,300,350,400,450,500,600,700,800,900,1000,1100,1200,1300,1400,1500]
-# contrast_list =  [10,50,100,200,300,400,500]
+contrast_list =  [10,50,75,100,125,150,175,200,250,300,350,400,450,500,600,700,800,900,1000,1100,1200,1300,1400,1500]
+# contrast_list =  [10,50,100,200,300,400,500
+contrast_list = np.linspace(10,2000,19)
 ncalcs = len(contrast_list)
 
 kseps, kthetas, kcons = np.zeros(ncalcs), np.zeros(ncalcs), np.zeros(ncalcs)
