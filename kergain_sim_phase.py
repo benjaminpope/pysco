@@ -279,6 +279,7 @@ for trial, contrast in enumerate(contrast_list):
 		return -chi2/2.
 
 	# addederror = np.std(my_observable) # in case there are bad frames
+	addederror = 1e-5
 	my_error = np.sqrt(np.std(kervises,axis=0)**2+addederror**2)
 	# my_error = np.sqrt(my_eigs**2+addederror**2)
 
