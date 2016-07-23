@@ -132,7 +132,7 @@ print 'x',xb,',y',yb
 seeingamp = 0.75
 
 try:
-	dummy = fitsio.FITS('psf_cube_phase_%.2f.fits' % seeingamp)
+	dummy = fitsio.FITS('psf_cube_phase_%.2f_wavel_%.2f.fits' % (seeingamp,wavel*1e6))
 	psfs = dummy[0][:,:,:]
 	print 'Loaded PSFs'
 except:
@@ -141,7 +141,7 @@ except:
 		psfs[j,:,:], imagex = diffract(wavel,rprim,rsec,pos,piston=piston,spaxel=spaxel,verbose=False,\
 								show_pupil=show,mode='phase',
 								perturbation=None,amp=0.0,seeingamp=seeingamp)
-	fitsio.write('psf_cube_phase_%.2f.fits' % seeingamp,psfs)
+	fitsio.write('psf_cube_phase_%.2f_wavel_%.2f.fits' % (seeingamp,wavel*1e6),psfs)
 
 print_time(clock()-t0)
 
@@ -266,6 +266,7 @@ for trial, contrast in enumerate(contrast_list):
 	# mycov = np.cov(raw_data.T) # calculate statistically independent KA
 	# my_eigs, my_s_matrix = np.linalg.eigh(mycov) # hermitian
 	# thismatrix = np.dot(my_s_matrix,KerGain)
+	thismatrix = KerGain
 
 	my_observable = np.mean(np.dot(thismatrix,(vis2s/vis2cal).T-1.),axis=1)
 
