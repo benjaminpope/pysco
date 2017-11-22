@@ -2,8 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import pyfits as pf
 from scipy.interpolate import RectBivariateSpline as interp 
-from PIL import Image
-import ImageDraw
+from PIL import Image, ImageDraw
 import pickle
 
 def palomarpupil(sz=1024,spiders=True):
