@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import pyfits as pf
 from scipy.interpolate import RectBivariateSpline as interp 
-import Image
+import PIL import Image
 import ImageDraw
 import pickle
 
