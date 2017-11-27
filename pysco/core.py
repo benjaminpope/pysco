@@ -465,6 +465,28 @@ def get_pharo_keywords(hdr):
 
 # =========================================================================
 # =========================================================================
+def get_subaru_keywords(hdr):
+    '''Extract the relevant keyword information from a fits header.
+
+    This version is adapted to handle CHARIS data. '''
+
+    data = {
+        'tel'      : 'subaru',         # telescope
+        'pscale'   : 4.55555555555555E-06*3600*1000,                    # CHARIS plate scale (mas)
+        'odate'    : hdr['UTC-DATE'],         # UTC date of observation
+        'otime'    : hdr['UTC-TIME'],         # UTC time of observation
+        'coadds'   : 1,                       # as far as I can tell...
+        'RA'       : hdr['CRVAL1'],           # right ascension (deg)
+        'DEC'      : hdr['CRVAL2'],           # declination (deg)
+        'filter'   : hdr['LAMBDA']*1e-9, # place-holder   # central wavelength (meters)
+        'filtname' : str(hdr['LAMBDA']),           # Filter name
+        'orient'   : hdr['TOT_ROT']          # Cassegrain ring angle
+        }
+
+    return data
+
+# =========================================================================
+# =========================================================================
 def get_simu_keywords(hdr):
     '''Extract the relevant keyword information from a fits header.
 
@@ -539,7 +561,7 @@ def get_simu_keywords(hdr):
 # [AL, 2014.05.28] The same definitions (except hdr) for extract_from_array and extract_from_fits_frame functions
 # [AL, 2014.05.29] Description updated
 # [AL, 2014.10.07] unwrap_kp flag added. Kernel phases unwrapping is off by default
-def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, rev=-1.0, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True, unwrap_kp=False):
+def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, rev=-1, manual=0,  wrad=25.0, sg_ld=1.0, D=0.0,re_center=True, window=True,  bsp=False, adjust_sampling=True, unwrap_kp=False):
     ''' Extract the Kernel-phase signal from a ndarray + header info.
     
     ----------------------------------------------------------------
@@ -580,15 +602,22 @@ def extract_from_array(array, hdr, kpi, save_im=False, wfs=False, plotim=False, 
     - (kpd_info, kpd_phase [,bsp_res])
 
     ---------------------------------------------------------------- '''
+    try:
+        telescope = hdr['TELESCOP']
+    except:
+        telescope = 'subaru'
 
-    if 'Keck II' in hdr['TELESCOP']: kpd_info = get_keck_keywords(hdr)
-    if 'HST'     in hdr['TELESCOP']: kpd_info = get_nicmos_keywords(hdr)
-    if 'simu'    in hdr['TELESCOP']: kpd_info = get_simu_keywords(hdr)
-    if 'Hale'    in hdr['TELESCOP']: kpd_info = get_pharo_keywords(hdr)
+    if 'Keck II' in telescope: kpd_info = get_keck_keywords(hdr)
+    if 'HST'     in telescope: kpd_info = get_nicmos_keywords(hdr)
+    if 'simu'    in telescope: kpd_info = get_simu_keywords(hdr)
+    if 'Hale'    in telescope: kpd_info = get_pharo_keywords(hdr)
+    if 'subaru'  in telescope: kpd_info = get_subaru_keywords(hdr)
                     
-    if ('Hale' in hdr['TELESCOP']) or ('simu' in hdr['TELESCOP']): # P3K PA are clockwise
+    if ('Hale' in telescope) or ('simu' in telescope): # P3K PA are clockwise
                                                                      # [AL, 04.07.2014] removed reverse from simulation     
-        rev = -1.0                               
+        rev = -1
+    else:
+        rev = 1                               
                                     
     # [AL, 2014.04.16] Added calculation of super gaussian radius in sg_ld*lambda/D
     if sg_ld*D>0 :                          
